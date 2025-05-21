@@ -10,7 +10,7 @@
                 "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
                 "val_from_train_ratio": 0,
-                "subset_train": 0.2,
+                "subset_train": 1.0,
                 "subset_val": 0.2,
                 "subset_test": 0.2,
                 "pin_memory": true,
@@ -21,7 +21,17 @@
                 "shuffle_train": true,
                 "shuffle_val": false,
                 "shuffle_test": false,
-                "drop_last": true
+                "drop_last": true,
+                "transforms": {
+                    "resize_h": 128,
+                    "resize_w": 128,
+                    "in_min": 0,
+                    "in_max": 255,
+                    "norm_min": -1,
+                    "norm_max": 1,
+                    "export_lower_perc_cutoff": 0.005,
+                    "export_upper_perc_cutoff": 0.995
+                }
             }
         }
     },
@@ -34,15 +44,21 @@
                 "out_channels": 3,
                 "down_block_types": [
                     "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
                     "DownBlock"
                 ],
                 "up_block_types": [
+                    "UpBlock",
+                    "UpBlock",
                     "UpBlock",
                     "UpBlock"
                 ],
                 "block_out_channel_mults": [
                     1,
-                    2
+                    2,
+                    2,
+                    4
                 ],
                 "time_embedding": true
             },
@@ -64,19 +80,18 @@
     "train": {
         "path": "~/dev/fdq_diffusion/celeb_gen/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 15,
+            "epochs": 100,
             "use_GPU": true,
             "use_AMP": false,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 500,
-            "early_stop_train_loss": 500,
+            "early_stop_val_loss": 50,
+            "early_stop_train_loss": 50,
             "early_stop_nan": 5,
             "diffusion_scheduler": "linear",
             "diffusion_nb_steps": 800,
-            "diffusion_shd_clip_min": 0.0001,
-            "diffusion_shd_clip_max": 0.9999,
             "diffusion_shd_beta_start": 0.0001,
-            "diffusion_shd_beta_end": 0.02
+            "diffusion_shd_beta_end": 0.02,
+            "diffusion_nb_plot_steps": 10
         }
     },
     "losses": {
@@ -91,7 +106,7 @@
         "save_best_val_model": true,
         "save_best_train_model": true,
         "checkpoint_frequency": 2,
-        "use_tensorboard": true,
+        "use_tensorboard": false,
         "use_wandb": true,
         "wandb_project": "celeb_generative",
         "wandb_entity": "stmd",
@@ -107,14 +122,14 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.7",
+        "fdq_version": "0.0.9",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
         "log_path": "~/dev/fonduecaquelon/slurm_log",
-        "job_time": 8,
-        "stop_grace_time": 3,
+        "job_time": 1000,
+        "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 8,
         "gres": "gpu:1",
@@ -122,7 +137,7 @@
         "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": true,
+        "run_test": false,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [

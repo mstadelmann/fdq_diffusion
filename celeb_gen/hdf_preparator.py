@@ -574,16 +574,18 @@ def createDatasets(experiment):
     dargs = experiment.exp_def.data.celeb_HDF.args
 
     to_float = transforms.Lambda(lambda t: t.type(torch.float32))
-    resizer = transforms.Resize((128, 128), antialias=True)
-    in_min = 0
-    in_max = 255
-    out_min = -1
-    out_max = 1
-    reranger = transforms.Lambda(
+    resizer = transforms.Resize(
+        (dargs.transforms.resize_h, dargs.transforms.resize_w), antialias=True
+    )
+    in_min = dargs.transforms.in_min
+    in_max = dargs.transforms.in_max
+    out_min = dargs.transforms.norm_min
+    out_max = dargs.transforms.norm_max
+    rgb_to_norm = transforms.Lambda(
         lambda t: ((t - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
     )
 
-    img_transformer = transforms.Compose([to_float, resizer, reranger])
+    img_transformer = transforms.Compose([to_float, resizer, rgb_to_norm])
 
     file_extension = dargs.get("file_extension", "hdf")
     hdf_ds_key_request = dargs.hdf_ds_key_request
