@@ -1,0 +1,22 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "generate_faces_x128.json"
+    },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "transforms": {
+                    "resize_h": 256,
+                    "resize_w": 256
+                }
+            }
+        }
+    },
+    "train": {
+        "args": {
+            "diffusion_scheduler": "sigmoid"
+        }
+    }
+}
