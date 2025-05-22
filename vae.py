@@ -93,7 +93,7 @@ def train(experiment) -> None:
             epsilon = torch.randn_like(z_sigma)
             z_sample = z_mu + z_sigma * epsilon
 
-            nbi = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape(0))
+            nbi = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0])
 
             mu_histo_path = createSubplots(
                 image_list=[img.detach().float() for img in z_mu[:nbi, ...]],
