@@ -1,0 +1,13 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "generate_faces.json"
+    },
+    "train": {
+        "args": {
+            "epochs": 200,
+            "diffusion_scheduler": "cosine"
+        }
+    }
+}

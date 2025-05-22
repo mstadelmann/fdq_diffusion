@@ -1,0 +1,68 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "generate_faces.json"
+    },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "transforms": {
+                    "resize_h": 512,
+                    "resize_w": 512,
+                    "in_min": 0,
+                    "in_max": 255,
+                    "norm_min": -1,
+                    "norm_max": 1,
+                    "export_lower_perc_cutoff": 0.005,
+                    "export_upper_perc_cutoff": 0.995
+                }
+            }
+        }
+    },
+    "models": {
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "dimensions": 2,
+                "in_channels": 3,
+                "out_channels": 3,
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "AttnDownBlock",
+                    "AttnDownBlock"
+                ],
+                "up_block_types": [
+                    "UpBlock",
+                    "UpBlock",
+                    "AttnUpBlock",
+                    "AttnUpBlock"
+                ],
+                "block_out_channel_mults": [
+                    1,
+                    2,
+                    2,
+                    4
+                ],
+                "time_embedding": true
+            }
+        }
+    },
+    "train": {
+        "args": {
+            "epochs": 500,
+            "use_GPU": true,
+            "use_AMP": false,
+            "accumulate_grad_batches": 1,
+            "early_stop_val_loss": 50,
+            "early_stop_train_loss": 50,
+            "early_stop_nan": 5,
+            "diffusion_scheduler": "linear",
+            "diffusion_nb_steps": 800,
+            "diffusion_shd_beta_start": 0.0001,
+            "diffusion_shd_beta_end": 0.02,
+            "diffusion_nb_plot_steps": 10
+        }
+    }
+}
