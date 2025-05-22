@@ -1,0 +1,23 @@
+{
+    "globals": {
+        "project": "Celeb_VAE",
+        "author": "Marc",
+        "parent": "celeb_vae_x128.json"
+    },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "transforms": {
+                    "resize_h": 256,
+                    "resize_w": 256
+                }
+            }
+        }
+    },
+    "train": {
+        "path": "~/dev/fdq_diffusion/vae.py",
+        "args": {
+            "kl_loss_weight": 1e-4
+        }
+    }
+}

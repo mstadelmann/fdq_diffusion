@@ -89,17 +89,41 @@ def train(experiment) -> None:
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
         experiment.valLoss = 0  # no validation train_loss_tensor
 
-        epsilon = torch.randn_like(z_sigma)
-        z_sample = z_mu + z_sigma * epsilon
+        with torch.no_grad():
+            epsilon = torch.randn_like(z_sigma)
+            z_sample = z_mu + z_sigma * epsilon
 
-        imgs_to_log = [
-            {"name": "input", "data": norm_to_rgb(images_gt)},
-            {"name": "recon", "data": norm_to_rgb(reconstruction)},
-            {"name": "diff", "data": torch.abs(images_gt - reconstruction)},
-            {"name": "sample", "data": z_sample},
-            {"name": "mu", "data": z_mu},
-            {"name": "sigma", "data": z_sigma},
-        ]
+            nbi = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape(0))
+
+            mu_histo_path = createSubplots(
+                image_list=[img.detach().float() for img in z_mu[:nbi, ...]],
+                grayscale=False,
+                experiment=experiment,
+                histogram=True,
+                figure_title="mu",
+            )
+
+            sigma_histo_path = createSubplots(
+                image_list=[img.detach().float() for img in z_sigma[:nbi, ...]],
+                grayscale=False,
+                experiment=experiment,
+                histogram=True,
+                figure_title="sigma",
+            )
+
+            imgs_to_log = [
+                {"name": "input", "data": images_gt[:nbi, ...]},
+                {"name": "recon", "data": reconstruction[:nbi, ...]},
+                {
+                    "name": "diff",
+                    "data": torch.abs(images_gt - reconstruction)[:nbi, ...],
+                },
+                {"name": "sample", "data": z_sample[:nbi, ...]},
+                {"name": "mu_h", "path": mu_histo_path},
+                {"name": "sigma_h", "path": sigma_histo_path},
+                {"name": "mu", "data": z_mu[:nbi, ...]},
+                {"name": "sigma", "data": z_sigma[:nbi, ...]},
+            ]
 
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():

@@ -94,7 +94,7 @@
     },
     "store": {
         "results_path": "~/data/ML_data/results",
-        "img_exp_nb": 4,
+        "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": true,
         "save_best_train_model": true,
