@@ -5,6 +5,9 @@ from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
 from image_functions import createSubplots, get_norm_to_rgb
 
+# from monai.losses.perceptual import PerceptualLoss
+
+
 def KL_loss(z_mu, z_sigma):
     """
     Compute the Kullback-Leibler (KL) divergence loss for a variational autoencoder (VAE).
@@ -26,10 +29,13 @@ def KL_loss(z_mu, z_sigma):
     )
     return torch.sum(kl_loss) / kl_loss.shape[0]
 
+
 def train(experiment) -> None:
 
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
+
+    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
     norm_to_rgb = get_norm_to_rgb(experiment)
 
@@ -38,6 +44,14 @@ def train(experiment) -> None:
     targs = experiment.exp_def.train.args
 
     train_loader = data.train_data_loader
+
+    # loss_perceptual = (
+    #     PerceptualLoss(
+    #         spatial_dims=3, network_type="squeeze", is_fake_3d=True, fake_3d_ratio=0.2
+    #     )
+    #     .eval()
+    #     .to(experiment.device)
+    # )
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
         experiment.current_epoch = epoch
@@ -50,51 +64,43 @@ def train(experiment) -> None:
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             images_gt = batch[0].to(experiment.device)
-            
-            if experiment.useAMP:
 
-                device_type = (
-                    "cuda" if experiment.device == torch.device("cuda") else "cpu"
+            with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+                reconstruction, z_mu, z_sigma = model(images_gt)
+
+                recon_loss = experiment.losses["MAE"](images_gt, reconstruction)
+                kl_loss = KL_loss(z_mu, z_sigma)
+                train_loss_tensor = (
+                    recon_loss + targs.kl_loss_weight * kl_loss
+                ) / experiment.gradacc_iter
+
+                if experiment.useAMP:
+                    experiment.scaler.scale(train_loss_tensor).backward()
+                else:
+                    train_loss_tensor.backward()
+
+                experiment.update_gradients(
+                    b_idx=nb_tbatch, loader_name="celeb_HDF", model_name="monaivae"
                 )
 
-                with torch.autocast(device_type=device_type, enabled=True):
-                    reconstruction, z_mu, z_sigma = model(images_gt)
-                    train_loss_tensor = (
-                        experiment.losses["MAE"](images_gt, reconstruction)
-                        / experiment.gradacc_iter
-                    )
-                    
-                experiment.scaler.scale(train_loss_tensor).backward()
-            
-            else:
-                reconstruction, z_mu, z_sigma = model(images_gt)
-                train_loss_tensor = (
-                        experiment.losses["MAE"](images_gt, reconstruction)
-                        / experiment.gradacc_iter
-                    )
-                
-                train_loss_tensor.backward()
-            
-            experiment.update_gradients(
-                b_idx=nb_tbatch, loader_name="celeb_HDF", model_name="monaivae"
-            )
-            
+            train_loss_sum += train_loss_tensor.detach().item()
+
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
         experiment.valLoss = 0  # no validation train_loss_tensor
-        
+
         epsilon = torch.randn_like(z_sigma)
         z_sample = z_mu + z_sigma * epsilon
-        
-        
-        imgs_to_log =[
-                {"name": "input", "data": images_gt},
-                {"name": "recon", "data": reconstruction},
-                {"name": "sample", "data": z_sample},
-                {"name": "mu", "data": z_mu},
-                {"name": "sigma", "data": z_sigma},
-            ]
-        
+
+        imgs_to_log = [
+            {"name": "input", "data": norm_to_rgb(images_gt)},
+            {"name": "recon", "data": norm_to_rgb(reconstruction)},
+            {"name": "diff", "data": torch.abs(images_gt - reconstruction)},
+            {"name": "sample", "data": z_sample},
+            {"name": "mu", "data": z_mu},
+            {"name": "sigma", "data": z_sigma},
+        ]
+
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break

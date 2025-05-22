@@ -83,7 +83,8 @@
             "accumulate_grad_batches": 1,
             "early_stop_val_loss": 50,
             "early_stop_train_loss": 50,
-            "early_stop_nan": 5
+            "early_stop_nan": 5,
+            "kl_loss_weight": 1e-6
         }
     },
     "losses": {
@@ -124,9 +125,9 @@
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 8,
-        "gres": "gpu:h200sxm:1",
+        "gres": "gpu:1",
         "mem": "120G",
-        "partition": "gpu_top",
+        "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
         "run_test": false,
