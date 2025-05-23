@@ -86,8 +86,8 @@ def fdq_train(experiment) -> None:
                 )
 
             train_loss_sum += train_loss_tensor.detach().item()
-            train_kl_loss_sum += recon_loss.detach().item()
-            train_recon_loss_sum += kl_loss.detach().item()
+            train_kl_loss_sum += kl_loss.detach().item()
+            train_recon_loss_sum += recon_loss.detach().item()
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
