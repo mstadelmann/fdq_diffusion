@@ -22,5 +22,5 @@ submit_job diff_celeb_gen/generate_faces_x256_sig.json
 
 submit_job celeb_vae/celeb_vae_x128.json
 submit_job celeb_vae/celeb_vae_x256.json
-submit_job celeb_vae/celeb_vae_x256_more_kl
+submit_job celeb_vae/celeb_vae_x256_more_kl.json
 submit_job celeb_vae/celeb_vae_x256_no_kl.json
