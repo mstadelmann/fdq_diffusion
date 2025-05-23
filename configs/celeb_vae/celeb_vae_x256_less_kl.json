@@ -16,7 +16,7 @@
     },
     "train": {
         "args": {
-            "kl_loss_weight": 0
+            "kl_loss_weight": 1e-9
         }
     }
 }
