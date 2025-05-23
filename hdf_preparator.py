@@ -709,7 +709,7 @@ def createDatasets(experiment):
         n_val_sub = int(n_train_sub * train_ratio)
         n_train_sub = int(n_train_sub - n_val_sub)
 
-        if not experiment.shuffleTrain:
+        if not dargs.shuffle_train:
             # gen = torch.Generator().manual_seed(42)
             # train_sub, val_sub = random_split(train_sub, [n_train_sub, n_val_sub], generator=gen)
 
@@ -768,9 +768,9 @@ def createDatasets(experiment):
         "n_train_samples": len(train_sub),
         "n_val_samples": len(val_sub) if val_data_loader is not None else 0,
         "n_test_samples": len(test_sub),
-        "n_train_batches": len(train_data_loader)
-        if train_data_loader is not None
-        else 0,
+        "n_train_batches": (
+            len(train_data_loader) if train_data_loader is not None else 0
+        ),
         "n_val_batches": len(val_data_loader) if val_data_loader is not None else 0,
         "n_test_batches": len(test_data_loader) if test_data_loader is not None else 0,
     }

@@ -36,7 +36,6 @@ def train(experiment) -> None:
     print_nb_weights(experiment)
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
-    nb_imgs = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0])
 
     norm_to_rgb = get_norm_to_rgb(experiment)
 
@@ -113,6 +112,9 @@ def train(experiment) -> None:
 
             epsilon = torch.randn_like(z_sigma)
             z_sample = z_mu + z_sigma * epsilon
+            nb_imgs = min(
+                experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0]
+            )
 
             mu_histo_path = createSubplots(
                 image_list=[img.detach().float() for img in z_mu[:nb_imgs, ...]],
