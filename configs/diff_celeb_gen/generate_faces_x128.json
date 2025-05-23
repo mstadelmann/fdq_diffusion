@@ -5,7 +5,7 @@
     },
     "data": {
         "celeb_HDF": {
-            "processor": "~/dev/fdq_diffusion/celeb_gen/hdf_preparator.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator.py",
             "args": {
                 "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
@@ -87,14 +87,14 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/celeb_gen/diffusion_chuchichaestli.py",
+        "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 200,
+            "epochs": 100,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 50,
-            "early_stop_train_loss": 50,
+            "early_stop_val_loss": 20,
+            "early_stop_train_loss": 20,
             "early_stop_nan": 5,
             "diffusion_scheduler": "linear",
             "diffusion_nb_steps": 800,

@@ -1,9 +1,26 @@
+#!/bin/bash
 
+submit_job() {
+    root_path="/cluster/home/stmd/dev/fdq_diffusion/configs/"
+    python3 /cluster/home/stmd/dev/fonduecaquelon/fdq_submit.py $root_path$1
+}
 
-python fdq_submit.py /cluster/home/stmd/dev/fdq_diffusion/celeb_gen/generate_faces_UHR_att.json
-34564 -> bad, manually stopped
+#--------------------------------------------------------------------------------------------------
+# CELEB DIFF GEN
+#--------------------------------------------------------------------------------------------------
 
+submit_job diff_celeb_gen/generate_faces_x128.json
+submit_job diff_celeb_gen/generate_faces_x128_moreAtt.json
+submit_job diff_celeb_gen/generate_faces_x256.json
+submit_job diff_celeb_gen/generate_faces_x256_cos.json
+submit_job diff_celeb_gen/generate_faces_x256_linsca.json
+submit_job diff_celeb_gen/generate_faces_x256_sig.json
 
+#--------------------------------------------------------------------------------------------------
+# CELEB VAE
+#--------------------------------------------------------------------------------------------------
 
-python fdq_submit.py /cluster/home/stmd/dev/fdq_diffusion/celeb_gen/generate_faces_HR_long.json
-34471 -> bad, manually stopped
+submit_job celeb_vae/celeb_vae_x128.json
+submit_job celeb_vae/celeb_vae_x256.json
+submit_job celeb_vae/celeb_vae_x256_more_kl
+submit_job celeb_vae/celeb_vae_x256_no_kl.json

@@ -9,13 +9,7 @@
             "args": {
                 "transforms": {
                     "resize_h": 256,
-                    "resize_w": 256,
-                    "in_min": 0,
-                    "in_max": 255,
-                    "norm_min": -1,
-                    "norm_max": 1,
-                    "export_lower_perc_cutoff": 0.005,
-                    "export_upper_perc_cutoff": 0.995
+                    "resize_w": 256
                 }
             }
         }

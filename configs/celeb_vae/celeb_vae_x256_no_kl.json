@@ -15,7 +15,6 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/vae.py",
         "args": {
             "kl_loss_weight": 0
         }

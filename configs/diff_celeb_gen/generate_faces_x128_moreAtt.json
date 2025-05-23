@@ -1,0 +1,30 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "generate_faces_x128.json"
+    },
+    "models": {
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
+                    "AttnDownBlock",
+                    "AttnDownBlock"
+                ],
+                "up_block_types": [
+                    "AttnUpBlock",
+                    "AttnUpBlock",
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock"
+                ]
+            }
+        }
+    }
+}
