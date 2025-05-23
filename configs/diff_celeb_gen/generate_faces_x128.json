@@ -89,7 +89,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 100,
+            "epochs": 200,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -136,7 +136,7 @@
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
-        "log_path": "~/dev/fonduecaquelon/slurm_log",
+        "log_path": "~/dev/fdq_diffusion/slurm_log",
         "job_time": 1400,
         "stop_grace_time": 15,
         "ntasks": 1,

@@ -119,7 +119,7 @@
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
-        "log_path": "~/dev/fonduecaquelon/slurm_log",
+        "log_path": "~/dev/fdq_diffusion/slurm_log",
         "job_time": 1400,
         "stop_grace_time": 15,
         "ntasks": 1,
@@ -129,7 +129,7 @@
         "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": false,
+        "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [
