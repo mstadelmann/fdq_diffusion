@@ -80,7 +80,7 @@
             "lr_scheduler": {
                 "class_name": "torch.optim.lr_scheduler.StepLR",
                 "args": {
-                    "step_size": 2,
+                    "step_size": 20,
                     "gamma": 0.95
                 }
             }
