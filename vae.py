@@ -36,6 +36,7 @@ def train(experiment) -> None:
     print_nb_weights(experiment)
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
+    nb_imgs = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0])
 
     norm_to_rgb = get_norm_to_rgb(experiment)
 
@@ -59,6 +60,7 @@ def train(experiment) -> None:
 
         model.train()
         train_loss_sum = 0.0
+        val_loss_sum = 0.0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -87,16 +89,33 @@ def train(experiment) -> None:
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        experiment.valLoss = 0  # no validation train_loss_tensor
+
+        model.eval()
+        pbar = startProgBar(data.n_val_batches, "validation...")
 
         with torch.no_grad():
+            for nb_vbatch, batch in enumerate(data.val_data_loader):
+                experiment.current_val_batch = nb_vbatch
+                pbar.update(nb_vbatch)
+
+                images_gt = batch[0].to(experiment.device)
+                reconstruction, z_mu, z_sigma = model(images_gt)
+
+                recon_loss = experiment.losses["MAE"](images_gt, reconstruction)
+                kl_loss = KL_loss(z_mu, z_sigma)
+
+                val_loss_tensor = recon_loss + targs.kl_loss_weight * kl_loss
+
+                val_loss_sum += val_loss_tensor.detach().item()
+
+            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+            pbar.finish()
+
             epsilon = torch.randn_like(z_sigma)
             z_sample = z_mu + z_sigma * epsilon
 
-            nbi = min(experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0])
-
             mu_histo_path = createSubplots(
-                image_list=[img.detach().float() for img in z_mu[:nbi, ...]],
+                image_list=[img.detach().float() for img in z_mu[:nb_imgs, ...]],
                 grayscale=False,
                 experiment=experiment,
                 histogram=True,
@@ -104,7 +123,7 @@ def train(experiment) -> None:
             )
 
             sigma_histo_path = createSubplots(
-                image_list=[img.detach().float() for img in z_sigma[:nbi, ...]],
+                image_list=[img.detach().float() for img in z_sigma[:nb_imgs, ...]],
                 grayscale=False,
                 experiment=experiment,
                 histogram=True,
@@ -112,17 +131,17 @@ def train(experiment) -> None:
             )
 
             imgs_to_log = [
-                {"name": "input", "data": images_gt[:nbi, ...]},
-                {"name": "recon", "data": reconstruction[:nbi, ...]},
+                {"name": "val_gt", "data": images_gt[:nb_imgs, ...]},
+                {"name": "val_recon", "data": reconstruction[:nb_imgs, ...]},
                 {
-                    "name": "diff",
-                    "data": torch.abs(images_gt - reconstruction)[:nbi, ...],
+                    "name": "val_diff",
+                    "data": torch.abs(images_gt - reconstruction)[:nb_imgs, ...],
                 },
-                {"name": "sample", "data": z_sample[:nbi, ...]},
-                {"name": "mu_h", "path": mu_histo_path},
-                {"name": "sigma_h", "path": sigma_histo_path},
-                {"name": "mu", "data": z_mu[:nbi, ...]},
-                {"name": "sigma", "data": z_sigma[:nbi, ...]},
+                {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
+                {"name": "val_mu_h", "path": mu_histo_path},
+                {"name": "val_sigma_h", "path": sigma_histo_path},
+                {"name": "val_mu", "data": z_mu[:nb_imgs, ...]},
+                {"name": "val_sigma", "data": z_sigma[:nb_imgs, ...]},
             ]
 
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
