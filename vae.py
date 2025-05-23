@@ -168,3 +168,67 @@ def train(experiment) -> None:
         experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
+
+
+@torch.no_grad()
+def createEvaluator(experiment):
+    """Basic VAE evaluation."""
+
+    data = experiment.data["celeb_HDF"]
+    model = experiment.models["monaivae"]
+    test_loader = data.test_data_loader
+    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_export_samples = experiment.exp_def.test.args.get("nb_export_samples", 0)
+
+    if experiment.exp_def.data.celeb_HDF.args.test_batch_size != 1:
+        raise ValueError(
+            "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
+        )
+
+    kl_losses = []
+    recon_losses = []
+    weighted_losses = []
+
+    print(f"Testset sample size: {data.n_test_samples}")
+    pbar = startProgBar(data.n_test_samples, "evaluation...")
+
+    for nb_tbatch, batch in enumerate(test_loader):
+        if nb_tbatch >= nb_test_samples:
+            break
+
+        pbar.update(nb_tbatch)
+        images_gt = batch[0].to(experiment.device)
+        reconstruction, z_mu, z_sigma = model(images_gt)
+
+        if nb_tbatch <= nb_export_samples:
+            img_list = [images_gt, reconstruction, images_gt - reconstruction]
+
+            createSubplots(
+                image_list=img_list,
+                grayscale=False,
+                experiment=experiment,
+                histogram=True,
+                figure_title=f"test image {nb_tbatch}",
+                labels=["gt", "recon", "diff"],
+            )
+
+        kl_loss = KL_loss(z_mu, z_sigma).detach().item()
+        kl_losses.append(kl_loss)
+        recon_loss = experiment.losses["MAE"](images_gt, reconstruction).detach().item()
+        recon_losses.append(recon_loss)
+        weighted_loss = (
+            recon_loss + experiment.exp_def.train.args.kl_loss_weight * kl_loss
+        )
+        weighted_losses.append(weighted_loss)
+
+    pbar.finish()
+
+    results = {
+        "weighted_loss": float(torch.tensor(weighted_losses).mean()),
+        "recon_loss": float(torch.tensor(recon_losses).mean()),
+        "kl_loss": float(torch.tensor(kl_losses).mean()),
+    }
+
+    print(results)
+
+    return results

@@ -106,12 +106,11 @@
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a"
     },
     "test": {
-        "processor": "~/dev/fonduecaquelon/experiment_templates/segment_pets/oxpets_test.py",
+        "processor": "~/dev/fdq_diffusion/vae.py",
         "test_model": "best",
         "args": {
-            "metrics": {
-                "nb_test_samples": "100"
-            }
+            "nb_test_samples": 100,
+            "nb_export_samples": 10
         }
     },
     "slurm_cluster": {
