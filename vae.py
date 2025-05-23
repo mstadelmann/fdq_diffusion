@@ -30,7 +30,7 @@ def KL_loss(z_mu, z_sigma):
     return torch.sum(kl_loss) / kl_loss.shape[0]
 
 
-def train(experiment) -> None:
+def fdq_train(experiment) -> None:
 
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
@@ -171,7 +171,7 @@ def train(experiment) -> None:
 
 
 @torch.no_grad()
-def createEvaluator(experiment):
+def fdq_test(experiment):
     """Basic VAE evaluation."""
 
     data = experiment.data["celeb_HDF"]

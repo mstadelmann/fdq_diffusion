@@ -30,7 +30,7 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
     return imgs
 
 
-def train(experiment) -> None:
+def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
 
