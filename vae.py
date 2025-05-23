@@ -59,7 +59,8 @@ def train(experiment) -> None:
 
         model.train()
         train_loss_sum = 0.0
-        val_loss_sum = 0.0
+        train_kl_loss_sum = 0.0
+        train_recon_loss_sum = 0.0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -85,12 +86,19 @@ def train(experiment) -> None:
                 )
 
             train_loss_sum += train_loss_tensor.detach().item()
+            train_kl_loss_sum += recon_loss.detach().item()
+            train_recon_loss_sum += kl_loss.detach().item()
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
+        train_kl_loss_sum = train_kl_loss_sum / len(data.val_data_loader.dataset)
+        train_recon_loss_sum = train_recon_loss_sum / len(data.val_data_loader.dataset)
 
         model.eval()
         pbar = startProgBar(data.n_val_batches, "validation...")
+        val_loss_sum = 0.0
+        val_kl_loss_sum = 0.0
+        val_recon_loss_sum = 0.0
 
         with torch.no_grad():
             for nb_vbatch, batch in enumerate(data.val_data_loader):
@@ -106,8 +114,12 @@ def train(experiment) -> None:
                 val_loss_tensor = recon_loss + targs.kl_loss_weight * kl_loss
 
                 val_loss_sum += val_loss_tensor.detach().item()
+                val_recon_loss_sum += recon_loss.detach().item()
+                val_kl_loss_sum += kl_loss.detach().item()
 
             experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+            val_recon_loss_sum = val_recon_loss_sum / len(data.val_data_loader.dataset)
+            val_kl_loss_sum = val_kl_loss_sum / len(data.val_data_loader.dataset)
             pbar.finish()
 
             epsilon = torch.randn_like(z_sigma)
@@ -132,6 +144,13 @@ def train(experiment) -> None:
                 figure_title="sigma",
             )
 
+            log_scalars = {
+                "train_recon_loss": train_recon_loss_sum,
+                "train_kl_loss": train_kl_loss_sum,
+                "val_recon_loss": val_recon_loss_sum,
+                "val_kl_loss": val_kl_loss_sum,
+            }
+
             imgs_to_log = [
                 {"name": "val_gt", "data": images_gt[:nb_imgs, ...]},
                 {"name": "val_recon", "data": reconstruction[:nb_imgs, ...]},
@@ -146,6 +165,6 @@ def train(experiment) -> None:
                 {"name": "val_sigma", "data": z_sigma[:nb_imgs, ...]},
             ]
 
-        experiment.finalize_epoch(log_images_wandb=imgs_to_log)
+        experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
