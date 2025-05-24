@@ -9,18 +9,24 @@ submit_job() {
 # CELEB DIFF GEN
 #--------------------------------------------------------------------------------------------------
 
-submit_job diff_celeb_gen/generate_faces_x128.json
-submit_job diff_celeb_gen/generate_faces_x128_moreAtt.json
-submit_job diff_celeb_gen/generate_faces_x256.json
-submit_job diff_celeb_gen/generate_faces_x256_cos.json
-submit_job diff_celeb_gen/generate_faces_x256_linsca.json
-submit_job diff_celeb_gen/generate_faces_x256_sig.json
+# submit_job diff_celeb_gen/generate_faces_x128.json
+# submit_job diff_celeb_gen/generate_faces_x128_moreAtt.json
+# submit_job diff_celeb_gen/generate_faces_x256.json
+# submit_job diff_celeb_gen/generate_faces_x256_cos.json
+# submit_job diff_celeb_gen/generate_faces_x256_linsca.json
+# submit_job diff_celeb_gen/generate_faces_x256_sig.json
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
 
-# submit_job celeb_vae/celeb_vae_x128.json
-submit_job celeb_vae/celeb_vae_x256.json
-submit_job celeb_vae/celeb_vae_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
-submit_job celeb_vae/celeb_vae_x256_less_kl.json
+submit_job celeb_vae/celeb_vae_x128.json
+# submit_job celeb_vae/celeb_vae_x256.json
+# submit_job celeb_vae/celeb_vae_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
+# submit_job celeb_vae/celeb_vae_x256_less_kl.json
+
+#--------------------------------------------------------------------------------------------------
+# CELEB Latent Diffusion
+#--------------------------------------------------------------------------------------------------
+# submit_job celeb_latent_diff/celeb_lat_diff_x128.json
+submit_job celeb_latent_diff/celeb_lat_diff_x256.json

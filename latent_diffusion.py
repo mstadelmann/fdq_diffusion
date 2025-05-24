@@ -6,8 +6,7 @@ from image_functions import createSubplots, get_norm_to_rgb
 
 
 @torch.no_grad()
-def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
-    model = experiment.models["ccUNET"]
+def get_sample_from_noise(model, diffuser, gen_shape, idx_to_store=None):
     model.eval()
 
     imgs = []
@@ -37,7 +36,7 @@ def fdq_train(experiment) -> None:
 
     data = experiment.data["celeb_HDF"]
     unet_model = experiment.models["ccUNET"]
-    vae_model = experiment.models["monaivae"]
+    vae_model = experiment.models["monaivae"].eval()
     targs = experiment.exp_def.train.args
 
     train_loader = data.train_data_loader
@@ -148,7 +147,7 @@ def fdq_train(experiment) -> None:
         ).tolist()
 
         images_latent = get_sample_from_noise(
-            experiment=experiment,
+            model=unet_model,
             diffuser=chuchi_diffuser,
             gen_shape=img_shape,
             idx_to_store=idx_to_store,
