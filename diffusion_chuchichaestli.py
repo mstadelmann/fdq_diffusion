@@ -1,5 +1,4 @@
 import torch
-from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM

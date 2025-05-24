@@ -1,9 +1,7 @@
 import torch
-from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
-from chuchichaestli.diffusion.ddpm import DDPM
-from image_functions import createSubplots, get_norm_to_rgb
+from image_functions import createSubplots
 
 # from monai.losses.perceptual import PerceptualLoss
 
@@ -31,13 +29,12 @@ def KL_loss(z_mu, z_sigma):
 
 
 def fdq_train(experiment) -> None:
-
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    norm_to_rgb = get_norm_to_rgb(experiment)
+    # norm_to_rgb = get_norm_to_rgb(experiment)
 
     data = experiment.data["celeb_HDF"]
     model = experiment.models["monaivae"]
