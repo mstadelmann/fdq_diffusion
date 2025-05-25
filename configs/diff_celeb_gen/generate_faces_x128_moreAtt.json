@@ -12,18 +12,19 @@
                     "DownBlock",
                     "DownBlock",
                     "DownBlock",
-                    "DownBlock",
+                    "AttnDownBlock",
                     "AttnDownBlock",
                     "AttnDownBlock"
                 ],
                 "up_block_types": [
                     "AttnUpBlock",
                     "AttnUpBlock",
-                    "UpBlock",
+                    "AttnUpBlock",
                     "UpBlock",
                     "UpBlock",
                     "UpBlock"
-                ]
+                ],
+                "time_channels": 1024
             }
         }
     }

@@ -103,7 +103,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/vae.py",
         "args": {
-            "epochs": 200,
+            "epochs": 100,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -140,7 +140,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.11",
+        "fdq_version": "0.0.12",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
