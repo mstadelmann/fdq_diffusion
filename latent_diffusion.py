@@ -2,7 +2,7 @@ import torch
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
-from image_functions import createSubplots, get_norm_to_rgb
+from image_functions import createSubplots
 
 
 @torch.no_grad()
@@ -32,7 +32,7 @@ def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
 
-    norm_to_rgb = get_norm_to_rgb(experiment)
+    norm_to_rgb = experiment.transformers["norm_to_rgb"]
 
     data = experiment.data["celeb_HDF"]
     unet_model = experiment.models["ccUNET"]

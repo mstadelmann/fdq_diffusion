@@ -93,16 +93,14 @@ class H5Dataset(data.Dataset):
         self.dataset_shape = []
         self.dataset_data = []
         self.hdf_ds_key_request = hdf_ds_key_request
-        self.groups_are_sample_pairs = (
-            None  # True means that one "data sample" corresponds
-        )
-        #                                     to one dataset in each group
-
-        self.datasets_are_sample_pairs = (
-            None  # True means that one "data sample" corresponds
-        )
-        #                                       to one index in each HDF dataset
-        #                                       e.g. one dataset for the image, one dataset for the mask
+        self.groups_are_sample_pairs = None
+        # groups_are_sample_pairs = True
+        # means that one "data sample" corresponds
+        # to one dataset in each group
+        self.datasets_are_sample_pairs = None
+        # datasets_are_sample_pairs = True means that one "data sample" corresponds
+        # to one index in each HDF dataset
+        # e.g. one dataset for the image, one dataset for the mask
 
         self.hdf_data_tensor = []  # -> [[[]]]  -> list per file, per group, per dataset
 
@@ -573,19 +571,7 @@ def createDatasets(experiment):
 
     dargs = experiment.exp_def.data.celeb_HDF.args
 
-    to_float = transforms.Lambda(lambda t: t.type(torch.float32))
-    resizer = transforms.Resize(
-        (dargs.transforms.resize_h, dargs.transforms.resize_w), antialias=True
-    )
-    in_min = dargs.transforms.in_min
-    in_max = dargs.transforms.in_max
-    out_min = dargs.transforms.norm_min
-    out_max = dargs.transforms.norm_max
-    rgb_to_norm = transforms.Lambda(
-        lambda t: ((t - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-    )
-
-    img_transformer = transforms.Compose([to_float, resizer, rgb_to_norm])
+    img_transformer = experiment.transformers["resize_norm_inp"]
 
     file_extension = dargs.get("file_extension", "hdf")
     hdf_ds_key_request = dargs.hdf_ds_key_request

@@ -34,7 +34,7 @@ def fdq_train(experiment) -> None:
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    # norm_to_rgb = get_norm_to_rgb(experiment)
+    # norm_to_rgb = experiment.transformers["norm_to_rgb"]
 
     data = experiment.data["celeb_HDF"]
     model = experiment.models["monaivae"]

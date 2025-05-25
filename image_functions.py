@@ -9,40 +9,6 @@ def compute_histo(image, nb_bins=100):
     return torch.histogram(image.cpu().float(), bins=bins)
 
 
-def get_norm_to_rgb(experiment):
-    def _rdm_reduce(tensor):
-        # random reduce tensor size for quantile computation -> estimation
-        n = 12582912  # random defined as 8*3*32*128*128
-        if tensor.numel() > n:
-            n = min(n, tensor.numel())
-            random_indices = torch.randperm(tensor.numel())[:n]
-            return tensor.view(-1)[random_indices]
-        else:
-            return tensor
-
-    dargs = experiment.exp_def.data.celeb_HDF.args
-    lower_percentile_cutoff = dargs.transforms.get("export_lower_perc_cutoff", 0.01)
-    upper_percentile_cutoff = dargs.transforms.get("export_upper_perc_cutoff", 0.99)
-
-    clamper_perc = transforms.Lambda(
-        lambda t: torch.clamp(
-            t,
-            torch.quantile(_rdm_reduce(t), lower_percentile_cutoff),
-            torch.quantile(_rdm_reduce(t), upper_percentile_cutoff),
-        )
-    )
-
-    in_min = dargs.transforms.norm_min
-    in_max = dargs.transforms.norm_max
-    out_min = dargs.transforms.in_min
-    out_max = dargs.transforms.in_max
-    scaler = transforms.Lambda(
-        lambda t: ((t - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-    )
-    to_int = transforms.Lambda(lambda t: t.type(torch.uint8))
-    return transforms.Compose([clamper_perc, scaler, to_int])
-
-
 def createSubplots(
     image_list,
     batch_nb=0,
