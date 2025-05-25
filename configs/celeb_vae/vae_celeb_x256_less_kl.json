@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_VAE",
         "author": "Marc",
-        "parent": "celeb_vae_x128.json"
+        "parent": "vae_celeb_x128.json"
     },
     "transforms": {
         "resize_norm_inp": [
@@ -25,7 +25,7 @@
     },
     "train": {
         "args": {
-            "kl_loss_weight": 1e-4
+            "kl_loss_weight": 1e-9
         }
     }
 }

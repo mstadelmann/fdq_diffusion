@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "generate_faces_x128.json"
+        "parent": "diff_celeb_x128.json"
     },
     "transforms": {
         "resize_norm_inp": [

@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_VAE",
         "author": "Marc",
-        "parent": "celeb_vae_x128.json"
+        "parent": "vae_celeb_x128.json"
     },
     "transforms": {
         "resize_norm_inp": [

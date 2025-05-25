@@ -1,8 +1,8 @@
 {
     "globals": {
-        "project": "Celeb_Generation",
+        "project": "Celeb_LatentDiff",
         "author": "Marc",
-        "parent": "generate_faces_x128.json"
+        "parent": "lat_diff_celeb_x128.json"
     },
     "transforms": {
         "resize_norm_inp": [
@@ -22,5 +22,11 @@
                 }
             }
         ]
+    },
+    "models": {
+        "monaivae": {
+            "class_name": "monai.networks.nets.AutoencoderKL",
+            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/Celeb_VAE/celeb_vae_x256/20250523_17_49_21__competent_kalam__34782/best_val_monaivae_e142.fdqm"
+        }
     }
 }

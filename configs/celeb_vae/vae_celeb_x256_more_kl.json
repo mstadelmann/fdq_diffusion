@@ -1,8 +1,8 @@
 {
     "globals": {
-        "project": "Celeb_Generation",
+        "project": "Celeb_VAE",
         "author": "Marc",
-        "parent": "generate_faces_x128.json"
+        "parent": "vae_celeb_x128.json"
     },
     "transforms": {
         "resize_norm_inp": [
@@ -25,7 +25,7 @@
     },
     "train": {
         "args": {
-            "diffusion_scheduler": "cosine"
+            "kl_loss_weight": 1e-4
         }
     }
 }
