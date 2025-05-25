@@ -571,7 +571,7 @@ def createDatasets(experiment):
 
     dargs = experiment.exp_def.data.celeb_HDF.args
 
-    img_transformer = experiment.transformers["resize_norm_inp"]
+    img_transformer = experiment.transformers["resize_norm"]
 
     file_extension = dargs.get("file_extension", "hdf")
     hdf_ds_key_request = dargs.hdf_ds_key_request

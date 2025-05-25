@@ -77,14 +77,14 @@ def fdq_train(experiment) -> None:
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
-                    image_list=[norm_to_rgb(img) for img in images_gt],
+                    image_list=[norm_to_rgb(i) for i in images_gt],
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Input GT",
                 )
                 latent_imgs_path = createSubplots(
-                    image_list=[z_vae for img in z_vae],
+                    image_list=[i for i in z_vae],
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,

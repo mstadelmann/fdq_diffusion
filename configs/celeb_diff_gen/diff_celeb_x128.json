@@ -4,7 +4,7 @@
         "author": "Marc"
     },
     "transforms": {
-        "resize_norm_inp": [
+        "resize_norm": [
             "Float32",
             {
                 "Resize_HW": {
@@ -23,17 +23,17 @@
         ],
         "norm_to_rgb": [
             {
-                "CLAMP_perc": {
-                    "lower_perc": 0.005,
-                    "upper_perc": 0.995
-                }
-            },
-            {
                 "ReRange": {
                     "in_min": -1,
                     "in_max": 1,
                     "out_min": 0,
                     "out_max": 255
+                }
+            },
+            {
+                "CLAMP_abs": {
+                    "lower": 0,
+                    "upper": 255
                 }
             },
             "Uint8"

@@ -5,7 +5,7 @@
         "parent": "lat_diff_celeb_x128.json"
     },
     "transforms": {
-        "resize_norm_inp": [
+        "resize_norm": [
             "Float32",
             {
                 "Resize_HW": {
