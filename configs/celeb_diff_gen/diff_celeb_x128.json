@@ -57,7 +57,12 @@
                 "shuffle_train": true,
                 "shuffle_val": false,
                 "shuffle_test": false,
-                "drop_last": true
+                "drop_last": true,
+                "loader_transforms": {
+                    "train": "resize_norm",
+                    "val": "resize_norm",
+                    "test": "resize_norm"
+                }
             }
         }
     },

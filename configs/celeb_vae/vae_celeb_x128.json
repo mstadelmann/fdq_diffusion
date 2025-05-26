@@ -110,7 +110,9 @@
             "early_stop_val_loss": 20,
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
-            "kl_loss_weight": 1e-6
+            "kl_loss_weight": 1e-6,
+            "data_name": "celeb_HDF",
+            "model_name": "monaivae"
         }
     },
     "losses": {

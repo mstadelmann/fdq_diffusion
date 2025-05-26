@@ -542,21 +542,29 @@ class H5Dataset(data.Dataset):
         return self.total_nb_samples
 
 
-def get_loader_transforms(experiment, mode):
+def get_loader_transforms(experiment, trans):
 
-    if mode not in ["train", "val", "test"]:
-        raise ValueError("Mode must be one of 'train', 'val', or 'test'.")
+    # if mode not in ["train", "val", "test"]:
+    #     raise ValueError("Mode must be one of 'train', 'val', or 'test'.")
 
-    dargs = experiment.exp_def.data.celeb_HDF.args
+    # loader_trans = experiment.exp_def.data.celeb_HDF.args.loader_transforms.to_dict()
 
-    tdef = dargs.loader_transforms.get(mode)
-    if tdef:
-        return experiment.transformers[tdef]
-    else:
+    # trans = loader_trans.get(mode)
+
+    if trans is None:
         return transforms.Lambda(lambda t: t)
 
+    elif isinstance(trans, dict):
+        transforms_d = {}
+        for key, value in trans.items():
+            transforms_d[key] = experiment.transformers[value]
+        return transforms_d
 
-def createDatasets(experiment):
+    elif isinstance(trans, str):
+        return experiment.transformers[trans]
+
+
+def createDatasets(experiment, args=None):
     """
     Data preparator for HDF5 files.
 
@@ -583,7 +591,10 @@ def createDatasets(experiment):
     - TODO: dont store full data in ram if subset is used.
     """
 
-    dargs = experiment.exp_def.data.celeb_HDF.args
+    # data_name = kwargs.get("data_name")
+    # dargs = experiment.exp_def.data.get(data_name).args
+    dargs = args
+    loader_trans = dargs.loader_transforms.to_dict()
 
     # train_loader_trans = experiment.transformers[dargs.loader_transforms.train]
 
@@ -599,26 +610,84 @@ def createDatasets(experiment):
     data_files = {}
 
     data_basePath = dargs.base_path
-    if data_basePath is None:
-        raise ValueError(
-            "No dataBasePath defined! Please define a path to the data files!"
-        )
+    # ""
+    # if data_basePath is None:
+    #     raise ValueError(
+    #         "No dataBasePath defined! Please define a path to the data files!"
+    #     )
 
-    # look for files in subdirectories
-    for data_dir in DatasetType:
-        if data_dir == DatasetType.All:
-            data_path = Path(data_basePath)
+    # # look for files in subdirectories
+    # for data_dir in DatasetType:
+    #     if data_dir == DatasetType.All:
+    #         data_path = Path(data_basePath)
+    #     else:
+    #         data_path = Path(os.path.join(data_basePath, data_dir.value))
+
+    #     if os.path.isdir(data_path):
+    #         data_files[data_dir] = sorted(data_path.glob(f"**/*.{file_extension}"))
+    #     else:
+    #         data_files[data_dir] = []
+
+    # if len(data_files[DatasetType.All]) == 0:
+    #     iprint(f"File extension filter: {file_extension}")
+    #     raise ValueError(f"No data files found in {data_basePath} !")
+    # ""
+
+    # use dataBasePath (searches for all files in this folder)
+    if dargs.base_path is not None:
+
+        if (
+            dargs.train_files_path is not None
+            or dargs.test_files_path is not None
+            or dargs.val_files_path is not None
+        ):
+            raise ValueError(
+                "This combination of data path definitions is not allowed!!"
+            )
+
+        # look for files in subdirectories
+        for data_dir in DatasetType:
+            if data_dir == DatasetType.All:
+                data_path = Path(data_basePath)
+            else:
+                data_path = Path(os.path.join(data_basePath, data_dir.value))
+
+            if os.path.isdir(data_path):
+                data_files[data_dir] = sorted(data_path.glob(f"**/*.{file_extension}"))
+            else:
+                data_files[data_dir] = []
+
+        if len(data_files[DatasetType.All]) == 0:
+            iprint(f"File extension filter: {file_extension}")
+            raise ValueError(f"No data files found in {dargs.base_path} !")
+
+        # no specific train set defined -> use all data for training
+        if len(data_files[DatasetType.Train]) == 0:
+            if (
+                len(data_files[DatasetType.Test]) != 0
+                or len(data_files[DatasetType.Val]) != 0
+            ):
+                raise ValueError(
+                    "No train set defined, but test or validation set! This case is currently not supported!"
+                )
+            data_files[DatasetType.Train] = data_files[DatasetType.All]
+
+    # define files directly in form of a list of paths
+    elif data_basePath is None:
+        if dargs.train_files_path is not None:
+            data_files[DatasetType.Train] = [Path(p) for p in dargs.train_files_path]
         else:
-            data_path = Path(os.path.join(data_basePath, data_dir.value))
+            raise ValueError("No Train Data Files defined!")
 
-        if os.path.isdir(data_path):
-            data_files[data_dir] = sorted(data_path.glob(f"**/*.{file_extension}"))
+        if dargs.val_files_path is not None:
+            data_files[DatasetType.Val] = [Path(p) for p in dargs.val_files_path]
         else:
-            data_files[data_dir] = []
+            data_files[DatasetType.Val] = []
 
-    if len(data_files[DatasetType.All]) == 0:
-        iprint(f"File extension filter: {file_extension}")
-        raise ValueError(f"No data files found in {data_basePath} !")
+        if dargs.test_files_path is not None:
+            data_files[DatasetType.Test] = [Path(p) for p in dargs.test_files_path]
+        else:
+            data_files[DatasetType.Test] = []
 
     # load train & val only in the case of training
     is_train = experiment.mode.op_mode.train
@@ -626,18 +695,20 @@ def createDatasets(experiment):
         iprint("Preparing training dataset")
         train = H5Dataset(
             file_paths=data_files[DatasetType.Train],
-            data_transform=get_loader_transforms(experiment, "train"),
+            data_transform=get_loader_transforms(experiment, loader_trans.get("train")),
             hdf_ds_key_request=hdf_ds_key_request,
-            data_is_3d=False,
+            data_is_3d=dargs.data_is_3d,
         )
 
         if len(data_files[DatasetType.Val]) > 0:
             iprint("Preparing validation dataset")
             val = H5Dataset(
                 file_paths=data_files[DatasetType.Val],
-                data_transform=get_loader_transforms(experiment, "val"),
+                data_transform=get_loader_transforms(
+                    experiment, loader_trans.get("val")
+                ),
                 hdf_ds_key_request=hdf_ds_key_request,
-                data_is_3d=False,
+                data_is_3d=dargs.data_is_3d,
             )
         else:
             val = []
@@ -653,9 +724,9 @@ def createDatasets(experiment):
         iprint("Preparing test dataset")
         test = H5Dataset(
             file_paths=data_files[DatasetType.Test],
-            data_transform=get_loader_transforms(experiment, "test"),
+            data_transform=get_loader_transforms(experiment, loader_trans.get("test")),
             hdf_ds_key_request=hdf_ds_key_request_test,
-            data_is_3d=False,
+            data_is_3d=dargs.data_is_3d,
         )
     else:
         test = []

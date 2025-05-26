@@ -36,9 +36,13 @@ def fdq_train(experiment) -> None:
 
     # norm_to_rgb = experiment.transformers["norm_to_rgb"]
 
-    data = experiment.data["celeb_HDF"]
-    model = experiment.models["monaivae"]
     targs = experiment.exp_def.train.args
+    is_3d = experiment.exp_def.data.get(targs.data_name).args.data_is_3d
+
+    data = experiment.data[targs.data_name]
+    model = experiment.models[targs.model_name]
+    # data = experiment.data["celeb_HDF"]
+    # model = experiment.models["monaivae"]
 
     train_loader = data.train_data_loader
 
@@ -79,7 +83,9 @@ def fdq_train(experiment) -> None:
                     train_loss_tensor.backward()
 
                 experiment.update_gradients(
-                    b_idx=nb_tbatch, loader_name="celeb_HDF", model_name="monaivae"
+                    b_idx=nb_tbatch,
+                    loader_name=targs.data_name,
+                    model_name=targs.model_name,
                 )
 
             train_loss_sum += train_loss_tensor.detach().item()
@@ -125,6 +131,21 @@ def fdq_train(experiment) -> None:
                 experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0]
             )
 
+            log_scalars = {
+                "train_recon_loss": train_recon_loss_sum,
+                "train_kl_loss": train_kl_loss_sum,
+                "val_recon_loss": val_recon_loss_sum,
+                "val_kl_loss": val_kl_loss_sum,
+            }
+
+            if is_3d and z_mu.dim() == 5:
+                mid_slice = z_mu.shape[2] // 2
+                z_mu = z_mu[:, :, mid_slice, ...]
+                z_sigma = z_sigma[:, :, mid_slice, ...]
+                z_sample = z_sample[:, :, mid_slice, ...]
+                images_gt = images_gt[:, :, mid_slice, ...]
+                reconstruction = reconstruction[:, :, mid_slice, ...]
+
             mu_histo_path = createSubplots(
                 image_list=[img.detach().float() for img in z_mu[:nb_imgs, ...]],
                 grayscale=False,
@@ -140,13 +161,6 @@ def fdq_train(experiment) -> None:
                 histogram=True,
                 figure_title="sigma",
             )
-
-            log_scalars = {
-                "train_recon_loss": train_recon_loss_sum,
-                "train_kl_loss": train_kl_loss_sum,
-                "val_recon_loss": val_recon_loss_sum,
-                "val_kl_loss": val_kl_loss_sum,
-            }
 
             imgs_to_log = [
                 {"name": "val_gt", "data": images_gt[:nb_imgs, ...]},
