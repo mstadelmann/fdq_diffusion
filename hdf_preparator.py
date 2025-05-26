@@ -542,6 +542,20 @@ class H5Dataset(data.Dataset):
         return self.total_nb_samples
 
 
+def get_loader_transforms(experiment, mode):
+
+    if mode not in ["train", "val", "test"]:
+        raise ValueError("Mode must be one of 'train', 'val', or 'test'.")
+
+    dargs = experiment.exp_def.data.celeb_HDF.args
+
+    tdef = dargs.loader_transforms.get(mode)
+    if tdef:
+        return experiment.transformers[tdef]
+    else:
+        return transforms.Lambda(lambda t: t)
+
+
 def createDatasets(experiment):
     """
     Data preparator for HDF5 files.
@@ -571,7 +585,9 @@ def createDatasets(experiment):
 
     dargs = experiment.exp_def.data.celeb_HDF.args
 
-    img_transformer = experiment.transformers["resize_norm"]
+    # train_loader_trans = experiment.transformers[dargs.loader_transforms.train]
+
+    # img_transformer = experiment.transformers["resize_norm"]
 
     file_extension = dargs.get("file_extension", "hdf")
     hdf_ds_key_request = dargs.hdf_ds_key_request
@@ -605,12 +621,12 @@ def createDatasets(experiment):
         raise ValueError(f"No data files found in {data_basePath} !")
 
     # load train & val only in the case of training
-    is_train = experiment.inargs.train_model
+    is_train = experiment.mode.op_mode.train
     if is_train:
         iprint("Preparing training dataset")
         train = H5Dataset(
             file_paths=data_files[DatasetType.Train],
-            data_transform=img_transformer,
+            data_transform=get_loader_transforms(experiment, "train"),
             hdf_ds_key_request=hdf_ds_key_request,
             data_is_3d=False,
         )
@@ -619,7 +635,7 @@ def createDatasets(experiment):
             iprint("Preparing validation dataset")
             val = H5Dataset(
                 file_paths=data_files[DatasetType.Val],
-                data_transform=img_transformer,
+                data_transform=get_loader_transforms(experiment, "val"),
                 hdf_ds_key_request=hdf_ds_key_request,
                 data_is_3d=False,
             )
@@ -632,12 +648,12 @@ def createDatasets(experiment):
         train = []
         val = []
 
-    is_test = experiment.inargs.test_model_auto or experiment.inargs.test_model_ia
+    is_test = experiment.mode.op_mode.test
     if is_test and len(data_files[DatasetType.Test]) > 0:
         iprint("Preparing test dataset")
         test = H5Dataset(
             file_paths=data_files[DatasetType.Test],
-            data_transform=img_transformer,
+            data_transform=get_loader_transforms(experiment, "test"),
             hdf_ds_key_request=hdf_ds_key_request_test,
             data_is_3d=False,
         )
