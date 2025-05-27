@@ -60,7 +60,7 @@
                 "data_is_3d": true,
                 "file_extension": "hdf",
                 "val_from_train_ratio": 0.1,
-                "subset_train": 0.5,
+                "subset_train": 1.0,
                 "subset_val": 1.0,
                 "subset_test": 1.0,
                 "pin_memory": true,
