@@ -82,11 +82,13 @@ def fdq_train(experiment) -> None:
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
-                    image_list=t_img_exp(images_gt),
+                    image_list=images_gt,
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
+                    hide_ticks=True,
                     figure_title="Input GT",
+                    export_transform=t_img_exp,
                 )
                 imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
@@ -148,8 +150,6 @@ def fdq_train(experiment) -> None:
             idx_to_store=idx_to_store,
         )
 
-        images = [t_img_exp(i) for i in images]
-
         history_path = createSubplots(
             image_list=images,
             grayscale=False,
@@ -157,6 +157,7 @@ def fdq_train(experiment) -> None:
             histogram=True,
             figure_title="Generative Diffusion Steps",
             labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
         )
 
         imgs_to_log.extend(

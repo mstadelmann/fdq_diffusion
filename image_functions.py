@@ -22,6 +22,7 @@ def createSubplots(
     hide_ticks=False,
     apply_global_range=True,
     fig_size=3,
+    export_transform=None,
 ):
     if labels is None:
         labels = len(image_list) * [""]
@@ -30,8 +31,11 @@ def createSubplots(
 
     nb_images = len(image_list)
 
-    global_min = min(float(img.min()) for img in image_list)
-    global_max = max(float(img.max()) for img in image_list)
+    if export_transform is None:
+        export_transform = transforms.Lambda(lambda t: t)
+
+    glob_print_min = min(float(export_transform(img).min()) for img in image_list)
+    glob_print_max = max(float(export_transform(img).max()) for img in image_list)
 
     if histogram:
         nb_rows = 2
@@ -75,41 +79,6 @@ def createSubplots(
         if len(img.shape) == 3:
             img = img.permute(1, 2, 0)
 
-        # if not grayscale and img.dtype == torch.float and img.max() > 50:
-        #     # assume RGB image in float values
-        #     # TODO where is this used? this might not be a good idea!
-        #     img = img.int()
-
-        if not apply_global_range:
-            global_min = float(img.min())
-            global_max = float(img.max())
-
-        if grayscale:
-            if nb_rows > 1:
-                im = axs[c_row, c_col].imshow(
-                    img.cpu(), cmap="gray", vmin=global_min, vmax=global_max
-                )
-                if not apply_global_range:
-                    fig.colorbar(im, ax=axs[c_row, c_col])
-
-                elif is_last:
-                    fig.colorbar(im, ax=axs[c_row, c_col])
-            else:
-                axs[c_col].imshow(
-                    img.cpu(), cmap="gray", vmin=global_min, vmax=global_max
-                )
-        else:
-            if nb_rows > 1:
-                axs[c_row, c_col].imshow(img.cpu(), vmin=global_min, vmax=global_max)
-            else:
-                axs[c_col].imshow(img.cpu(), vmin=global_min, vmax=global_max)
-
-        if lbl is not None:
-            if nb_rows > 1:
-                axs[c_row, c_col].set_title(lbl)
-            else:
-                axs[c_col].set_title(lbl)
-
         if histogram:
             if grayscale:
                 hist = compute_histo(torch.squeeze(img).cpu())
@@ -123,6 +92,40 @@ def createSubplots(
                 axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="g")
                 hist = compute_histo(torch.squeeze(img).cpu()[2])
                 axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="b")
+
+        img = export_transform(img)
+
+        if not apply_global_range:
+            glob_print_min = float(img.min())
+            glob_print_max = float(img.max())
+
+        if grayscale:
+            if nb_rows > 1:
+                im = axs[c_row, c_col].imshow(
+                    img.cpu(), cmap="gray", vmin=glob_print_min, vmax=glob_print_max
+                )
+                if not apply_global_range:
+                    fig.colorbar(im, ax=axs[c_row, c_col])
+
+                elif is_last:
+                    fig.colorbar(im, ax=axs[c_row, c_col])
+            else:
+                axs[c_col].imshow(
+                    img.cpu(), cmap="gray", vmin=glob_print_min, vmax=glob_print_max
+                )
+        else:
+            if nb_rows > 1:
+                axs[c_row, c_col].imshow(
+                    img.cpu(), vmin=glob_print_min, vmax=glob_print_max
+                )
+            else:
+                axs[c_col].imshow(img.cpu(), vmin=glob_print_min, vmax=glob_print_max)
+
+        if lbl is not None:
+            if nb_rows > 1:
+                axs[c_row, c_col].set_title(lbl)
+            else:
+                axs[c_col].set_title(lbl)
 
     if hide_ticks:
         for ax in axs.flat:
