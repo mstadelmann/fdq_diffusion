@@ -544,13 +544,6 @@ class H5Dataset(data.Dataset):
 
 def get_loader_transforms(experiment, trans):
 
-    # if mode not in ["train", "val", "test"]:
-    #     raise ValueError("Mode must be one of 'train', 'val', or 'test'.")
-
-    # loader_trans = experiment.exp_def.data.celeb_HDF.args.loader_transforms.to_dict()
-
-    # trans = loader_trans.get(mode)
-
     if trans is None:
         return transforms.Lambda(lambda t: t)
 
@@ -591,55 +584,25 @@ def createDatasets(experiment, args=None):
     - TODO: dont store full data in ram if subset is used.
     """
 
-    # data_name = kwargs.get("data_name")
-    # dargs = experiment.exp_def.data.get(data_name).args
-    dargs = args
-    loader_trans = dargs.loader_transforms.to_dict()
-
-    # train_loader_trans = experiment.transformers[dargs.loader_transforms.train]
-
-    # img_transformer = experiment.transformers["resize_norm"]
-
-    file_extension = dargs.get("file_extension", "hdf")
-    hdf_ds_key_request = dargs.hdf_ds_key_request
-    hdf_ds_key_request_test = dargs.hdf_ds_key_request_test
+    loader_trans = args.loader_transforms.to_dict()
+    file_extension = args.get("file_extension", "hdf")
+    hdf_ds_key_request = args.hdf_ds_key_request
+    hdf_ds_key_request_test = args.hdf_ds_key_request_test
 
     if hdf_ds_key_request_test is None:
         hdf_ds_key_request_test = hdf_ds_key_request
 
     data_files = {}
 
-    data_basePath = dargs.base_path
-    # ""
-    # if data_basePath is None:
-    #     raise ValueError(
-    #         "No dataBasePath defined! Please define a path to the data files!"
-    #     )
-
-    # # look for files in subdirectories
-    # for data_dir in DatasetType:
-    #     if data_dir == DatasetType.All:
-    #         data_path = Path(data_basePath)
-    #     else:
-    #         data_path = Path(os.path.join(data_basePath, data_dir.value))
-
-    #     if os.path.isdir(data_path):
-    #         data_files[data_dir] = sorted(data_path.glob(f"**/*.{file_extension}"))
-    #     else:
-    #         data_files[data_dir] = []
-
-    # if len(data_files[DatasetType.All]) == 0:
-    #     iprint(f"File extension filter: {file_extension}")
-    #     raise ValueError(f"No data files found in {data_basePath} !")
-    # ""
+    data_basePath = args.base_path
 
     # use dataBasePath (searches for all files in this folder)
-    if dargs.base_path is not None:
+    if args.base_path is not None:
 
         if (
-            dargs.train_files_path is not None
-            or dargs.test_files_path is not None
-            or dargs.val_files_path is not None
+            args.train_files_path is not None
+            or args.test_files_path is not None
+            or args.val_files_path is not None
         ):
             raise ValueError(
                 "This combination of data path definitions is not allowed!!"
@@ -659,7 +622,7 @@ def createDatasets(experiment, args=None):
 
         if len(data_files[DatasetType.All]) == 0:
             iprint(f"File extension filter: {file_extension}")
-            raise ValueError(f"No data files found in {dargs.base_path} !")
+            raise ValueError(f"No data files found in {args.base_path} !")
 
         # no specific train set defined -> use all data for training
         if len(data_files[DatasetType.Train]) == 0:
@@ -674,18 +637,18 @@ def createDatasets(experiment, args=None):
 
     # define files directly in form of a list of paths
     elif data_basePath is None:
-        if dargs.train_files_path is not None:
-            data_files[DatasetType.Train] = [Path(p) for p in dargs.train_files_path]
+        if args.train_files_path is not None:
+            data_files[DatasetType.Train] = [Path(p) for p in args.train_files_path]
         else:
             raise ValueError("No Train Data Files defined!")
 
-        if dargs.val_files_path is not None:
-            data_files[DatasetType.Val] = [Path(p) for p in dargs.val_files_path]
+        if args.val_files_path is not None:
+            data_files[DatasetType.Val] = [Path(p) for p in args.val_files_path]
         else:
             data_files[DatasetType.Val] = []
 
-        if dargs.test_files_path is not None:
-            data_files[DatasetType.Test] = [Path(p) for p in dargs.test_files_path]
+        if args.test_files_path is not None:
+            data_files[DatasetType.Test] = [Path(p) for p in args.test_files_path]
         else:
             data_files[DatasetType.Test] = []
 
@@ -697,7 +660,7 @@ def createDatasets(experiment, args=None):
             file_paths=data_files[DatasetType.Train],
             data_transform=get_loader_transforms(experiment, loader_trans.get("train")),
             hdf_ds_key_request=hdf_ds_key_request,
-            data_is_3d=dargs.data_is_3d,
+            data_is_3d=args.data_is_3d,
         )
 
         if len(data_files[DatasetType.Val]) > 0:
@@ -708,7 +671,7 @@ def createDatasets(experiment, args=None):
                     experiment, loader_trans.get("val")
                 ),
                 hdf_ds_key_request=hdf_ds_key_request,
-                data_is_3d=dargs.data_is_3d,
+                data_is_3d=args.data_is_3d,
             )
         else:
             val = []
@@ -726,7 +689,7 @@ def createDatasets(experiment, args=None):
             file_paths=data_files[DatasetType.Test],
             data_transform=get_loader_transforms(experiment, loader_trans.get("test")),
             hdf_ds_key_request=hdf_ds_key_request_test,
-            data_is_3d=dargs.data_is_3d,
+            data_is_3d=args.data_is_3d,
         )
     else:
         test = []
@@ -735,9 +698,9 @@ def createDatasets(experiment, args=None):
     n_val = len(val)
     n_test = len(test)
 
-    train_subratio = dargs.subset_train
-    val_subratio = dargs.subset_val
-    test_subratio = dargs.subset_test
+    train_subratio = args.subset_train
+    val_subratio = args.subset_val
+    test_subratio = args.subset_test
 
     n_train_sub = int(n_train * train_subratio)
     if n_train_sub == 0 and is_train:
@@ -754,7 +717,7 @@ def createDatasets(experiment, args=None):
     if n_train == n_train_sub:
         train_sub = train
     else:
-        if not dargs.shuffle_train:
+        if not args.shuffle_train:
             train_sub = torch.utils.data.Subset(train, range(n_train_sub))
         else:
             train_sub, _ = random_split(train, [n_train_sub, n_train - n_train_sub])
@@ -762,7 +725,7 @@ def createDatasets(experiment, args=None):
     if n_val == n_val_sub:
         val_sub = val
     else:
-        if not dargs.shuffle_train:
+        if not args.shuffle_train:
             val_sub = torch.utils.data.Subset(val, range(n_val_sub))
         else:
             val_sub, _ = random_split(val, [n_val_sub, n_val - n_val_sub])
@@ -770,19 +733,18 @@ def createDatasets(experiment, args=None):
     if n_test == n_test_sub:
         test_sub = test
     else:
-        if not dargs.shuffle_test:
+        if not args.shuffle_test:
             test_sub = torch.utils.data.Subset(test, range(n_test_sub))
         else:
             test_sub, _ = random_split(test, [n_test_sub, n_test - n_test_sub])
 
     # spilt train into val and train (if no val set is defined)
-
-    train_ratio = dargs.val_from_train_ratio
+    train_ratio = args.val_from_train_ratio
     if len(val_sub) == 0 and train_ratio != 0:
         n_val_sub = int(n_train_sub * train_ratio)
         n_train_sub = int(n_train_sub - n_val_sub)
 
-        if not dargs.shuffle_train:
+        if not args.shuffle_train:
             # gen = torch.Generator().manual_seed(42)
             # train_sub, val_sub = random_split(train_sub, [n_train_sub, n_val_sub], generator=gen)
 
@@ -801,11 +763,11 @@ def createDatasets(experiment, args=None):
     if len(train_sub) > 0:
         train_data_loader = torch.utils.data.DataLoader(
             train_sub,
-            batch_size=dargs.train_batch_size,
-            shuffle=dargs.shuffle_train,
-            pin_memory=dargs.pin_memory,
-            num_workers=dargs.num_workers,
-            drop_last=dargs.drop_last,
+            batch_size=args.train_batch_size,
+            shuffle=args.shuffle_train,
+            pin_memory=args.pin_memory,
+            num_workers=args.num_workers,
+            drop_last=args.drop_last,
         )
     else:
         train_data_loader = None
@@ -813,11 +775,11 @@ def createDatasets(experiment, args=None):
     if len(val_sub) > 0:
         val_data_loader = torch.utils.data.DataLoader(
             val_sub,
-            batch_size=dargs.val_batch_size,
-            shuffle=dargs.shuffle_val,
-            pin_memory=dargs.pin_memory,
-            num_workers=dargs.num_workers,
-            drop_last=dargs.drop_last,
+            batch_size=args.val_batch_size,
+            shuffle=args.shuffle_val,
+            pin_memory=args.pin_memory,
+            num_workers=args.num_workers,
+            drop_last=args.drop_last,
         )
     else:
         val_data_loader = None
@@ -825,11 +787,11 @@ def createDatasets(experiment, args=None):
     if len(test_sub) > 0:
         test_data_loader = torch.utils.data.DataLoader(
             test_sub,
-            batch_size=dargs.test_batch_size,
-            shuffle=dargs.shuffle_test,
-            pin_memory=dargs.pin_memory,
-            num_workers=dargs.num_workers,
-            drop_last=dargs.drop_last,
+            batch_size=args.test_batch_size,
+            shuffle=args.shuffle_test,
+            pin_memory=args.pin_memory,
+            num_workers=args.num_workers,
+            drop_last=args.drop_last,
         )
     else:
         test_data_loader = None
