@@ -146,7 +146,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/latent_diffusion.py",
         "args": {
-            "epochs": 100,
+            "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -190,7 +190,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.13",
+        "fdq_version": "0.0.14",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",

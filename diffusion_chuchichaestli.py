@@ -1,4 +1,5 @@
 import torch
+from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
@@ -35,7 +36,11 @@ def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
 
-    norm_to_rgb = experiment.transformers["norm_to_rgb"]
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
 
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
@@ -77,7 +82,7 @@ def fdq_train(experiment) -> None:
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
-                    image_list=[norm_to_rgb(img) for img in images_gt],
+                    image_list=t_img_exp(images_gt),
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
@@ -143,7 +148,7 @@ def fdq_train(experiment) -> None:
             idx_to_store=idx_to_store,
         )
 
-        images = [norm_to_rgb(i) for i in images]
+        images = [t_img_exp(i) for i in images]
 
         history_path = createSubplots(
             image_list=images,

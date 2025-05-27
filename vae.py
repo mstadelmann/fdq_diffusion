@@ -1,4 +1,5 @@
 import torch
+from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from image_functions import createSubplots
@@ -31,6 +32,12 @@ def KL_loss(z_mu, z_sigma):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
+
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
@@ -134,16 +141,16 @@ def fdq_train(experiment) -> None:
                 "val_kl_loss": val_kl_loss_sum,
             }
 
-            if is_3d and z_mu.dim() == 5:
-                mid_slice = z_mu.shape[2] // 2
-                z_mu = z_mu[:, :, mid_slice, ...]
-                z_sigma = z_sigma[:, :, mid_slice, ...]
-                z_sample = z_sample[:, :, mid_slice, ...]
-                images_gt = images_gt[:, :, mid_slice, ...]
-                reconstruction = reconstruction[:, :, mid_slice, ...]
+            # if is_3d and z_mu.dim() == 5:
+            #     mid_slice = z_mu.shape[2] // 2
+            #     z_mu = z_mu[:, :, mid_slice, ...]
+            #     z_sigma = z_sigma[:, :, mid_slice, ...]
+            #     z_sample = z_sample[:, :, mid_slice, ...]
+            #     images_gt = images_gt[:, :, mid_slice, ...]
+            #     reconstruction = reconstruction[:, :, mid_slice, ...]
 
             mu_histo_path = createSubplots(
-                image_list=[img.detach().float() for img in z_mu[:nb_imgs, ...]],
+                image_list=t_img_exp(z_mu[:nb_imgs, ...].detach().float()),
                 grayscale=False,
                 experiment=experiment,
                 histogram=True,
@@ -151,7 +158,7 @@ def fdq_train(experiment) -> None:
             )
 
             sigma_histo_path = createSubplots(
-                image_list=[img.detach().float() for img in z_sigma[:nb_imgs, ...]],
+                image_list=t_img_exp(z_sigma[:nb_imgs, ...].detach().float()),
                 grayscale=False,
                 experiment=experiment,
                 histogram=True,
@@ -159,17 +166,19 @@ def fdq_train(experiment) -> None:
             )
 
             imgs_to_log = [
-                {"name": "val_gt", "data": images_gt[:nb_imgs, ...]},
-                {"name": "val_recon", "data": reconstruction[:nb_imgs, ...]},
+                {"name": "val_gt", "data": t_img_exp(images_gt[:nb_imgs, ...])},
+                {"name": "val_recon", "data": t_img_exp(reconstruction[:nb_imgs, ...])},
                 {
                     "name": "val_diff",
-                    "data": torch.abs(images_gt - reconstruction)[:nb_imgs, ...],
+                    "data": t_img_exp(
+                        torch.abs(images_gt - reconstruction)[:nb_imgs, ...]
+                    ),
                 },
-                {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
+                {"name": "val_sample", "data": t_img_exp(z_sample[:nb_imgs, ...])},
                 {"name": "val_mu_h", "path": mu_histo_path},
                 {"name": "val_sigma_h", "path": sigma_histo_path},
-                {"name": "val_mu", "data": z_mu[:nb_imgs, ...]},
-                {"name": "val_sigma", "data": z_sigma[:nb_imgs, ...]},
+                {"name": "val_mu", "data": t_img_exp(z_mu[:nb_imgs, ...])},
+                {"name": "val_sigma", "data": t_img_exp(z_sigma[:nb_imgs, ...])},
             ]
 
         experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
@@ -185,11 +194,17 @@ def fdq_test(experiment):
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
+
     test_loader = data.test_data_loader
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
     nb_export_samples = experiment.exp_def.test.args.get("nb_export_samples", 0)
 
-    if data.args.test_batch_size != 1:
+    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(
             "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
         )
@@ -210,7 +225,11 @@ def fdq_test(experiment):
         reconstruction, z_mu, z_sigma = model(images_gt)
 
         if nb_tbatch <= nb_export_samples:
-            img_list = [images_gt, reconstruction, images_gt - reconstruction]
+            img_list = [
+                t_img_exp(images_gt),
+                t_img_exp(reconstruction),
+                t_img_exp(images_gt - reconstruction),
+            ]
 
             createSubplots(
                 image_list=img_list,
