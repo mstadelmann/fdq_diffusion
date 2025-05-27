@@ -7,7 +7,9 @@ from image_functions import createSubplots
 
 @torch.no_grad()
 def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
-    model = experiment.models["ccUNET"]
+
+    targs = experiment.exp_def.train.args
+    model = experiment.models[targs.model_name]
     model.eval()
 
     imgs = []
@@ -35,9 +37,9 @@ def fdq_train(experiment) -> None:
 
     norm_to_rgb = experiment.transformers["norm_to_rgb"]
 
-    data = experiment.data["celeb_HDF"]
-    model = experiment.models["ccUNET"]
     targs = experiment.exp_def.train.args
+    data = experiment.data[targs.dataloader_name]
+    model = experiment.models[targs.model_name]
 
     train_loader = data.train_data_loader
 
@@ -115,7 +117,9 @@ def fdq_train(experiment) -> None:
                 train_loss_tensor.backward()
 
             experiment.update_gradients(
-                b_idx=nb_tbatch, loader_name="celeb_HDF", model_name="ccUNET"
+                b_idx=nb_tbatch,
+                loader_name=targs.dataloader_name,
+                model_name=targs.model_name,
             )
 
             train_loss_sum += train_loss_tensor.detach().item()

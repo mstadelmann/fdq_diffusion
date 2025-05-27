@@ -131,7 +131,9 @@
             "diffusion_nb_steps": 800,
             "diffusion_shd_beta_start": 0.0001,
             "diffusion_shd_beta_end": 0.02,
-            "diffusion_nb_plot_steps": 10
+            "diffusion_nb_plot_steps": 10,
+            "dataloader_name": "celeb_HDF",
+            "model_name": "ccUNET"
         }
     },
     "losses": {
@@ -162,7 +164,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.12",
+        "fdq_version": "0.0.13",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",

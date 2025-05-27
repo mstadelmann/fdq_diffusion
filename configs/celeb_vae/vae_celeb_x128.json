@@ -57,7 +57,12 @@
                 "shuffle_train": true,
                 "shuffle_val": false,
                 "shuffle_test": false,
-                "drop_last": true
+                "drop_last": true,
+                "loader_transforms": {
+                    "train": "resize_norm",
+                    "val": "resize_norm",
+                    "test": "resize_norm"
+                }
             }
         }
     },
@@ -111,7 +116,7 @@
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
             "kl_loss_weight": 1e-6,
-            "data_name": "celeb_HDF",
+            "dataloader_name": "celeb_HDF",
             "model_name": "monaivae"
         }
     },
@@ -142,7 +147,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.12",
+        "fdq_version": "0.0.13",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",

@@ -34,15 +34,11 @@ def fdq_train(experiment) -> None:
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    # norm_to_rgb = experiment.transformers["norm_to_rgb"]
-
     targs = experiment.exp_def.train.args
-    is_3d = experiment.exp_def.data.get(targs.data_name).args.data_is_3d
+    is_3d = experiment.exp_def.data.get(targs.dataloader_name).args.data_is_3d
 
-    data = experiment.data[targs.data_name]
+    data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
-    # data = experiment.data["celeb_HDF"]
-    # model = experiment.models["monaivae"]
 
     train_loader = data.train_data_loader
 
@@ -84,7 +80,7 @@ def fdq_train(experiment) -> None:
 
                 experiment.update_gradients(
                     b_idx=nb_tbatch,
-                    loader_name=targs.data_name,
+                    loader_name=targs.dataloader_name,
                     model_name=targs.model_name,
                 )
 
@@ -185,13 +181,15 @@ def fdq_train(experiment) -> None:
 def fdq_test(experiment):
     """Basic VAE evaluation."""
 
-    data = experiment.data["celeb_HDF"]
-    model = experiment.models["monaivae"]
+    targs = experiment.exp_def.train.args
+    data = experiment.data[targs.dataloader_name]
+    model = experiment.models[targs.model_name]
+
     test_loader = data.test_data_loader
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
     nb_export_samples = experiment.exp_def.test.args.get("nb_export_samples", 0)
 
-    if experiment.exp_def.data.celeb_HDF.args.test_batch_size != 1:
+    if data.args.test_batch_size != 1:
         raise ValueError(
             "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
         )

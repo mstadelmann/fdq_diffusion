@@ -34,10 +34,10 @@ def fdq_train(experiment) -> None:
 
     norm_to_rgb = experiment.transformers["norm_to_rgb"]
 
-    data = experiment.data["celeb_HDF"]
-    unet_model = experiment.models["ccUNET"]
-    vae_model = experiment.models["monaivae"].eval()
     targs = experiment.exp_def.train.args
+    data = experiment.data[targs.dataloader_name]
+    unet_model = experiment.models[targs.model_name]
+    vae_model = experiment.models[targs.encoder_name]
 
     train_loader = data.train_data_loader
 
@@ -129,7 +129,9 @@ def fdq_train(experiment) -> None:
                 train_loss_tensor.backward()
 
             experiment.update_gradients(
-                b_idx=nb_tbatch, loader_name="celeb_HDF", model_name="ccUNET"
+                b_idx=nb_tbatch,
+                loader_name=targs.dataloader_name,
+                model_name=targs.model_name,
             )
 
             train_loss_sum += train_loss_tensor.detach().item()
