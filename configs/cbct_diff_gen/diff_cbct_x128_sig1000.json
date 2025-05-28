@@ -1,0 +1,14 @@
+{
+    "globals": {
+        "project": "CBCT_Diff_Gen",
+        "author": "Marc",
+        "parent": "diff_cbct_x128.json"
+    },
+    "train": {
+        "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
+        "args": {
+            "diffusion_scheduler": "sigmoid",
+            "diffusion_nb_steps": 1000
+        }
+    }
+}

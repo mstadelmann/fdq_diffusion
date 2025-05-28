@@ -134,7 +134,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 200,
+            "epochs": 100,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,

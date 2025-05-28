@@ -8,7 +8,7 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 #--------------------------------------------------------------------------------------------------
-submit_job celeb_diff_gen/diff_celeb_x128.json
+# submit_job celeb_diff_gen/diff_celeb_x128.json
 # submit_job celeb_diff_gen/diff_celeb_x128_moreAtt.json
 # submit_job celeb_diff_gen/diff_celeb_x256.json
 # submit_job celeb_diff_gen/diff_celeb_x256_cos.json
@@ -19,8 +19,8 @@ submit_job celeb_diff_gen/diff_celeb_x128.json
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-submit_job celeb_vae/vae_celeb_x128.json
-submit_job celeb_vae/vae_celeb_x256.json
+# submit_job celeb_vae/vae_celeb_x128.json
+# submit_job celeb_vae/vae_celeb_x256.json
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 
@@ -35,17 +35,19 @@ submit_job celeb_vae/vae_celeb_x256.json
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_diff_gen/diff_cbct_x128_quick.json
-submit_job cbct_diff_gen/diff_cbct_x128.json
+# submit_job cbct_diff_gen/diff_cbct_x128.json # -> noisy
+submit_job cbct_diff_gen/diff_cbct_x128_minmax_norm.json
+submit_job cbct_diff_gen/diff_cbct_x128_sig1000.json
+submit_job cbct_diff_gen/diff_cbct_x128_attv1.json
+submit_job cbct_diff_gen/diff_cbct_x128_attv2.json
 
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_vae/vae_cbct_x128_quick.json
 # submit_job cbct_vae/vae_cbct_x128.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_latent_diff/lat_diff_cbct_maisi_x128.json
+submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256.json

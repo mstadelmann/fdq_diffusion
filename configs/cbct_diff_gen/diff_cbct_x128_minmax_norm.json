@@ -1,0 +1,18 @@
+{
+    "globals": {
+        "project": "CBCT_Diff_Gen",
+        "author": "Marc",
+        "parent": "diff_cbct_x128.json"
+    },
+    "transforms": {
+        "HU_to_norm": [
+            "Float32",
+            {
+                "ReRange_minmax": {
+                    "out_min": -1,
+                    "out_max": 1
+                }
+            }
+        ]
+    }
+}
