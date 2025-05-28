@@ -2,7 +2,7 @@
     "globals": {
         "project": "CBCT_Diff_Gen",
         "author": "Marc",
-        "parent": "diff_cbct_x128.json"
+        "parent": "diff_cbct_x256.json"
     },
     "transforms": {
         "HU_to_norm": [
