@@ -130,7 +130,7 @@
         "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": true,
-        "save_best_train_model": true,
+        "save_best_train_model": false,
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
         "use_wandb": true,
@@ -162,7 +162,7 @@
         "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": true,
+        "run_test": false,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [

@@ -14,11 +14,5 @@
                 }
             }
         ]
-    },
-    "train": {
-        "path": "~/dev/fdq_diffusion/latent_diff_maisi.py",
-        "args": {
-            "epochs": 20
-        }
     }
 }

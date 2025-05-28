@@ -120,7 +120,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 200,
+            "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -145,7 +145,7 @@
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 4,
         "save_last_model": true,
-        "save_best_val_model": true,
+        "save_best_val_model": false,
         "save_best_train_model": true,
         "checkpoint_frequency": 2,
         "use_tensorboard": false,

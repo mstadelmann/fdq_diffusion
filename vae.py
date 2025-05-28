@@ -43,6 +43,7 @@ def fdq_train(experiment) -> None:
 
     targs = experiment.exp_def.train.args
     is_3d = experiment.exp_def.data.get(targs.dataloader_name).args.data_is_3d
+    is_grayscale = False
 
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
@@ -70,6 +71,11 @@ def fdq_train(experiment) -> None:
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             images_gt = batch[0].to(experiment.device)
+
+            if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
+                img_shape = images_gt.shape[1:]
+                if img_shape[1] == 1:
+                    is_grayscale = True
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
                 reconstruction, z_mu, z_sigma = model(images_gt)
@@ -151,7 +157,7 @@ def fdq_train(experiment) -> None:
 
             mu_histo_path = createSubplots(
                 image_list=t_img_exp(z_mu[:nb_imgs, ...].detach().float()),
-                grayscale=False,
+                grayscale=is_grayscale,
                 experiment=experiment,
                 histogram=True,
                 figure_title="mu",
@@ -159,7 +165,7 @@ def fdq_train(experiment) -> None:
 
             sigma_histo_path = createSubplots(
                 image_list=t_img_exp(z_sigma[:nb_imgs, ...].detach().float()),
-                grayscale=False,
+                grayscale=is_grayscale,
                 experiment=experiment,
                 histogram=True,
                 figure_title="sigma",

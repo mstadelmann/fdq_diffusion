@@ -1,0 +1,39 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "diff_celeb_x128.json"
+    },
+    "models": {
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "n_channels": 32,
+                "num_layers_per_block": 1,
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "AttnDownBlock",
+                    "AttnDownBlock"
+                ],
+                "up_block_types": [
+                    "AttnUpBlock",
+                    "AttnUpBlock",
+                    "UpBlock",
+                    "UpBlock"
+                ],
+                "block_out_channel_mults": [
+                    1,
+                    1,
+                    2,
+                    2
+                ],
+                "time_channels": 512
+            }
+        }
+    },
+    "slurm_cluster": {
+        "gres": "gpu:1",
+        "partition": "gpu"
+    }
+}

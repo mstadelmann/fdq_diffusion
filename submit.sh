@@ -8,7 +8,13 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_diff_gen/diff_celeb_x128.json
+submit_job celeb_diff_gen/diff_celeb_x128_small.json # model 1.37M = 5MB
+submit_job celeb_diff_gen/diff_celeb_x128_small_att.json # model 1.39M = 5.4MB
+submit_job celeb_diff_gen/diff_celeb_x128_deeper.json # model 162.24M = 620MB
+submit_job celeb_diff_gen/diff_celeb_x128_more_layer.json # 2.12M = 8.2 MB
+submit_job celeb_diff_gen/diff_celeb_x128_wider.json # 18.46M = 71 MB
+submit_job celeb_diff_gen/diff_celeb_x128_med.json
+submit_job celeb_diff_gen/diff_celeb_x128.json # 3940.48M = 15GB
 # submit_job celeb_diff_gen/diff_celeb_x128_moreAtt.json
 # submit_job celeb_diff_gen/diff_celeb_x256.json
 # submit_job celeb_diff_gen/diff_celeb_x256_cos.json
@@ -19,8 +25,8 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_vae/vae_celeb_x128.json
-# submit_job celeb_vae/vae_celeb_x256.json
+submit_job celeb_vae/vae_celeb_x128.json
+submit_job celeb_vae/vae_celeb_x256.json
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 
@@ -28,25 +34,25 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_latent_diff/lat_diff_celeb_x128.json
-# submit_job celeb_latent_diff/lat_diff_celeb_x256.json
+submit_job celeb_latent_diff/lat_diff_celeb_x128.json
+submit_job celeb_latent_diff/lat_diff_celeb_x256.json
 
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-# submit_job cbct_diff_gen/diff_cbct_x128.json # -> noisy
-submit_job cbct_diff_gen/diff_cbct_x128_minmax_norm.json
-submit_job cbct_diff_gen/diff_cbct_x128_sig1000.json
-submit_job cbct_diff_gen/diff_cbct_x128_attv1.json
-submit_job cbct_diff_gen/diff_cbct_x128_attv2.json
-submit_job cbct_diff_gen/diff_cbct_x128_01norm.json
+submit_job cbct_diff_gen/diff_cbct_x256.json # -> noisy
+submit_job cbct_diff_gen/diff_cbct_x256_minmax_norm.json
+submit_job cbct_diff_gen/diff_cbct_x256_sig1000.json
+submit_job cbct_diff_gen/diff_cbct_x256_attv1.json
+submit_job cbct_diff_gen/diff_cbct_x256_attv2.json
+submit_job cbct_diff_gen/diff_cbct_x256_01norm.json
 
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job cbct_vae/vae_cbct_x128.json
+submit_job cbct_vae/vae_cbct_x256.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN

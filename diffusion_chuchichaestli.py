@@ -58,6 +58,7 @@ def fdq_train(experiment) -> None:
         schedule=targs.diffusion_scheduler,
     )
     img_shape = None
+    is_grayscale = False
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
         experiment.current_epoch = epoch
@@ -81,11 +82,13 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = images_gt.shape[1:]
+                if img_shape[1] == 1:
+                    is_grayscale = True
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
                     image_list=images_gt,
-                    grayscale=False,
+                    grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
                     hide_ticks=True,
@@ -135,7 +138,7 @@ def fdq_train(experiment) -> None:
 
         history_path = createSubplots(
             image_list=images,
-            grayscale=False,
+            grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
             figure_title="Generative Diffusion Steps",
@@ -145,7 +148,7 @@ def fdq_train(experiment) -> None:
 
         imgs_to_log.extend(
             [
-                {"name": "gen_result", "data": images[-1]},
+                {"name": "gen_result", "data": t_img_exp(images[-1])},
                 {"name": "gen_hist", "path": history_path},
             ]
         )

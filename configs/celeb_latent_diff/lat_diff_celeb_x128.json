@@ -69,7 +69,7 @@
     "models": {
         "monaivae": {
             "class_name": "monai.networks.nets.AutoencoderKL",
-            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/Celeb_VAE/celeb_vae_x128/20250523_09_30_18__romantic_pare__34673/last_monaivae_e4.fdqm",
+            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/Celeb_VAE/celeb_vae_x128/20250525_03_03_49__vigorous_elbakyan__34881/best_val_monaivae_e97.fdqm",
             "freeze": true,
             "args": {
                 "spatial_dims": 2,
@@ -172,7 +172,7 @@
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 8,
         "save_last_model": true,
-        "save_best_val_model": true,
+        "save_best_val_model": false,
         "save_best_train_model": true,
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
