@@ -44,6 +44,8 @@ def fdq_train(experiment) -> None:
     unet_model = experiment.models[targs.model_name]
     vae_model = experiment.models[targs.encoder_name]
 
+    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
+
     train_loader = data.train_data_loader
 
     chuchi_diffuser = DDPM(
@@ -103,28 +105,7 @@ def fdq_train(experiment) -> None:
                     ]
                 )
 
-            # this can be written without code repetition, however, goal is to keep both options flexible...
-            # following: https://pytorch.org/tutorials/recipes/recipes/amp_recipe.html
-            if experiment.useAMP:
-                device_type = (
-                    "cuda" if experiment.device == torch.device("cuda") else "cpu"
-                )
-
-                with torch.autocast(device_type=device_type, enabled=True):
-                    noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
-                    noise_pred = unet_model(noisy_imgs, t)
-                    train_loss_tensor = (
-                        experiment.losses["MAE"](noise, noise_pred)
-                        / experiment.gradacc_iter
-                    )
-
-                # noise_pred becomes NaN if AMP is used. Why?
-                # https://pytorch.org/docs/stable/amp.html
-                # https://pytorch.org/docs/2.2/notes/amp_examples.html#amp-examples
-
-                experiment.scaler.scale(train_loss_tensor).backward()
-
-            else:
+            with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
                 noise_pred = unet_model(noisy_imgs, t)
                 train_loss_tensor = (
@@ -132,13 +113,16 @@ def fdq_train(experiment) -> None:
                     / experiment.gradacc_iter
                 )
 
-                train_loss_tensor.backward()
+                if experiment.useAMP:
+                    experiment.scaler.scale(train_loss_tensor).backward()
+                else:
+                    train_loss_tensor.backward()
 
-            experiment.update_gradients(
-                b_idx=nb_tbatch,
-                loader_name=targs.dataloader_name,
-                model_name=targs.model_name,
-            )
+                experiment.update_gradients(
+                    b_idx=nb_tbatch,
+                    loader_name=targs.dataloader_name,
+                    model_name=targs.model_name,
+                )
 
             train_loss_sum += train_loss_tensor.detach().item()
 
