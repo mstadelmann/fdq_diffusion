@@ -98,10 +98,22 @@ def fdq_train(experiment) -> None:
                     histogram=True,
                     figure_title="Input Latent",
                 )
+                decoded_imgs_path = createSubplots(
+                    image_list=vae_model.decode(z_vae),
+                    grayscale=False,
+                    experiment=experiment,
+                    histogram=True,
+                    figure_title="Decoded Latent",
+                )
+
                 imgs_to_log.extend(
                     [
-                        {"name": "train_in_imgs", "path": gt_imgs_path},
-                        {"name": "train_latent_imgs", "path": latent_imgs_path},
+                        {"name": "train_in", "path": gt_imgs_path},
+                        {"name": "train_in_lat", "path": latent_imgs_path},
+                        {
+                            "name": "train_in_lat_dec",
+                            "path": decoded_imgs_path,
+                        },
                     ]
                 )
 

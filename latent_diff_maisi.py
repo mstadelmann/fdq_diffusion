@@ -1,5 +1,6 @@
 import os
 import torch
+from torchvision import transforms
 import tempfile
 from monai.apps.generation.maisi.networks.autoencoderkl_maisi import AutoencoderKlMaisi
 from monai.apps.utils import download_url
@@ -27,7 +28,7 @@ MAISI_ARGS = {
     "with_decoder_nonlocal_attn": False,
     "use_checkpointing": False,
     "use_convtranspose": False,
-    "norm_float16": True,
+    "norm_float16": False,
     "num_splits": 4,
     "dim_split": 1,
 }
@@ -81,12 +82,18 @@ def fdq_train(experiment) -> None:
     iprint("Chuchichaestli MAISI Diffusion Training")
     print_nb_weights(experiment)
 
-    norm_to_rgb = experiment.transformers["norm_to_rgb"]
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
 
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
     unet_model = experiment.models[targs.model_name]
-    maisi_model = load_url(AutoencoderKlMaisi(**MAISI_ARGS), url=MAISI_URL, freeze=True)
+    maisi_model = load_url(
+        AutoencoderKlMaisi(**MAISI_ARGS), url=MAISI_URL, freeze=True
+    ).to(experiment.device)
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
@@ -128,23 +135,50 @@ def fdq_train(experiment) -> None:
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
-                    image_list=[norm_to_rgb(i) for i in images_gt],
-                    grayscale=False,
+                    image_list=images_gt,
+                    grayscale=True,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Input GT",
+                    export_transform=t_img_exp,
                 )
                 latent_imgs_path = createSubplots(
-                    image_list=[i for i in z_vae],
+                    image_list=z_vae[:, :3, ...],
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
-                    figure_title="Input Latent",
+                    figure_title="Input Latent (CH1-3)",
+                    export_transform=t_img_exp,
+                )
+                z_vae_decoded = maisi_model.decode(z_vae)
+                decoded_imgs_path = createSubplots(
+                    image_list=z_vae_decoded,
+                    grayscale=True,
+                    experiment=experiment,
+                    histogram=True,
+                    figure_title="Decoded Latent",
+                    export_transform=t_img_exp,
+                )
+                diff_imgs_path = createSubplots(
+                    image_list=torch.abs(images_gt - z_vae_decoded),
+                    grayscale=True,
+                    experiment=experiment,
+                    histogram=True,
+                    figure_title="Diff: Input - Decoded Latent",
+                    export_transform=t_img_exp,
                 )
                 imgs_to_log.extend(
                     [
                         {"name": "train_in_imgs", "path": gt_imgs_path},
                         {"name": "train_latent_imgs", "path": latent_imgs_path},
+                        {
+                            "name": "train_in_lat_dec",
+                            "path": decoded_imgs_path,
+                        },
+                        {
+                            "name": "train_in_gt_decode_diff",
+                            "path": diff_imgs_path,
+                        },
                     ]
                 )
 
@@ -181,18 +215,19 @@ def fdq_train(experiment) -> None:
             dtype=torch.int,
         ).tolist()
 
-        images_latent = get_sample_from_noise(
+        diff_history_latent = get_sample_from_noise(
             model=unet_model,
             diffuser=chuchi_diffuser,
             gen_shape=img_shape,
             idx_to_store=idx_to_store,
         )
 
-        images_norm = [maisi_model.decode(i) for i in images_latent]
-        images = [norm_to_rgb(i) for i in images_norm]
+        diff_history_latent_2dimg = [
+            t_img_exp(i[:, :3, ...]) for i in diff_history_latent
+        ]
 
         history_path_latent = createSubplots(
-            image_list=images_latent,
+            image_list=diff_history_latent_2dimg,
             grayscale=False,
             experiment=experiment,
             histogram=True,
@@ -200,18 +235,21 @@ def fdq_train(experiment) -> None:
             labels=[f"Step {i}" for i in idx_to_store],
         )
 
+        diff_history_norm = [maisi_model.decode(i) for i in diff_history_latent]
+
         history_path = createSubplots(
-            image_list=images,
-            grayscale=False,
+            image_list=diff_history_norm,
+            grayscale=True,
             experiment=experiment,
             histogram=True,
             figure_title="Generative Diffusion Steps - Pixel",
             labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
         )
 
         imgs_to_log.extend(
             [
-                {"name": "gen_result", "data": images[-1]},
+                {"name": "gen_result", "data": t_img_exp(diff_history_norm[-1])},
                 {"name": "gen_hist_lat", "path": history_path_latent},
                 {"name": "gen_hist", "path": history_path},
             ]
