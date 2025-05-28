@@ -1,0 +1,24 @@
+{
+    "globals": {
+        "project": "CBCT_LatentDiff",
+        "author": "Marc",
+        "parent": "lat_diff_cbct_maisi_x256.json"
+    },
+    "transforms": {
+        "HU_to_norm": [
+            "Float32",
+            {
+                "ReRange_minmax": {
+                    "out_min": 0,
+                    "out_max": 1
+                }
+            }
+        ]
+    },
+    "train": {
+        "path": "~/dev/fdq_diffusion/latent_diff_maisi.py",
+        "args": {
+            "epochs": 20
+        }
+    }
+}

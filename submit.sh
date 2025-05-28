@@ -40,6 +40,7 @@ submit_job cbct_diff_gen/diff_cbct_x128_minmax_norm.json
 submit_job cbct_diff_gen/diff_cbct_x128_sig1000.json
 submit_job cbct_diff_gen/diff_cbct_x128_attv1.json
 submit_job cbct_diff_gen/diff_cbct_x128_attv2.json
+submit_job cbct_diff_gen/diff_cbct_x128_01norm.json
 
 
 #--------------------------------------------------------------------------------------------------
@@ -51,3 +52,4 @@ submit_job cbct_diff_gen/diff_cbct_x128_attv2.json
 # CBCT LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
 submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256.json
+submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.json
