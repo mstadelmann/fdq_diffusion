@@ -1,4 +1,5 @@
 import torch
+from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
@@ -32,7 +33,11 @@ def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
     print_nb_weights(experiment)
 
-    norm_to_rgb = experiment.transformers["norm_to_rgb"]
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
 
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
@@ -77,14 +82,15 @@ def fdq_train(experiment) -> None:
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
-                    image_list=[norm_to_rgb(i) for i in images_gt],
+                    image_list=images_gt,
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Input GT",
+                    export_transform=t_img_exp,
                 )
                 latent_imgs_path = createSubplots(
-                    image_list=[i for i in z_vae],
+                    image_list=z_vae,
                     grayscale=False,
                     experiment=experiment,
                     histogram=True,
@@ -148,18 +154,15 @@ def fdq_train(experiment) -> None:
             dtype=torch.int,
         ).tolist()
 
-        images_latent = get_sample_from_noise(
+        diff_history_latent = get_sample_from_noise(
             model=unet_model,
             diffuser=chuchi_diffuser,
             gen_shape=img_shape,
             idx_to_store=idx_to_store,
         )
 
-        images_norm = [vae_model.decode(i) for i in images_latent]
-        images = [norm_to_rgb(i) for i in images_norm]
-
         history_path_latent = createSubplots(
-            image_list=images_latent,
+            image_list=diff_history_latent,
             grayscale=False,
             experiment=experiment,
             histogram=True,
@@ -167,18 +170,21 @@ def fdq_train(experiment) -> None:
             labels=[f"Step {i}" for i in idx_to_store],
         )
 
+        diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
+
         history_path = createSubplots(
-            image_list=images,
+            image_list=diff_history_norm,
             grayscale=False,
             experiment=experiment,
             histogram=True,
             figure_title="Generative Diffusion Steps - Pixel",
             labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
         )
 
         imgs_to_log.extend(
             [
-                {"name": "gen_result", "data": images[-1]},
+                {"name": "gen_result", "data": t_img_exp(diff_history_norm[-1])},
                 {"name": "gen_hist_lat", "path": history_path_latent},
                 {"name": "gen_hist", "path": history_path},
             ]
