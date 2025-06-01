@@ -1,0 +1,16 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "diff_celeb_x128.json",
+        "set_random_seed": 33
+    },
+    "models": {
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "n_channels": 64
+            }
+        }
+    }
+}

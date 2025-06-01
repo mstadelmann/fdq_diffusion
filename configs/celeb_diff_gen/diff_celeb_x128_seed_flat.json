@@ -1,0 +1,36 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "diff_celeb_x128.json",
+        "set_random_seed": 33
+    },
+    "models": {
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
+                    "AttnDownBlock",
+                    "DownBlock"
+                ],
+                "up_block_types": [
+                    "UpBlock",
+                    "AttnUpBlock",
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock"
+                ],
+                "block_out_channel_mults": [
+                    1,
+                    1,
+                    2,
+                    4,
+                    4
+                ]
+            }
+        }
+    }
+}
