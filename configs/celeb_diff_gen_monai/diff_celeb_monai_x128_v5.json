@@ -33,5 +33,10 @@
                 ]
             }
         }
+    },
+    "slurm_cluster": {
+        "gres": "gpu:1",
+        "partition": "gpu_top",
+        "job_time": 1400
     }
 }
