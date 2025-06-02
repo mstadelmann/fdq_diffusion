@@ -168,16 +168,37 @@ def fdq_train(experiment) -> None:
             experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
             pbar.finish()
 
-        # Generate sample
-        noise = torch.randn((1, *images_gt.shape[1:]), device=experiment.device)
-        scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
+            # Generate sample
+            noise = torch.randn((1, *images_gt.shape[1:]), device=experiment.device)
+            scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
 
-        with torch.autocast(device_type=device_type, enabled=True):
-            image = inferer.sample(
-                input_noise=noise, diffusion_model=model, scheduler=scheduler
+            isteps = int(
+                targs.diffusion_nb_steps / targs.get("diffusion_nb_plot_steps", 15)
             )
 
-        imgs_to_log.extend([{"name": "gen_result", "data": t_img_exp(image)}])
+            image, intermediates = inferer.sample(
+                input_noise=noise,
+                diffusion_model=model,
+                scheduler=scheduler,
+                save_intermediates=True,
+                intermediate_steps=isteps,
+            )
+
+        history_path = createSubplots(
+            image_list=intermediates,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=True,
+            figure_title="Generative Diffusion Steps",
+            export_transform=t_img_exp,
+        )
+
+        imgs_to_log.extend(
+            [
+                {"name": "gen_result", "data": t_img_exp(image)},
+                {"name": "gen_hist", "path": history_path},
+            ]
+        )
 
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():

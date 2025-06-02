@@ -33,19 +33,6 @@
                     true,
                     true
                 ]
-            },
-            "optimizer": {
-                "class_name": "torch.optim.Adam",
-                "args": {
-                    "lr": 0.0001
-                }
-            },
-            "lr_scheduler": {
-                "class_name": "torch.optim.lr_scheduler.StepLR",
-                "args": {
-                    "step_size": 20,
-                    "gamma": 0.95
-                }
             }
         }
     }
