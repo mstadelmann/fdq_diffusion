@@ -6,9 +6,15 @@
     },
     "models": {
         "monaiUNET": {
-            "class_name": "monai.networks.nets.DiffusionModelUNet",
             "args": {
-                "resblock_updown": false
+                "attention_levels": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "use_flash_attention": true
             }
         }
     }

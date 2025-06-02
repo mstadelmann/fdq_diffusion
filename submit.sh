@@ -8,8 +8,14 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 #--------------------------------------------------------------------------------------------------
+
 submit_job celeb_diff_gen_monai/diff_celeb_monai_x128.json
 submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v1.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v2.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v3.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v4.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v5.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v6.json
 
 exit
 

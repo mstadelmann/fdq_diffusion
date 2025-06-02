@@ -114,7 +114,6 @@ def fdq_train(experiment) -> None:
 
         with torch.no_grad():
             for nb_vbatch, batch in enumerate(data.val_data_loader):
-                experiment.current_val_batch = nb_vbatch
                 pbar.update(nb_vbatch)
 
                 images_gt = batch[0].to(experiment.device)

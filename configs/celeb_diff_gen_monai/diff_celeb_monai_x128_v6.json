@@ -1,0 +1,37 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "diff_celeb_monai_x128.json"
+    },
+    "models": {
+        "monaiUNET": {
+            "args": {
+                "num_res_blocks": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "channels": [
+                    128,
+                    256,
+                    256,
+                    512,
+                    512,
+                    1024
+                ],
+                "attention_levels": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true
+                ]
+            }
+        }
+    }
+}

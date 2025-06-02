@@ -557,7 +557,7 @@ def get_loader_transforms(experiment, trans):
         return experiment.transformers[trans]
 
 
-def createDatasets(experiment, args=None):
+def create_datasets(experiment, args=None):
     """
     Data preparator for HDF5 files.
 
