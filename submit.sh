@@ -9,6 +9,7 @@ submit_job() {
 # CELEB DIFF GEN
 #--------------------------------------------------------------------------------------------------
 submit_job celeb_diff_gen_monai/diff_celeb_monai_x128.json
+submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v1.json
 
 exit
 

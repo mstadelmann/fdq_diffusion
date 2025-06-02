@@ -3,7 +3,6 @@ from torchvision import transforms
 from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer
-from monai.networks.nets import DiffusionModelUNet
 from monai.networks.schedulers import DDPMScheduler
 from image_functions import createSubplots
 
@@ -28,8 +27,34 @@ def fdq_train(experiment) -> None:
 
     train_loader = data.train_data_loader
 
-    num_train_timesteps = 1000
-    scheduler = DDPMScheduler(num_train_timesteps=num_train_timesteps)
+    # MONAI DDPMScheduler
+    # Args:
+    #     num_train_timesteps: number of diffusion steps used to train the model.
+    #     schedule: member of NoiseSchedules, name of noise schedule function in component store
+    #     variance_type: member of DDPMVarianceType
+    #     clip_sample: option to clip predicted sample between -1 and 1 for numerical stability.
+    #     prediction_type: member of DDPMPredictionType
+    #     clip_sample_min: minimum clipping value when clip_sample equals True
+    #     clip_sample_max: maximum clipping value when clip_sample equals True
+    #     schedule_args: arguments to pass to the schedule function
+
+    supported_schedules = [
+        "linear_beta",
+        "scaled_linear_beta",
+        "sigmoid_beta",
+        "cosine",
+    ]
+
+    if targs.diffusion_scheduler not in supported_schedules:
+        raise ValueError(
+            f"Unsupported diffusion scheduler: {targs.diffusion_scheduler}. "
+            f"Supported schedulers are: {supported_schedules}"
+        )
+
+    scheduler = DDPMScheduler(
+        num_train_timesteps=targs.diffusion_nb_steps,
+        schedule=targs.diffusion_scheduler,
+    )
     inferer = DiffusionInferer(scheduler)
 
     img_shape = None
@@ -77,7 +102,7 @@ def fdq_train(experiment) -> None:
                 noise = torch.randn_like(images_gt).to(experiment.device)
                 timesteps = torch.randint(
                     0,
-                    num_train_timesteps,
+                    targs.diffusion_nb_steps,
                     (images_gt.shape[0],),
                     device=images_gt.device,
                 ).long()
@@ -90,7 +115,7 @@ def fdq_train(experiment) -> None:
                 )
 
                 train_loss_tensor = (
-                    experiment.losses["MAE"](noise, noise_pred)
+                    experiment.losses["MSE"](noise, noise_pred)
                     / experiment.gradacc_iter
                 )
                 if experiment.useAMP:
@@ -109,12 +134,43 @@ def fdq_train(experiment) -> None:
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        experiment.valLoss = 0  # no validation train_loss_tensor
 
-        # Dummy validation: generate samples
         model.eval()
-        noise = torch.randn_like(images_gt).to(experiment.device)
-        scheduler.set_timesteps(num_inference_steps=1000)
+        pbar = startProgBar(data.n_val_batches, "validation...")
+        val_loss_sum = 0.0
+
+        with torch.no_grad(), torch.autocast(
+            device_type=device_type, enabled=experiment.useAMP
+        ):
+
+            for nb_vbatch, batch in enumerate(data.val_data_loader):
+                experiment.current_val_batch = nb_vbatch
+                pbar.update(nb_vbatch)
+
+                images_gt = batch[0].to(experiment.device)
+                noise = torch.randn_like(images_gt).to(experiment.device)
+                timesteps = torch.randint(
+                    0,
+                    targs.diffusion_nb_steps,
+                    (images_gt.shape[0],),
+                    device=images_gt.device,
+                ).long()
+
+                noise_pred = inferer(
+                    inputs=images_gt,
+                    diffusion_model=model,
+                    noise=noise,
+                    timesteps=timesteps,
+                )
+
+                val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
+
+            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+            pbar.finish()
+
+        # Generate sample
+        noise = torch.randn((1, *images_gt.shape[1:]), device=experiment.device)
+        scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
 
         with torch.autocast(device_type=device_type, enabled=True):
             image = inferer.sample(

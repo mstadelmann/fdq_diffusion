@@ -1,0 +1,52 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "diff_celeb_monai_x128.json"
+    },
+    "models": {
+        "monaiUNET": {
+            "class_name": "monai.networks.nets.DiffusionModelUNet",
+            "args": {
+                "spatial_dims": 2,
+                "in_channels": 3,
+                "out_channels": 3,
+                "resblock_updown": true,
+                "num_res_blocks": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "channels": [
+                    32,
+                    64,
+                    64,
+                    64,
+                    128
+                ],
+                "attention_levels": [
+                    false,
+                    false,
+                    false,
+                    true,
+                    true
+                ]
+            },
+            "optimizer": {
+                "class_name": "torch.optim.Adam",
+                "args": {
+                    "lr": 0.0001
+                }
+            },
+            "lr_scheduler": {
+                "class_name": "torch.optim.lr_scheduler.StepLR",
+                "args": {
+                    "step_size": 20,
+                    "gamma": 0.95
+                }
+            }
+        }
+    }
+}
