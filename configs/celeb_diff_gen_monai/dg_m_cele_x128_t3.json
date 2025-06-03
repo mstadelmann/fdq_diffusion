@@ -1,0 +1,16 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "dg_m_cele_x128_v0.json"
+    },
+    "models": {
+        "monaiUNET": {
+            "optimizer": {
+                "args": {
+                    "lr": 2.5e-5
+                }
+            }
+        }
+    }
+}

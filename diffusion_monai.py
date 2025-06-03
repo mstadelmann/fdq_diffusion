@@ -10,7 +10,7 @@ from image_functions import createSubplots
 
 
 def fdq_train(experiment) -> None:
-    iprint("Chuchichaestli Diffusion Training")
+    iprint("MONAI Diffusion Training")
     print_nb_weights(experiment)
 
     img_exp_op = experiment.exp_def.store.img_exp_transform
@@ -45,15 +45,33 @@ def fdq_train(experiment) -> None:
         "cosine",
     ]
 
-    if targs.diffusion_scheduler not in supported_schedules:
+    if (
+        targs.diffusion_scheduler is not None
+        and targs.diffusion_scheduler not in supported_schedules
+    ):
         raise ValueError(
             f"Unsupported diffusion scheduler: {targs.diffusion_scheduler}. "
             f"Supported schedulers are: {supported_schedules}"
         )
 
+    supported_scheduler_args = ["beta_start", "beta_end", "sig_range", "s"]
+
+    scheduler_args = targs.get("diffusion_scheduler_args", {})
+    if scheduler_args is None:
+        scheduler_args = {}
+    else:
+        scheduler_args = scheduler_args.to_dict()
+        for param in scheduler_args.keys():
+            if param not in supported_scheduler_args:
+                raise ValueError(
+                    f"Unsupported scheduler argument: {param}. "
+                    f"Supported arguments are: {supported_scheduler_args}"
+                )
+
     scheduler = DDPMScheduler(
         num_train_timesteps=targs.diffusion_nb_steps,
         schedule=targs.diffusion_scheduler,
+        **scheduler_args,
     )
     inferer = DiffusionInferer(scheduler)
 

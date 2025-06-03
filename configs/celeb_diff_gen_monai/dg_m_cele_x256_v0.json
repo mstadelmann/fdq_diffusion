@@ -1,0 +1,41 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "dg_m_cele_x128_v0.json"
+    },
+    "transforms": {
+        "resize_norm": [
+            "Float32",
+            {
+                "Resize_HW": {
+                    "h": 256,
+                    "w": 256
+                }
+            },
+            {
+                "ReRange": {
+                    "in_min": 0,
+                    "in_max": 255,
+                    "out_min": -1,
+                    "out_max": 1
+                }
+            }
+        ]
+    },
+    "train": {
+        "path": "~/dev/fdq_diffusion/diffusion_monai.py",
+        "args": {
+            "epochs": 150,
+            "early_stop_val_loss": 35,
+            "early_stop_train_loss": 35,
+            "diffusion_scheduler": "linear_beta",
+            "diffusion_nb_steps": 800
+        }
+    },
+    "slurm_cluster": {
+        "gres": "gpu:1",
+        "partition": "gpu_top",
+        "job_time": 1400
+    }
+}

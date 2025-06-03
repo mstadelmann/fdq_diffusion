@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "diff_celeb_monai_x128.json"
+        "parent": "dg_m_cele_x128_v0.json"
     },
     "models": {
         "monaiUNET": {
@@ -17,11 +17,11 @@
                 ],
                 "channels": [
                     128,
+                    128,
                     256,
                     256,
                     512,
-                    512,
-                    1024
+                    512
                 ],
                 "attention_levels": [
                     false,
@@ -29,8 +29,12 @@
                     false,
                     false,
                     true,
-                    true
-                ]
+                    false
+                ],
+                "transformer_num_layers": 2,
+                "norm_eps": 1e-5,
+                "norm_num_groups": 32,
+                "num_head_channels": 8
             }
         }
     }

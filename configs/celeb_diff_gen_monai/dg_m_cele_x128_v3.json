@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "diff_celeb_monai_x128.json"
+        "parent": "dg_m_cele_x128_v0.json"
     },
     "models": {
         "monaiUNET": {

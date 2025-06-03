@@ -2,14 +2,14 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "diff_celeb_monai_x128.json"
+        "parent": "dg_m_cele_x128_v0.json"
     },
     "models": {
         "monaiUNET": {
             "args": {
                 "attention_levels": [
-                    true,
-                    true,
+                    false,
+                    false,
                     true,
                     true,
                     true
@@ -17,8 +17,17 @@
             }
         }
     },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "train_batch_size": 8,
+                "val_batch_size": 8,
+                "test_batch_size": 1
+            }
+        }
+    },
     "slurm_cluster": {
-        "gres": "gpu:1",
+        "gres": "gpu:h200sxm:1",
         "partition": "gpu_top",
         "job_time": 1400
     }

@@ -1,0 +1,15 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "dg_m_cele_x128_v0.json"
+    },
+    "models": {
+        "monaiUNET": {
+            "class_name": "monai.networks.nets.DiffusionModelUNet",
+            "args": {
+                "resblock_updown": false
+            }
+        }
+    }
+}

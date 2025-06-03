@@ -7,17 +7,31 @@ submit_job() {
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
+# dg_m_cele_ = DiffuionGenerative_MONAI_Celebrties
 #--------------------------------------------------------------------------------------------------
 
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v1.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v2.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v3.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v4.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v5.json
-submit_job celeb_diff_gen_monai/diff_celeb_monai_x128_v6.json
 
-exit
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json
+
+
+
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running
+
+
+exit 0
 
 # submit_job celeb_diff_gen/diff_celeb_x128_small.json # model 1.37M = 5MB -> bad
 # submit_job celeb_diff_gen/diff_celeb_x128_small_att.json # model 1.39M = 5.4MB -> bad

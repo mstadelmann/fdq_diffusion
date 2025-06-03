@@ -1,0 +1,43 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "dg_m_cele_x128_v0.json"
+    },
+    "transforms": {
+        "resize_norm": [
+            "Float32",
+            {
+                "Resize_HW": {
+                    "h": 128,
+                    "w": 128
+                }
+            },
+            {
+                "ReRange": {
+                    "in_min": 0,
+                    "in_max": 255,
+                    "out_min": 0,
+                    "out_max": 1
+                }
+            }
+        ],
+        "norm_to_rgb": [
+            {
+                "ReRange": {
+                    "in_min": 0,
+                    "in_max": 1,
+                    "out_min": 0,
+                    "out_max": 255
+                }
+            },
+            {
+                "CLAMP_abs": {
+                    "lower": 0,
+                    "upper": 255
+                }
+            },
+            "Uint8"
+        ]
+    }
+}
