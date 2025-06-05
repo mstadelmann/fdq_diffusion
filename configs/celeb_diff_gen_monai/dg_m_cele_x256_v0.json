@@ -23,16 +23,6 @@
             }
         ]
     },
-    "train": {
-        "path": "~/dev/fdq_diffusion/diffusion_monai.py",
-        "args": {
-            "epochs": 150,
-            "early_stop_val_loss": 35,
-            "early_stop_train_loss": 35,
-            "diffusion_scheduler": "linear_beta",
-            "diffusion_nb_steps": 800
-        }
-    },
     "slurm_cluster": {
         "gres": "gpu:1",
         "partition": "gpu_top",

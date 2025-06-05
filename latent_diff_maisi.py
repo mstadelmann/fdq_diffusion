@@ -6,7 +6,6 @@ from monai.apps.generation.maisi.networks.autoencoderkl_maisi import Autoencoder
 from monai.apps.utils import download_url
 from safetensors.torch import load_model
 from torch.nn.modules import Module
-from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
 from image_functions import createSubplots
@@ -80,7 +79,6 @@ def get_sample_from_noise(model, diffuser, gen_shape, idx_to_store=None):
 
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli MAISI Diffusion Training")
-    print_nb_weights(experiment)
 
     img_exp_op = experiment.exp_def.store.img_exp_transform
     if img_exp_op is None:

@@ -1,6 +1,5 @@
 import torch
 from torchvision import transforms
-from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
 from image_functions import createSubplots
@@ -34,7 +33,6 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
 
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
-    print_nb_weights(experiment)
 
     img_exp_op = experiment.exp_def.store.img_exp_transform
     if img_exp_op is None:

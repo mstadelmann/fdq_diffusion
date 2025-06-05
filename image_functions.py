@@ -132,11 +132,23 @@ def createSubplots(
             axs.set_xticklabels([])
             axs.set_yticklabels([])
         else:
-            for ax in axs.flat:
-                ax.set_xticks([])
-                ax.set_yticks([])
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
+            if histogram:
+                for i in range(nb_cols):
+                    axs[0, i].set_xticks([])
+                    axs[0, i].set_yticks([])
+                    axs[0, i].set_xticklabels([])
+                    axs[0, i].set_yticklabels([])
+            else:
+                for ax in axs.flat:
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                    ax.set_xticklabels([])
+                    ax.set_yticklabels([])
+    else:
+        if histogram:
+            for i in range(nb_cols):
+                axs[0, i].set_yticks([])
+                axs[0, i].set_yticklabels([])
 
     if save_path is None:
         save_path = experiment.get_next_export_fn()

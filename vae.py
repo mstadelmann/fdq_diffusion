@@ -1,6 +1,5 @@
 import torch
 from torchvision import transforms
-from fdq.misc import print_nb_weights
 from fdq.ui_functions import startProgBar, iprint
 from image_functions import createSubplots
 
@@ -31,7 +30,6 @@ def KL_loss(z_mu, z_sigma):
 
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
-    print_nb_weights(experiment)
 
     img_exp_op = experiment.exp_def.store.img_exp_transform
     if img_exp_op is None:

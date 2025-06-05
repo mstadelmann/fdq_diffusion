@@ -114,7 +114,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
-            "epochs": 150,
+            "epochs": 200,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -159,7 +159,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.22",
+        "fdq_version": "0.0.23",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
@@ -174,7 +174,7 @@
         "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": false,
+        "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [

@@ -1,6 +1,6 @@
 import torch
 from torchvision import transforms
-from fdq.misc import print_nb_weights, save_wandb
+from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer
 from monai.networks.schedulers import DDPMScheduler
@@ -11,7 +11,6 @@ from image_functions import createSubplots
 
 def fdq_train(experiment) -> None:
     iprint("MONAI Diffusion Training")
-    print_nb_weights(experiment)
 
     img_exp_op = experiment.exp_def.store.img_exp_transform
     if img_exp_op is None:
