@@ -17,20 +17,20 @@ submit_job() {
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # ok
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # mostly good
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # okayish
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # black
+# submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # black
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json # bad
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json # bright
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json # funny
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json # mostly good
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
+# submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
 
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running
 
 
-exit 0
+# old
 
 # submit_job celeb_diff_gen/diff_celeb_x128_small.json # model 1.37M = 5MB -> bad
 # submit_job celeb_diff_gen/diff_celeb_x128_small_att.json # model 1.39M = 5.4MB -> bad
@@ -41,10 +41,10 @@ exit 0
 # submit_job celeb_diff_gen/diff_celeb_x128.json # 3940.48M = 15GB -> OK
 
 
-submit_job celeb_diff_gen/diff_celeb_x128_seed_flat.json
-submit_job celeb_diff_gen/diff_celeb_x128_seed_narrow.json
-submit_job celeb_diff_gen/diff_celeb_x128_seed_noatt.json
-submit_job celeb_diff_gen/diff_celeb_x128_seed.json
+# submit_job celeb_diff_gen/diff_celeb_x128_seed_flat.json
+# submit_job celeb_diff_gen/diff_celeb_x128_seed_narrow.json
+# submit_job celeb_diff_gen/diff_celeb_x128_seed_noatt.json
+# submit_job celeb_diff_gen/diff_celeb_x128_seed.json
 
 # submit_job celeb_diff_gen/diff_celeb_x128_moreAtt.json
 # submit_job celeb_diff_gen/diff_celeb_x256.json
@@ -71,21 +71,23 @@ submit_job celeb_diff_gen/diff_celeb_x128_seed.json
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_diff_gen/diff_cbct_x256.json # -> noisy
-submit_job cbct_diff_gen/diff_cbct_x256_minmax_norm.json
-submit_job cbct_diff_gen/diff_cbct_x256_sig1000.json
-submit_job cbct_diff_gen/diff_cbct_x256_attv1.json
-submit_job cbct_diff_gen/diff_cbct_x256_attv2.json
-submit_job cbct_diff_gen/diff_cbct_x256_01norm.json
+# submit_job cbct_diff_gen/diff_cbct_x256.json # -> noisy
+# submit_job cbct_diff_gen/diff_cbct_x256_minmax_norm.json
+# submit_job cbct_diff_gen/diff_cbct_x256_sig1000.json
+# submit_job cbct_diff_gen/diff_cbct_x256_attv1.json
+# submit_job cbct_diff_gen/diff_cbct_x256_attv2.json
+# submit_job cbct_diff_gen/diff_cbct_x256_01norm.json
+
+submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v0.json
 
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_vae/vae_cbct_x256.json
+# submit_job cbct_vae/vae_cbct_x256.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256.json
-submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.json
+# submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256.json
+# submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.json
