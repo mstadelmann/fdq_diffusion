@@ -1,0 +1,20 @@
+{
+    "globals": {
+        "project": "CBCT_Diff_Gen",
+        "author": "Marc",
+        "parent": "dg_m_cbct_x256_v0.json"
+    },
+    "models": {
+        "monaiUNET": {
+            "args": {
+                "attention_levels": [
+                    false,
+                    false,
+                    false,
+                    true
+                ],
+                "use_flash_attention": true
+            }
+        }
+    }
+}

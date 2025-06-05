@@ -79,6 +79,8 @@ submit_job() {
 # submit_job cbct_diff_gen/diff_cbct_x256_01norm.json
 
 submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v0.json
+submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v1.json
+submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v2.json
 
 
 #--------------------------------------------------------------------------------------------------
