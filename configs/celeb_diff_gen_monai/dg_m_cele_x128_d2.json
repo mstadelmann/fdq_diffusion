@@ -8,10 +8,9 @@
         "resize_norm": [
             "Float32",
             "RandomVerticalFlip",
-            "RandomHorizontalFlip",
             {
                 "RandomAffine": {
-                    "degrees": 15
+                    "degrees": 10
                 }
             },
             {

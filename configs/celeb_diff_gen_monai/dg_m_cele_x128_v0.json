@@ -152,11 +152,11 @@
         "img_exp_transform": "norm_to_rgb"
     },
     "test": {
-        "processor": "~/dev/fonduecaquelon/experiment_templates/segment_pets/oxpets_test.py",
+        "processor": "~/dev/fdq_diffusion/diffusion_monai.py",
         "test_model": "best",
         "args": {
             "metrics": {
-                "nb_test_samples": "100"
+                "nb_test_samples": "10"
             }
         }
     },

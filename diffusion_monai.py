@@ -220,3 +220,98 @@ def fdq_train(experiment) -> None:
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
+
+
+@torch.no_grad()
+def fdq_test(experiment):
+
+    targs = experiment.exp_def.train.args
+    data = experiment.data[targs.dataloader_name]
+    model = experiment.models[targs.model_name]
+    test_loader = data.test_data_loader
+
+    img_exp_op = experiment.exp_def.store.img_exp_transform
+    if img_exp_op is None:
+        t_img_exp = transforms.Lambda(lambda t: t)
+    else:
+        t_img_exp = experiment.transformers[img_exp_op]
+
+    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
+        raise ValueError(
+            "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
+        )
+
+    supported_scheduler_args = ["beta_start", "beta_end", "sig_range", "s"]
+
+    scheduler_args = targs.get("diffusion_scheduler_args", {})
+    if scheduler_args is None:
+        scheduler_args = {}
+    else:
+        scheduler_args = scheduler_args.to_dict()
+        for param in scheduler_args.keys():
+            if param not in supported_scheduler_args:
+                raise ValueError(
+                    f"Unsupported scheduler argument: {param}. "
+                    f"Supported arguments are: {supported_scheduler_args}"
+                )
+
+    scheduler = DDPMScheduler(
+        num_train_timesteps=targs.diffusion_nb_steps,
+        schedule=targs.diffusion_scheduler,
+        **scheduler_args,
+    )
+    inferer = DiffusionInferer(scheduler)
+
+    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    test_sample = next(iter(test_loader))[0]
+
+    pbar = startProgBar(nb_test_samples, "evaluation...")
+
+    results = []
+
+    for inf_nb in range(nb_test_samples):
+        pbar.update(inf_nb)
+
+        # Generate sample
+        noise = torch.randn((1, *test_sample.shape[1:]), device=experiment.device)
+        scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
+
+        isteps = int(
+            targs.diffusion_nb_steps / targs.get("diffusion_nb_plot_steps", 15)
+        )
+
+        image, intermediates = inferer.sample(
+            input_noise=noise,
+            diffusion_model=model,
+            scheduler=scheduler,
+            save_intermediates=True,
+            intermediate_steps=isteps,
+        )
+
+        results.append(image)
+
+        _ = createSubplots(
+            image_list=intermediates,
+            grayscale=False,
+            experiment=experiment,
+            histogram=True,
+            figure_title=f"Test img {inf_nb + 1}",
+            export_transform=t_img_exp,
+            show_colorbar=False,
+        )
+
+        results.append(image.cpu())
+
+    _ = createSubplots(
+        image_list=results,
+        grayscale=False,
+        experiment=experiment,
+        histogram=False,
+        figure_title="Generated test samples",
+        export_transform=t_img_exp,
+        hide_ticks=True,
+        show_colorbar=False,
+    )
+
+    pbar.finish()
+    print("Test samples generated and saved.")

@@ -23,7 +23,19 @@ def createSubplots(
     apply_global_range=True,
     fig_size=3,
     export_transform=None,
+    show_colorbar=True,
 ):
+
+    def _ax(axis, r=None, c=None):
+        # Helper function to access axes in a flexible way
+        ndim = np.ndim(axis)
+        if ndim == 0:
+            return axis
+        if ndim == 1:
+            return axis[r]
+        if ndim == 2:
+            return axis[r, c]
+
     if labels is None:
         labels = len(image_list) * [""]
     elif len(labels) != len(image_list):
@@ -82,16 +94,16 @@ def createSubplots(
         if histogram:
             if grayscale:
                 hist = compute_histo(torch.squeeze(img).cpu())
-                axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="r")
+                _ax(axs, 1, c_col).plot(hist.bin_edges[:-1], hist.hist, color="r")
                 # fix_histo_ticks(axs[1, c_col], hist)
 
             else:
                 hist = compute_histo(torch.squeeze(img).cpu()[0])
-                axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="r")
+                _ax(axs, 1, c_col).plot(hist.bin_edges[:-1], hist.hist, color="r")
                 hist = compute_histo(torch.squeeze(img).cpu()[1])
-                axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="g")
+                _ax(axs, 1, c_col).plot(hist.bin_edges[:-1], hist.hist, color="g")
                 hist = compute_histo(torch.squeeze(img).cpu()[2])
-                axs[1, c_col].plot(hist.bin_edges[:-1], hist.hist, color="b")
+                _ax(axs, 1, c_col).plot(hist.bin_edges[:-1], hist.hist, color="b")
 
         img = export_transform(img)
 
@@ -99,40 +111,32 @@ def createSubplots(
             glob_print_min = float(img.min())
             glob_print_max = float(img.max())
 
-        if grayscale:
-            if nb_rows > 1:
-                im = axs[c_row, c_col].imshow(
-                    img.cpu(), cmap="gray", vmin=glob_print_min, vmax=glob_print_max
-                )
-                if not apply_global_range:
-                    fig.colorbar(im, ax=axs[c_row, c_col])
+        cmap = "gray" if grayscale else None
+        im = _ax(axs, c_row, c_col).imshow(
+            img.cpu(), cmap=cmap, vmin=glob_print_min, vmax=glob_print_max
+        )
+        if show_colorbar:
+            if not apply_global_range:
+                fig.colorbar(im, ax=_ax(axs, c_row, c_col))
 
-                elif is_last:
-                    fig.colorbar(im, ax=axs[c_row, c_col])
-            else:
-                axs[c_col].imshow(
-                    img.cpu(), cmap="gray", vmin=glob_print_min, vmax=glob_print_max
-                )
-        else:
-            if nb_rows > 1:
-                axs[c_row, c_col].imshow(
-                    img.cpu(), vmin=glob_print_min, vmax=glob_print_max
-                )
-            else:
-                axs[c_col].imshow(img.cpu(), vmin=glob_print_min, vmax=glob_print_max)
+            elif is_last:
+                fig.colorbar(im, ax=_ax(axs, c_row, c_col))
 
         if lbl is not None:
-            if nb_rows > 1:
-                axs[c_row, c_col].set_title(lbl)
-            else:
-                axs[c_col].set_title(lbl)
+            _ax(axs, c_row, c_col).set_title(lbl)
 
     if hide_ticks:
-        for ax in axs.flat:
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
+        if np.ndim(axs) == 0:
+            axs.set_xticks([])
+            axs.set_yticks([])
+            axs.set_xticklabels([])
+            axs.set_yticklabels([])
+        else:
+            for ax in axs.flat:
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
 
     if save_path is None:
         save_path = experiment.get_next_export_fn()
