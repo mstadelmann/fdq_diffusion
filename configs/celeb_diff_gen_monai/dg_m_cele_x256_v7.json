@@ -66,6 +66,9 @@
             }
         }
     },
+    "store": {
+        "wandb_project": "diff_gen_celeb_x256"
+    },
     "slurm_cluster": {
         "gres": "gpu:1",
         "partition": "gpu_top",
