@@ -1,6 +1,6 @@
 import torch
 from torchvision import transforms
-from fdq.misc import print_nb_weights
+from fdq.misc import print_nb_weights, save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer
 from monai.networks.schedulers import DDPMScheduler
@@ -288,8 +288,6 @@ def fdq_test(experiment):
             intermediate_steps=isteps,
         )
 
-        results.append(image)
-
         _ = createSubplots(
             image_list=intermediates,
             grayscale=False,
@@ -302,7 +300,7 @@ def fdq_test(experiment):
 
         results.append(image.cpu())
 
-    _ = createSubplots(
+    res_path = createSubplots(
         image_list=results,
         grayscale=False,
         experiment=experiment,
@@ -312,6 +310,11 @@ def fdq_test(experiment):
         hide_ticks=True,
         show_colorbar=False,
     )
+    imgs_to_log = [
+        {"name": "test_samples", "path": res_path},
+    ]
+
+    save_wandb(experiment, images=imgs_to_log)
 
     pbar.finish()
     print("Test samples generated and saved.")
