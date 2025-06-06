@@ -12,11 +12,12 @@ from image_functions import createSubplots
 def fdq_train(experiment) -> None:
     iprint("MONAI Diffusion Training")
 
-    img_exp_op = experiment.exp_def.store.img_exp_transform
-    if img_exp_op is None:
-        t_img_exp = transforms.Lambda(lambda t: t)
-    else:
-        t_img_exp = experiment.transformers[img_exp_op]
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
 
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
@@ -229,11 +230,12 @@ def fdq_test(experiment):
     model = experiment.models[targs.model_name]
     test_loader = data.test_data_loader
 
-    img_exp_op = experiment.exp_def.store.img_exp_transform
-    if img_exp_op is None:
-        t_img_exp = transforms.Lambda(lambda t: t)
-    else:
-        t_img_exp = experiment.transformers[img_exp_op]
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
 
     if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(

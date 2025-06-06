@@ -80,11 +80,12 @@ def get_sample_from_noise(model, diffuser, gen_shape, idx_to_store=None):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli MAISI Diffusion Training")
 
-    img_exp_op = experiment.exp_def.store.img_exp_transform
-    if img_exp_op is None:
-        t_img_exp = transforms.Lambda(lambda t: t)
-    else:
-        t_img_exp = experiment.transformers[img_exp_op]
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
 
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
