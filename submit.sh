@@ -67,6 +67,7 @@ submit_job() {
 # submit_job celeb_latent_diff/lat_diff_celeb_x128.json
 # submit_job celeb_latent_diff/lat_diff_celeb_x256.json
 
+submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
