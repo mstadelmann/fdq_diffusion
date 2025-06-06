@@ -65,8 +65,8 @@
                 "subset_test": 1.0,
                 "pin_memory": true,
                 "num_workers": 4,
-                "train_batch_size": 2,
-                "val_batch_size": 2,
+                "train_batch_size": 1,
+                "val_batch_size": 1,
                 "test_batch_size": 1,
                 "shuffle_train": true,
                 "shuffle_val": false,
@@ -152,6 +152,9 @@
     "losses": {
         "MAE": {
             "class_name": "torch.nn.L1Loss"
+        },
+        "MSE": {
+            "class_name": "torch.nn.MSELoss"
         }
     },
     "store": {

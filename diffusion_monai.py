@@ -99,7 +99,7 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = images_gt.shape[1:]
-                if img_shape[1] == 1:
+                if img_shape[0] == 1:
                     is_grayscale = True
 
                 # first test batch: store inputs
@@ -275,6 +275,8 @@ def fdq_test(experiment):
         noise = torch.randn((1, *test_sample.shape[1:]), device=experiment.device)
         scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
 
+        is_grayscale = noise.shape[0] == 1
+
         isteps = int(
             targs.diffusion_nb_steps / targs.get("diffusion_nb_plot_steps", 15)
         )
@@ -289,7 +291,7 @@ def fdq_test(experiment):
 
         _ = createSubplots(
             image_list=intermediates,
-            grayscale=False,
+            grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
             figure_title=f"Test img {inf_nb + 1}",
@@ -301,7 +303,7 @@ def fdq_test(experiment):
 
     res_path = createSubplots(
         image_list=results,
-        grayscale=False,
+        grayscale=is_grayscale,
         experiment=experiment,
         histogram=False,
         figure_title="Generated test samples",
