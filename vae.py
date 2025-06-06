@@ -149,36 +149,34 @@ def fdq_train(experiment) -> None:
                 "val_kl_loss": val_kl_loss_sum,
             }
 
-            # if is_3d and z_mu.dim() == 5:
-            #     mid_slice = z_mu.shape[2] // 2
-            #     z_mu = z_mu[:, :, mid_slice, ...]
-            #     z_sigma = z_sigma[:, :, mid_slice, ...]
-            #     z_sample = z_sample[:, :, mid_slice, ...]
-            #     images_gt = images_gt[:, :, mid_slice, ...]
-            #     reconstruction = reconstruction[:, :, mid_slice, ...]
-
-            mu_histo_path = createSubplots(
-                image_list=t_img_exp(z_mu[:nb_imgs, ...].detach().float()),
-                grayscale=is_grayscale,
-                experiment=experiment,
-                histogram=True,
-                figure_title="mu",
-            )
-
-            sigma_histo_path = createSubplots(
-                image_list=t_img_exp(z_sigma[:nb_imgs, ...].detach().float()),
-                grayscale=is_grayscale,
-                experiment=experiment,
-                histogram=True,
-                figure_title="sigma",
-            )
-
             val_gt_path = sigma_histo_path = createSubplots(
                 image_list=images_gt[:nb_imgs, ...],
                 grayscale=is_grayscale,
                 experiment=experiment,
                 histogram=True,
                 figure_title="val_gt",
+                hide_ticks=True,
+                show_colorbar=False,
+                export_transform=t_img_exp,
+            )
+
+            mu_histo_path = createSubplots(
+                image_list=z_mu[:nb_imgs, ...],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="mu",
+                hide_ticks=True,
+                show_colorbar=False,
+                export_transform=t_img_exp,
+            )
+
+            sigma_histo_path = createSubplots(
+                image_list=z_sigma[:nb_imgs, ...],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="sigma",
                 hide_ticks=True,
                 show_colorbar=False,
                 export_transform=t_img_exp,
@@ -212,9 +210,7 @@ def fdq_train(experiment) -> None:
                 {"name": "diff abs(gt - recon)", "path": diff_path},
                 {"name": "val_mu_h", "path": mu_histo_path},
                 {"name": "val_sigma_h", "path": sigma_histo_path},
-                {"name": "val_sample", "data": t_img_exp(z_sample[:nb_imgs, ...])},
-                # {"name": "val_mu", "data": t_img_exp(z_mu[:nb_imgs, ...])},
-                # {"name": "val_sigma", "data": t_img_exp(z_sigma[:nb_imgs, ...])},
+                {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
             ]
 
         experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
