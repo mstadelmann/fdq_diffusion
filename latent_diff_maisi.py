@@ -1,6 +1,5 @@
 import os
 import torch
-from torchvision import transforms
 import tempfile
 from monai.apps.generation.maisi.networks.autoencoderkl_maisi import AutoencoderKlMaisi
 from monai.apps.utils import download_url

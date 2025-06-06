@@ -1,5 +1,4 @@
 import torch
-from torchvision import transforms
 from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer

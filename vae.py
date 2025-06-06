@@ -1,6 +1,6 @@
 import torch
-from torchvision import transforms
 from fdq.ui_functions import startProgBar, iprint
+from fdq.misc import save_wandb
 from image_functions import createSubplots
 
 # from monai.losses.perceptual import PerceptualLoss
@@ -31,11 +31,12 @@ def KL_loss(z_mu, z_sigma):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
 
-    img_exp_op = experiment.exp_def.store.img_exp_transform
-    if img_exp_op is None:
-        t_img_exp = transforms.Lambda(lambda t: t)
-    else:
-        t_img_exp = experiment.transformers[img_exp_op]
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
@@ -115,7 +116,11 @@ def fdq_train(experiment) -> None:
                 pbar.update(nb_vbatch)
 
                 images_gt = batch[0].to(experiment.device)
+
                 reconstruction, z_mu, z_sigma = model(images_gt)
+                # z_mu, z_sigma = model.encode(images_gt)
+                # z_vae = model.sampling(z_mu, z_sigma)
+                # reconstruction = model.decode(z_vae)
 
                 recon_loss = experiment.losses["MAE"](images_gt, reconstruction)
                 kl_loss = KL_loss(z_mu, z_sigma)
@@ -168,20 +173,48 @@ def fdq_train(experiment) -> None:
                 figure_title="sigma",
             )
 
+            val_gt_path = sigma_histo_path = createSubplots(
+                image_list=images_gt[:nb_imgs, ...],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="val_gt",
+                hide_ticks=True,
+                show_colorbar=False,
+                export_transform=t_img_exp,
+            )
+
+            val_recon_path = sigma_histo_path = createSubplots(
+                image_list=reconstruction[:nb_imgs, ...],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="val_recon",
+                hide_ticks=True,
+                show_colorbar=False,
+                export_transform=t_img_exp,
+            )
+
+            diff_path = sigma_histo_path = createSubplots(
+                image_list=torch.abs(images_gt - reconstruction)[:nb_imgs, ...],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="diff: abs(val_gt - val_recon)",
+                hide_ticks=True,
+                show_colorbar=False,
+                export_transform=t_img_exp,
+            )
+
             imgs_to_log = [
-                {"name": "val_gt", "data": t_img_exp(images_gt[:nb_imgs, ...])},
-                {"name": "val_recon", "data": t_img_exp(reconstruction[:nb_imgs, ...])},
-                {
-                    "name": "val_diff",
-                    "data": t_img_exp(
-                        torch.abs(images_gt - reconstruction)[:nb_imgs, ...]
-                    ),
-                },
-                {"name": "val_sample", "data": t_img_exp(z_sample[:nb_imgs, ...])},
+                {"name": "val_gt_histo", "path": val_gt_path},
+                {"name": "val_recon_histo", "path": val_recon_path},
+                {"name": "diff abs(gt - recon)", "path": diff_path},
                 {"name": "val_mu_h", "path": mu_histo_path},
                 {"name": "val_sigma_h", "path": sigma_histo_path},
-                {"name": "val_mu", "data": t_img_exp(z_mu[:nb_imgs, ...])},
-                {"name": "val_sigma", "data": t_img_exp(z_sigma[:nb_imgs, ...])},
+                {"name": "val_sample", "data": t_img_exp(z_sample[:nb_imgs, ...])},
+                # {"name": "val_mu", "data": t_img_exp(z_mu[:nb_imgs, ...])},
+                # {"name": "val_sigma", "data": t_img_exp(z_sigma[:nb_imgs, ...])},
             ]
 
         experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
@@ -197,11 +230,12 @@ def fdq_test(experiment):
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
-    img_exp_op = experiment.exp_def.store.img_exp_transform
-    if img_exp_op is None:
-        t_img_exp = transforms.Lambda(lambda t: t)
-    else:
-        t_img_exp = experiment.transformers[img_exp_op]
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
 
     test_loader = data.test_data_loader
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
@@ -227,20 +261,31 @@ def fdq_test(experiment):
         images_gt = batch[0].to(experiment.device)
         reconstruction, z_mu, z_sigma = model(images_gt)
 
+        is_grayscale = images_gt.shape[1] == 1
+
         if nb_tbatch <= nb_export_samples:
             img_list = [
-                t_img_exp(images_gt),
-                t_img_exp(reconstruction),
-                t_img_exp(images_gt - reconstruction),
+                images_gt,
+                reconstruction,
+                images_gt - reconstruction,
             ]
 
-            createSubplots(
+            eval_path = createSubplots(
                 image_list=img_list,
-                grayscale=False,
+                grayscale=is_grayscale,
                 experiment=experiment,
                 histogram=True,
                 figure_title=f"test image {nb_tbatch}",
                 labels=["gt", "recon", "diff"],
+                export_transform=t_img_exp,
+                show_colorbar=False,
+            )
+
+            save_wandb(
+                experiment,
+                images=[
+                    {"name": "test_samples", "path": eval_path},
+                ],
             )
 
         kl_loss = KL_loss(z_mu, z_sigma).detach().item()

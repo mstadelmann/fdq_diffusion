@@ -168,6 +168,7 @@ def createSubplots(
             else:
                 if histogram:
                     if np.ndim(axs) == 1:
+                        # if we have only 1 img with histogram, its still 1D
                         axs[0].set_xticks([])
                         axs[0].set_yticks([])
                         axs[0].set_xticklabels([])
@@ -187,8 +188,8 @@ def createSubplots(
         else:
             if histogram:
                 for i in range(nb_cols):
-                    axs[0, i].set_yticks([])
-                    axs[0, i].set_yticklabels([])
+                    axs[1, i].set_yticks([])
+                    axs[1, i].set_yticklabels([])
 
         if save_path is None:
             save_path = experiment.get_next_export_fn()
