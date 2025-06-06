@@ -275,7 +275,7 @@ def fdq_test(experiment):
         noise = torch.randn((1, *test_sample.shape[1:]), device=experiment.device)
         scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
 
-        is_grayscale = noise.shape[0] == 1
+        is_grayscale = noise.shape[1] == 1
 
         isteps = int(
             targs.diffusion_nb_steps / targs.get("diffusion_nb_plot_steps", 15)
