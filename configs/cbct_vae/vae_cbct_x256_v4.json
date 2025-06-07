@@ -4,6 +4,19 @@
         "author": "Marc",
         "parent": "vae_cbct_x256.json"
     },
+    "data": {
+        "ctrate": {
+            "args": {
+                "train_batch_size": 1,
+                "val_batch_size": 1
+            }
+        }
+    },
+    "train": {
+        "args": {
+            "accumulate_grad_batches": 4
+        }
+    },
     "models": {
         "monaivae": {
             "class_name": "monai.networks.nets.AutoencoderKL",
