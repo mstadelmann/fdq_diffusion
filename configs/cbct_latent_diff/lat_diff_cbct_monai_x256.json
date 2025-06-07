@@ -1,6 +1,6 @@
 {
     "globals": {
-        "project": "CBCT_VAE",
+        "project": "CBCT_LatentDiff",
         "author": "Marc"
     },
     "transforms": {
@@ -89,6 +89,8 @@
     "models": {
         "monaivae": {
             "class_name": "monai.networks.nets.AutoencoderKL",
+            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/CBCT_VAE/vae_cbct_x256/20250607_03_34_14__fervent_archimedes__37466/best_val_monaivae_e149.fdqm",
+            "freeze": true,
             "args": {
                 "spatial_dims": 3,
                 "in_channels": 1,
@@ -109,6 +111,36 @@
                 ],
                 "with_encoder_nonlocal_attn": false,
                 "with_decoder_nonlocal_attn": false
+            }
+        },
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
+            "args": {
+                "dimensions": 3,
+                "in_channels": 1,
+                "out_channels": 1,
+                "n_channels": 128,
+                "num_layers_per_block": 2,
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock"
+                ],
+                "up_block_types": [
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock"
+                ],
+                "block_out_channel_mults": [
+                    1,
+                    1,
+                    2,
+                    2
+                ],
+                "time_embedding": true,
+                "time_channels": 512
             },
             "optimizer": {
                 "class_name": "torch.optim.Adam",
@@ -126,18 +158,23 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/vae.py",
+        "path": "~/dev/fdq_diffusion/latent_diffusion.py",
         "args": {
-            "epochs": 200,
+            "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
             "early_stop_val_loss": 20,
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
-            "kl_loss_weight": 1e-6,
+            "diffusion_scheduler": "linear",
+            "diffusion_nb_steps": 800,
+            "diffusion_shd_beta_start": 0.0001,
+            "diffusion_shd_beta_end": 0.02,
+            "diffusion_nb_plot_steps": 10,
             "dataloader_name": "ctrate",
-            "model_name": "monaivae"
+            "model_name": "ccUNET",
+            "encoder_name": "monaivae"
         }
     },
     "losses": {
@@ -149,12 +186,12 @@
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 8,
         "save_last_model": true,
-        "save_best_val_model": true,
-        "save_best_train_model": false,
+        "save_best_val_model": false,
+        "save_best_train_model": true,
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
         "use_wandb": true,
-        "wandb_project": "cbct_vae",
+        "wandb_project": "cbct_lat_diff",
         "wandb_entity": "stmd",
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "extract_2d_from_3d"
@@ -183,7 +220,7 @@
         "partition": "gpu_top",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": true,
+        "run_test": false,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [

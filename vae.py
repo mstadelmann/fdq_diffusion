@@ -41,9 +41,6 @@ def fdq_train(experiment) -> None:
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
     targs = experiment.exp_def.train.args
-    is_3d = experiment.exp_def.data.get(targs.dataloader_name).args.data_is_3d
-    is_grayscale = False
-
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
@@ -71,10 +68,7 @@ def fdq_train(experiment) -> None:
             pbar.update(nb_tbatch)
             images_gt = batch[0].to(experiment.device)
 
-            if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
-                img_shape = images_gt.shape[1:]
-                if img_shape[1] == 1:
-                    is_grayscale = True
+            is_grayscale = images_gt.shape[1] == 1
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
                 reconstruction, z_mu, z_sigma = model(images_gt)
@@ -136,8 +130,8 @@ def fdq_train(experiment) -> None:
             val_kl_loss_sum = val_kl_loss_sum / len(data.val_data_loader.dataset)
             pbar.finish()
 
-            epsilon = torch.randn_like(z_sigma)
-            z_sample = z_mu + z_sigma * epsilon
+            # epsilon = torch.randn_like(z_sigma)
+            # z_sample = z_mu + z_sigma * epsilon
             nb_imgs = min(
                 experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0]
             )
@@ -210,7 +204,7 @@ def fdq_train(experiment) -> None:
                 {"name": "diff abs(gt - recon)", "path": diff_path},
                 {"name": "val_mu_h", "path": mu_histo_path},
                 {"name": "val_sigma_h", "path": sigma_histo_path},
-                {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
+                # {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
             ]
 
         experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)

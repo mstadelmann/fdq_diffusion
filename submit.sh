@@ -67,7 +67,7 @@ submit_job() {
 # submit_job celeb_latent_diff/lat_diff_celeb_x128.json
 # submit_job celeb_latent_diff/lat_diff_celeb_x256.json
 
-submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
+# submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
@@ -84,14 +84,17 @@ submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
 # submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v1.json
 # submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v2.json
 
+submit_job cbct_diff_gen_monai/dg_m_cbct_x128_v0.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job cbct_vae/vae_cbct_x256.json
+submit_job cbct_vae/vae_cbct_x256.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
 # submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256.json
 # submit_job cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.json
+
+submit_job cbct_latent_diff/lat_diff_cbct_monai_x256.json
