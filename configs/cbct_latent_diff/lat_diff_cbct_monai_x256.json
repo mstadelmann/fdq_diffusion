@@ -160,7 +160,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/latent_diffusion.py",
         "args": {
-            "epochs": 150,
+            "epochs": 250,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,

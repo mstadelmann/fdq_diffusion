@@ -79,29 +79,38 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = z_vae.shape[1:]
+                is_grayscale = images_gt.shape[1] == 1
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
                     image_list=images_gt,
-                    grayscale=False,
+                    grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Input GT",
                     export_transform=t_img_exp,
+                    hide_ticks=True,
+                    show_colorbar=False,
                 )
                 latent_imgs_path = createSubplots(
                     image_list=z_vae,
-                    grayscale=False,
+                    grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Input Latent",
+                    export_transform=t_img_exp,
+                    hide_ticks=True,
+                    show_colorbar=False,
                 )
                 decoded_imgs_path = createSubplots(
                     image_list=vae_model.decode(z_vae),
-                    grayscale=False,
+                    grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
                     figure_title="Decoded Latent",
+                    export_transform=t_img_exp,
+                    hide_ticks=True,
+                    show_colorbar=False,
                 )
 
                 imgs_to_log.extend(
@@ -157,23 +166,28 @@ def fdq_train(experiment) -> None:
 
         history_path_latent = createSubplots(
             image_list=diff_history_latent,
-            grayscale=False,
+            grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
             figure_title="Generative Diffusion Steps - Latent",
             labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
         )
 
         diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
 
         history_path = createSubplots(
             image_list=diff_history_norm,
-            grayscale=False,
+            grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
             figure_title="Generative Diffusion Steps - Pixel",
             labels=[f"Step {i}" for i in idx_to_store],
             export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
         )
 
         imgs_to_log.extend(
