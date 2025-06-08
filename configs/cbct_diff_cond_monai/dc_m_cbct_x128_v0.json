@@ -214,7 +214,7 @@
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
         "use_wandb": true,
-        "wandb_project": "diff_gen_cbct_x128",
+        "wandb_project": "diff_cond_cbct_x128",
         "wandb_entity": "stmd",
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "extract_2d_from_3d"
