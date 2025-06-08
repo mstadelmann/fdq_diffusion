@@ -55,9 +55,6 @@
             "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "train_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_0_v03_sca_05__141samples.hdf"
-                ],
-                "_train_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_0_v03_sca_05__141samples.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_1_v03_sca_05__146samples.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_2_v03_sca_05__146samples.hdf",
@@ -88,9 +85,6 @@
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_13_v03_sca_05__146samples.hdf"
                 ],
                 "test_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_0_v03_sca_05__138samples.hdf"
-                ],
-                "_test_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_0_v03_sca_05__138samples.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_1_v03_sca_05__152samples.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_2_v03_sca_05__158samples.hdf",
@@ -179,7 +173,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
-            "epochs": 5,
+            "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -227,7 +221,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.23",
+        "fdq_version": "0.0.24",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
