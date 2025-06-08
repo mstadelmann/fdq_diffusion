@@ -92,8 +92,10 @@ def fdq_train(experiment) -> None:
 
             if len(batch) == 2:
                 condition = batch[1].to(experiment.device)
+                monai_mode = "concat"
             else:
                 condition = None
+                monai_mode = "crossattn"  # default MONAI mode
 
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
@@ -147,6 +149,7 @@ def fdq_train(experiment) -> None:
                     noise=noise,
                     timesteps=timesteps,
                     condition=condition,
+                    mode=monai_mode,
                 )
 
                 train_loss_tensor = (
@@ -201,6 +204,7 @@ def fdq_train(experiment) -> None:
                     noise=noise,
                     timesteps=timesteps,
                     condition=condition,
+                    mode=monai_mode,
                 )
 
                 val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
@@ -223,6 +227,7 @@ def fdq_train(experiment) -> None:
                 save_intermediates=True,
                 intermediate_steps=isteps,
                 conditioning=condition,
+                mode=monai_mode,
             )
 
         history_path = createSubplots(
