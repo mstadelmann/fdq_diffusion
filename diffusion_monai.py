@@ -246,6 +246,26 @@ def fdq_train(experiment) -> None:
             ]
         )
 
+        if condition is not None:
+            cond_diff_path = createSubplots(
+                image_list=[images_gt, condition, image, images_gt - image],
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="Generative Diffusion Steps",
+                export_transform=t_img_exp,
+                labels=["GT", "Condition", "Generated", "GT - Generated"],
+            )
+
+            imgs_to_log.extend(
+                [
+                    {
+                        "name": "gen_cond_diff",
+                        "path": cond_diff_path,
+                    }
+                ]
+            )
+
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
