@@ -90,6 +90,11 @@ def fdq_train(experiment) -> None:
             pbar.update(nb_tbatch)
             images_gt = batch[0].to(experiment.device)
 
+            if len(batch) == 2:
+                condition = batch[1].to(experiment.device)
+            else:
+                condition = None
+
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
                 # TODO
@@ -114,6 +119,18 @@ def fdq_train(experiment) -> None:
                 )
                 imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
+                if condition is not None:
+                    cond_imgs_path = createSubplots(
+                        image_list=condition,
+                        grayscale=is_grayscale,
+                        experiment=experiment,
+                        histogram=True,
+                        hide_ticks=True,
+                        figure_title="Input Condition",
+                        export_transform=t_img_exp,
+                    )
+                    imgs_to_log.append({"name": "train_cond", "path": cond_imgs_path})
+
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
 
                 noise = torch.randn_like(images_gt).to(experiment.device)
@@ -129,6 +146,7 @@ def fdq_train(experiment) -> None:
                     diffusion_model=model,
                     noise=noise,
                     timesteps=timesteps,
+                    condition=condition,
                 )
 
                 train_loss_tensor = (
@@ -164,6 +182,11 @@ def fdq_train(experiment) -> None:
                 pbar.update(nb_vbatch)
 
                 images_gt = batch[0].to(experiment.device)
+                if len(batch) == 2:
+                    condition = batch[1].to(experiment.device)
+                else:
+                    condition = None
+
                 noise = torch.randn_like(images_gt).to(experiment.device)
                 timesteps = torch.randint(
                     0,
@@ -177,6 +200,7 @@ def fdq_train(experiment) -> None:
                     diffusion_model=model,
                     noise=noise,
                     timesteps=timesteps,
+                    condition=condition,
                 )
 
                 val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
@@ -198,6 +222,7 @@ def fdq_train(experiment) -> None:
                 scheduler=scheduler,
                 save_intermediates=True,
                 intermediate_steps=isteps,
+                conditioning=condition,
             )
 
         history_path = createSubplots(

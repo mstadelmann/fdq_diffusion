@@ -1,0 +1,37 @@
+{
+    "globals": {
+        "project": "CBCT_Diff_Gen",
+        "author": "Marc",
+        "parent": "dg_m_cbct_x256_v0.json"
+    },
+    "data": {
+        "ctrate": {
+            "args": {
+                "train_files_path": [
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_0_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_1_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_2_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_3_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_4_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_6_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_7_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_8_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_9_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_10_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_11_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_12_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_13_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_14_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_15_v03.hdf"
+                ],
+                "test_files_path": [
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_0_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_1_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_2_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_3_v03.hdf"
+                ]
+            }
+        }
+    }
+}

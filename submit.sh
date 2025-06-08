@@ -69,9 +69,20 @@ submit_job() {
 
 # submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
 
+
+
+
+##################################################################################################
+
+
+
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
 #--------------------------------------------------------------------------------------------------
+
+# submit_job cbct_diff_gen_monai/dg_m_cbct_x128_v0.json
+
+
 # submit_job cbct_diff_gen/diff_cbct_x256.json # -> noisy
 # submit_job cbct_diff_gen/diff_cbct_x256_minmax_norm.json
 # submit_job cbct_diff_gen/diff_cbct_x256_sig1000.json
@@ -83,16 +94,21 @@ submit_job() {
 # submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v0.json
 # submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v1.json
 # submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v2.json
+# submit_job cbct_diff_gen_monai/dg_m_cbct_x256_v3.json
 
-# submit_job cbct_diff_gen_monai/dg_m_cbct_x128_v0.json
+#--------------------------------------------------------------------------------------------------
+# CBCT DIFF Cnd
+#--------------------------------------------------------------------------------------------------
+submit_job cbct_diff_cond_monai/dc_m_cbct_x128_v0.json
+exit
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
 # submit_job cbct_vae/vae_cbct_x256.json
 submit_job cbct_vae/vae_cbct_x256_v1.json
-submit_job cbct_vae/vae_cbct_x256_v2.json
-submit_job cbct_vae/vae_cbct_x256_v3.json
+submit_job cbct_vae/vae_cbct_x256_v2.json # OOM
+submit_job cbct_vae/vae_cbct_x256_v3.json # OOM
 submit_job cbct_vae/vae_cbct_x256_v4.json
 
 #--------------------------------------------------------------------------------------------------
