@@ -99,7 +99,7 @@
                         "Vol_full": "HU_to_norm"
                     },
                     {
-                        "Vol_full": "HU_to_norm_blur"
+                        "Vol_sparse50": "HU_to_norm"
                     }
                 ],
                 "hdf_ds_key_request_test": [
@@ -107,7 +107,7 @@
                         "Vol_full": "HU_to_norm"
                     },
                     {
-                        "Vol_full": "HU_to_norm_blur"
+                        "Vol_sparse50": "HU_to_norm"
                     }
                 ],
                 "data_is_3d": true,

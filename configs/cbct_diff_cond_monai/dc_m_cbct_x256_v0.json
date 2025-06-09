@@ -1,6 +1,6 @@
 {
     "globals": {
-        "project": "CBCT_LatentDiff",
+        "project": "CBCT_Diff_Cond_Monai",
         "author": "Marc"
     },
     "transforms": {
@@ -12,6 +12,23 @@
                     "in_max": 1000,
                     "out_min": -1,
                     "out_max": 1
+                }
+            }
+        ],
+        "HU_to_norm_blur": [
+            "Float32",
+            {
+                "ReRange": {
+                    "in_min": -1500,
+                    "in_max": 1000,
+                    "out_min": -2,
+                    "out_max": 2
+                }
+            },
+            {
+                "Gaussian_Blur": {
+                    "blur_sigma": 10.0,
+                    "blur_kernel_size": 7
                 }
             }
         ],
@@ -35,7 +52,7 @@
     },
     "data": {
         "ctrate": {
-            "processor": "~/dev/fdq_diffusion/hdf_preparator.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "train_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_0_v03.hdf",
@@ -43,7 +60,17 @@
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_2_v03.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_3_v03.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_4_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf"
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_6_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_7_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_8_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_9_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_10_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_11_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_12_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_13_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_14_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_15_v03.hdf"
                 ],
                 "test_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_0_v03.hdf",
@@ -52,10 +79,20 @@
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_3_v03.hdf"
                 ],
                 "hdf_ds_key_request": [
-                    "Vol_full"
+                    {
+                        "Vol_full": "HU_to_norm"
+                    },
+                    {
+                        "Vol_sparse50": "HU_to_norm"
+                    }
                 ],
                 "hdf_ds_key_request_test": [
-                    "Vol_full"
+                    {
+                        "Vol_full": "HU_to_norm"
+                    },
+                    {
+                        "Vol_sparse50": "HU_to_norm"
+                    }
                 ],
                 "data_is_3d": true,
                 "file_extension": "hdf",
@@ -65,56 +102,42 @@
                 "subset_test": 1.0,
                 "pin_memory": true,
                 "num_workers": 4,
-                "train_batch_size": 2,
-                "val_batch_size": 2,
+                "train_batch_size": 1,
+                "val_batch_size": 1,
                 "test_batch_size": 1,
                 "shuffle_train": true,
-                "shuffle_val": false,
+                "shuffle_val": true,
                 "shuffle_test": false,
-                "drop_last": true,
-                "loader_transforms": {
-                    "train": {
-                        "Vol_full": "HU_to_norm"
-                    },
-                    "val": {
-                        "Vol_full": "HU_to_norm"
-                    },
-                    "test": {
-                        "Vol_full": "HU_to_norm"
-                    }
-                }
+                "drop_last": true
             }
         }
     },
     "models": {
-        "ccUNET": {
-            "class_name": "chuchichaestli.models.unet.unet.UNet",
+        "monaiUNET": {
+            "class_name": "monai.networks.nets.DiffusionModelUNet",
             "args": {
-                "dimensions": 3,
-                "in_channels": 4,
-                "out_channels": 4,
-                "n_channels": 128,
-                "num_layers_per_block": 2,
-                "down_block_types": [
-                    "DownBlock",
-                    "DownBlock",
-                    "DownBlock",
-                    "DownBlock"
-                ],
-                "up_block_types": [
-                    "UpBlock",
-                    "UpBlock",
-                    "UpBlock",
-                    "UpBlock"
-                ],
-                "block_out_channel_mults": [
-                    1,
-                    1,
+                "spatial_dims": 3,
+                "in_channels": 2,
+                "out_channels": 1,
+                "resblock_updown": true,
+                "num_res_blocks": [
+                    2,
+                    2,
                     2,
                     2
                 ],
-                "time_embedding": true,
-                "time_channels": 512
+                "channels": [
+                    64,
+                    128,
+                    256,
+                    512
+                ],
+                "attention_levels": [
+                    false,
+                    false,
+                    false,
+                    false
+                ]
             },
             "optimizer": {
                 "class_name": "torch.optim.Adam",
@@ -132,49 +155,53 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/latent_diff_maisi.py",
+        "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
             "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 20,
+            "early_stop_val_loss": 50,
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
-            "diffusion_scheduler": "linear",
-            "diffusion_nb_steps": 800,
-            "diffusion_shd_beta_start": 0.0001,
-            "diffusion_shd_beta_end": 0.02,
-            "diffusion_nb_plot_steps": 10,
             "dataloader_name": "ctrate",
-            "model_name": "ccUNET"
+            "model_name": "monaiUNET",
+            "diffusion_nb_steps": 800,
+            "diffusion_nb_plot_steps": 10,
+            "diffusion_scheduler": "linear_beta",
+            "diffusion_scheduler_args": {
+                "beta_start": 0.0001,
+                "beta_end": 0.02
+            }
         }
     },
     "losses": {
         "MAE": {
             "class_name": "torch.nn.L1Loss"
+        },
+        "MSE": {
+            "class_name": "torch.nn.MSELoss"
         }
     },
     "store": {
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 8,
         "save_last_model": true,
-        "save_best_val_model": false,
+        "save_best_val_model": true,
         "save_best_train_model": true,
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
         "use_wandb": true,
-        "wandb_project": "cbct_lat_diff",
+        "wandb_project": "diff_cond_cbct_x128",
         "wandb_entity": "stmd",
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "extract_2d_from_3d"
     },
     "test": {
-        "processor": "~/dev/fdq_diffusion/vae.py",
-        "test_model": "best",
+        "processor": "~/dev/fdq_diffusion/diffusion_monai.py",
+        "test_model": "last",
         "args": {
-            "nb_test_samples": 100,
-            "nb_export_samples": 10
+            "nb_test_samples": 10
         }
     },
     "slurm_cluster": {
@@ -187,13 +214,13 @@
         "job_time": 1400,
         "stop_grace_time": 15,
         "ntasks": 1,
-        "cpus_per_task": 8,
+        "cpus_per_task": 16,
         "gres": "gpu:h200sxm:1",
         "mem": "120G",
         "partition": "gpu_top",
         "account": "cai_ivs",
         "run_train": true,
-        "run_test": false,
+        "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [

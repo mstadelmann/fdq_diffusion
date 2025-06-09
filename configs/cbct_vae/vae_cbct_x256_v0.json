@@ -43,7 +43,17 @@
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_2_v03.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_3_v03.hdf",
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_4_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf"
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_6_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_7_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_8_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_9_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_10_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_11_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_12_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_13_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_14_v03.hdf",
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_15_v03.hdf"
                 ],
                 "test_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_0_v03.hdf",
@@ -69,7 +79,7 @@
                 "val_batch_size": 2,
                 "test_batch_size": 1,
                 "shuffle_train": true,
-                "shuffle_val": false,
+                "shuffle_val": true,
                 "shuffle_test": false,
                 "drop_last": true,
                 "loader_transforms": {
@@ -168,7 +178,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.24",
+        "fdq_version": "0.0.25",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
