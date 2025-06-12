@@ -1,0 +1,52 @@
+{
+    "globals": {
+        "project": "CBCT_Diff_Cond_Monai",
+        "author": "Marc",
+        "parent": "dc_m_cbct_x256_v0.json"
+    },
+    "transforms": {
+        "extract_2d_from_3d_sag": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 3
+                }
+            }
+        ],
+        "extract_2d_from_3d_cor": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 4
+                }
+            }
+        ]
+    },
+    "losses": {
+        "MAE": {
+            "class_name": "torch.nn.L1Loss"
+        },
+        "MSE": {
+            "class_name": "torch.nn.MSELoss"
+        },
+        "PSNR": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "norm"
+            }
+        },
+        "PSNR_hu": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "HU"
+            }
+        }
+    },
+    "test": {
+        "processor": "~/dev/fdq_diffusion/diffusion_monai_cond.py",
+        "test_model": "last",
+        "args": {
+            "nb_test_samples": 10
+        }
+    }
+}
