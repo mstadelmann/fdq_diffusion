@@ -31,6 +31,20 @@
                     "axis": 2
                 }
             }
+        ],
+        "extract_2d_from_3d_sag": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 3
+                }
+            }
+        ],
+        "extract_2d_from_3d_cor": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 4
+                }
+            }
         ]
     },
     "data": {
@@ -153,6 +167,20 @@
     "losses": {
         "MAE": {
             "class_name": "torch.nn.L1Loss"
+        },
+        "PSNR": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "norm"
+            }
+        },
+        "PSNR_hu": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "HU"
+            }
         }
     },
     "store": {
@@ -173,8 +201,7 @@
         "processor": "~/dev/fdq_diffusion/vae.py",
         "test_model": "best",
         "args": {
-            "nb_test_samples": 100,
-            "nb_export_samples": 10
+            "nb_test_samples": 10
         }
     },
     "slurm_cluster": {
@@ -192,7 +219,7 @@
         "mem": "120G",
         "partition": "gpu_top",
         "account": "cai_ivs",
-        "run_train": true,
+        "run_train": false,
         "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,

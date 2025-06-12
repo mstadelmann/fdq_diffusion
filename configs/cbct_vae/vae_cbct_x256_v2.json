@@ -34,5 +34,9 @@
                 ]
             }
         }
+    },
+    "slurm_cluster": {
+        "run_train": false,
+        "run_test": true
     }
 }

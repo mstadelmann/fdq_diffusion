@@ -21,8 +21,8 @@
                 "ReRange": {
                     "in_min": -1500,
                     "in_max": 1000,
-                    "out_min": -2,
-                    "out_max": 2
+                    "out_min": -1,
+                    "out_max": 1
                 }
             },
             {
@@ -46,6 +46,20 @@
             {
                 "Get2DFrom3D": {
                     "axis": 2
+                }
+            }
+        ],
+        "extract_2d_from_3d_sag": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 3
+                }
+            }
+        ],
+        "extract_2d_from_3d_cor": [
+            {
+                "Get2DFrom3D": {
+                    "axis": 4
                 }
             }
         ]
@@ -173,7 +187,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
-            "epochs": 150,
+            "epochs": 50,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -197,6 +211,20 @@
         },
         "MSE": {
             "class_name": "torch.nn.MSELoss"
+        },
+        "PSNR": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "norm"
+            }
+        },
+        "PSNR_hu": {
+            "path": "~/dev/fdq_diffusion/common.py",
+            "class_name": "PSNR",
+            "args": {
+                "mode": "HU"
+            }
         }
     },
     "store": {
@@ -214,7 +242,7 @@
         "img_exp_transform": "extract_2d_from_3d"
     },
     "test": {
-        "processor": "~/dev/fdq_diffusion/diffusion_monai.py",
+        "processor": "~/dev/fdq_diffusion/diffusion_monai_cond.py",
         "test_model": "last",
         "args": {
             "nb_test_samples": 10
@@ -231,11 +259,11 @@
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 16,
-        "gres": "gpu:h200sxm:1",
+        "gres": "gpu:1",
         "mem": "120G",
         "partition": "gpu_top",
         "account": "cai_ivs",
-        "run_train": false,
+        "run_train": true,
         "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,

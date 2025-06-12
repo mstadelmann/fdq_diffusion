@@ -1,6 +1,7 @@
 {
     "globals": {
         "project": "CBCT_Diff_Cond_Monai",
+        "comment": "Conditional diffusion using a blurred GT as condition.",
         "author": "Marc"
     },
     "transforms": {
@@ -21,8 +22,8 @@
                 "ReRange": {
                     "in_min": -1500,
                     "in_max": 1000,
-                    "out_min": -2,
-                    "out_max": 2
+                    "out_min": -1,
+                    "out_max": 1
                 }
             },
             {
@@ -231,11 +232,11 @@
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 16,
-        "gres": "gpu:h200sxm:1",
+        "gres": "gpu:1",
         "mem": "120G",
         "partition": "gpu_top",
         "account": "cai_ivs",
-        "run_train": false,
+        "run_train": true,
         "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,

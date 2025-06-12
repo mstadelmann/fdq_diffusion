@@ -18,6 +18,11 @@ def fdq_train(experiment) -> None:
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
+    if "norm_to_HU" in experiment.transformers:
+        norm_to_hu = experiment.transformers["norm_to_HU"]
+    else:
+        norm_to_hu = None
+
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
@@ -134,7 +139,6 @@ def fdq_train(experiment) -> None:
                     imgs_to_log.append({"name": "train_cond", "path": cond_imgs_path})
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-
                 noise = torch.randn_like(images_gt).to(experiment.device)
                 timesteps = torch.randint(
                     0,
@@ -177,10 +181,10 @@ def fdq_train(experiment) -> None:
         pbar = startProgBar(data.n_val_batches, "validation...")
         val_loss_sum = 0.0
 
-        with torch.no_grad(), torch.autocast(
-            device_type=device_type, enabled=experiment.useAMP
+        with (
+            torch.no_grad(),
+            torch.autocast(device_type=device_type, enabled=experiment.useAMP),
         ):
-
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
 
@@ -230,6 +234,15 @@ def fdq_train(experiment) -> None:
                 mode=monai_mode,
             )
 
+            if norm_to_hu is not None and condition is not None:
+                result_hu = norm_to_hu(image)
+                images_gt_hu = norm_to_hu(images_gt)
+                PSNR = experiment.losses["PSNR"](images_gt_hu, result_hu).item()
+                PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
+                log_scalars = {"PSNR": PSNR, "PSNR_hu": PSNR_hu}
+            else:
+                log_scalars = None
+
         history_path = createSubplots(
             image_list=intermediates,
             grayscale=is_grayscale,
@@ -247,14 +260,21 @@ def fdq_train(experiment) -> None:
         )
 
         if condition is not None:
+            img_list = [images_gt, condition, image, images_gt - image]
+            img_labels = ["GT", "Condition", "Generated", "GT - Generated"]
+            if norm_to_hu is not None:
+                img_list.extend([images_gt_hu, result_hu])
+                img_labels.extend(["GT_HU", "Generated_HU"])
+
             cond_diff_path = createSubplots(
-                image_list=[images_gt, condition, image, images_gt - image],
+                image_list=img_list,
                 grayscale=is_grayscale,
                 experiment=experiment,
                 histogram=True,
                 figure_title="Generative Diffusion Steps",
                 export_transform=t_img_exp,
-                labels=["GT", "Condition", "Generated", "GT - Generated"],
+                labels=img_labels,
+                apply_global_range=False,
             )
 
             imgs_to_log.extend(
@@ -266,14 +286,15 @@ def fdq_train(experiment) -> None:
                 ]
             )
 
-        experiment.finalize_epoch(log_images_wandb=imgs_to_log)
+        experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
 
 
 @torch.no_grad()
 def fdq_test(experiment):
-
+    # this is just a generative test.
+    # the test for the conditional model is here: diffusion_monai_cond.py
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]

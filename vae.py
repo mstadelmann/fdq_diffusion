@@ -227,9 +227,13 @@ def fdq_test(experiment):
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
+    if "norm_to_HU" in experiment.transformers:
+        norm_to_hu = experiment.transformers["norm_to_HU"]
+    else:
+        norm_to_hu = None
+
     test_loader = data.test_data_loader
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
-    nb_export_samples = experiment.exp_def.test.args.get("nb_export_samples", 0)
 
     if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(
@@ -239,6 +243,7 @@ def fdq_test(experiment):
     kl_losses = []
     recon_losses = []
     weighted_losses = []
+    results = []
 
     print(f"Testset sample size: {data.n_test_samples}")
     pbar = startProgBar(data.n_test_samples, "evaluation...")
@@ -251,32 +256,47 @@ def fdq_test(experiment):
         images_gt = batch[0].to(experiment.device)
         reconstruction, z_mu, z_sigma = model(images_gt)
 
+        results.append(reconstruction.cpu())
+
         is_grayscale = images_gt.shape[1] == 1
 
-        if nb_tbatch <= nb_export_samples:
-            img_list = [
-                images_gt,
-                reconstruction,
-                images_gt - reconstruction,
-            ]
+        img_list = [
+            images_gt,
+            reconstruction,
+            images_gt - reconstruction,
+        ]
 
-            eval_path = createSubplots(
-                image_list=img_list,
-                grayscale=is_grayscale,
-                experiment=experiment,
-                histogram=True,
-                figure_title=f"test image {nb_tbatch}",
-                labels=["gt", "recon", "diff"],
-                export_transform=t_img_exp,
-                show_colorbar=False,
-            )
+        labels = ["gt", "recon", "diff"]
 
-            save_wandb(
-                experiment,
-                images=[
-                    {"name": "test_samples", "path": eval_path},
-                ],
-            )
+        if norm_to_hu is not None:
+            result_hu = norm_to_hu(reconstruction)
+            images_gt_hu = norm_to_hu(images_gt)
+            img_list.extend([result_hu, images_gt_hu])
+            labels.extend(["recon_hu", "gt_hu"])
+            PSNR = experiment.losses["PSNR"](images_gt, reconstruction).item()
+            PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
+            log_scalars = {"PSNR": PSNR, "PSNR_hu": PSNR_hu}
+        else:
+            log_scalars = None
+
+        eval_path = createSubplots(
+            image_list=img_list,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=True,
+            figure_title=f"test image {nb_tbatch}",
+            labels=labels,
+            export_transform=t_img_exp,
+            show_colorbar=False,
+        )
+
+        save_wandb(
+            experiment,
+            images=[
+                {"name": "test_samples", "path": eval_path},
+            ],
+            scalars=log_scalars,
+        )
 
         kl_loss = KL_loss(z_mu, z_sigma).detach().item()
         kl_losses.append(kl_loss)
@@ -289,12 +309,54 @@ def fdq_test(experiment):
 
     pbar.finish()
 
-    results = {
+    results_scalars = {
         "weighted_loss": float(torch.tensor(weighted_losses).mean()),
         "recon_loss": float(torch.tensor(recon_losses).mean()),
         "kl_loss": float(torch.tensor(kl_losses).mean()),
     }
 
-    print(results)
+    print(results_scalars)
 
-    return results
+    res_path = createSubplots(
+        image_list=results,
+        grayscale=is_grayscale,
+        experiment=experiment,
+        histogram=False,
+        figure_title="Generated test samples",
+        export_transform=t_img_exp,
+        hide_ticks=True,
+        show_colorbar=False,
+    )
+
+    images = [{"name": "results overview", "path": res_path}]
+
+    # sagital and coronal planes
+    if "extract_2d_from_3d_sag" in experiment.transformers:
+        res_path_sag = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples sag",
+            export_transform=experiment.transformers["extract_2d_from_3d_sag"],
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+        images.append({"name": "results overview sag", "path": res_path_sag})
+
+    if "extract_2d_from_3d_cor" in experiment.transformers:
+        res_path_cor = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples cor",
+            export_transform=experiment.transformers["extract_2d_from_3d_cor"],
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+        images.append({"name": "results overview cor", "path": res_path_cor})
+
+    save_wandb(experiment, images=images)
+
+    return results_scalars
