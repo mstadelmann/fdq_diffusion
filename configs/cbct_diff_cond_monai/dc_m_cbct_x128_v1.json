@@ -235,7 +235,7 @@
         "mem": "120G",
         "partition": "gpu_top",
         "account": "cai_ivs",
-        "run_train": false,
+        "run_train": true,
         "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,
