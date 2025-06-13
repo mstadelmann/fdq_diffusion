@@ -23,6 +23,14 @@
             }
         ]
     },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "train_batch_size": 4,
+                "val_batch_size": 4
+            }
+        }
+    },
     "store": {
         "wandb_project": "diff_gen_celeb_x256"
     },

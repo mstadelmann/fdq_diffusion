@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "diff_celeb_x128.json"
+        "parent": "dg_c_celeb_x128_v0.json"
     },
     "transforms": {
         "resize_norm": [
@@ -23,9 +23,15 @@
             }
         ]
     },
-    "train": {
-        "args": {
-            "diffusion_scheduler": "cosine"
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "train_batch_size": 4,
+                "val_batch_size": 4
+            }
         }
+    },
+    "store": {
+        "wandb_project": "diff_gen_celeb_x256"
     }
 }

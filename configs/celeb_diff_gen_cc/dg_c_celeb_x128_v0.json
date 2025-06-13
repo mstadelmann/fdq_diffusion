@@ -72,34 +72,37 @@
         }
     },
     "models": {
-        "monaiUNET": {
-            "class_name": "monai.networks.nets.DiffusionModelUNet",
+        "ccUNET": {
+            "class_name": "chuchichaestli.models.unet.unet.UNet",
             "args": {
-                "spatial_dims": 2,
+                "dimensions": 2,
                 "in_channels": 3,
                 "out_channels": 3,
-                "resblock_updown": true,
-                "num_res_blocks": [
-                    2,
+                "n_channels": 64,
+                "num_layers_per_block": 1,
+                "down_block_types": [
+                    "DownBlock",
+                    "DownBlock",
+                    "DownBlock",
+                    "AttnDownBlock",
+                    "AttnDownBlock"
+                ],
+                "up_block_types": [
+                    "AttnUpBlock",
+                    "AttnUpBlock",
+                    "UpBlock",
+                    "UpBlock",
+                    "UpBlock"
+                ],
+                "block_out_channel_mults": [
+                    1,
                     2,
                     2,
                     2,
                     2
                 ],
-                "channels": [
-                    64,
-                    128,
-                    256,
-                    512,
-                    1024
-                ],
-                "attention_levels": [
-                    false,
-                    false,
-                    false,
-                    true,
-                    true
-                ]
+                "time_embedding": true,
+                "time_channels": 512
             },
             "optimizer": {
                 "class_name": "torch.optim.Adam",
@@ -117,38 +120,36 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/diffusion_monai.py",
+        "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
             "epochs": 200,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 50,
+            "early_stop_val_loss": 40,
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
-            "dataloader_name": "celeb_HDF",
-            "model_name": "monaiUNET",
+            "diffusion_scheduler": "linear",
             "diffusion_nb_steps": 800,
+            "diffusion_shd_beta_start": 0.0001,
+            "diffusion_shd_beta_end": 0.02,
             "diffusion_nb_plot_steps": 10,
-            "diffusion_scheduler": "linear_beta",
-            "diffusion_scheduler_args": {
-                "beta_start": 0.0001,
-                "beta_end": 0.02
-            }
+            "dataloader_name": "celeb_HDF",
+            "model_name": "ccUNET"
         }
     },
     "losses": {
-        "MSE": {
-            "class_name": "torch.nn.MSELoss"
+        "MAE": {
+            "class_name": "torch.nn.L1Loss"
         }
     },
     "store": {
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 4,
         "save_last_model": true,
-        "save_best_val_model": true,
+        "save_best_val_model": false,
         "save_best_train_model": true,
-        "checkpoint_frequency": 4,
+        "checkpoint_frequency": 2,
         "use_tensorboard": false,
         "use_wandb": true,
         "wandb_project": "diff_gen_celeb_x128",
@@ -157,8 +158,8 @@
         "img_exp_transform": "norm_to_rgb"
     },
     "test": {
-        "processor": "~/dev/fdq_diffusion/diffusion_monai.py",
-        "test_model": "last",
+        "processor": "~/dev/fonduecaquelon/experiment_templates/segment_pets/oxpets_test.py",
+        "test_model": "best",
         "args": {
             "nb_test_samples": 10
         }
@@ -170,13 +171,13 @@
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
         "log_path": "~/dev/fdq_diffusion/slurm_log",
-        "job_time": 4000,
+        "job_time": 1400,
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 8,
         "gres": "gpu:1",
-        "mem": "100G",
-        "partition": "gpu",
+        "mem": "120G",
+        "partition": "gpu_top",
         "account": "cai_ivs",
         "run_train": true,
         "run_test": true,

@@ -10,7 +10,10 @@ submit_job() {
 # dg_m_cele_ = DiffuionGenerative_MONAI_Celebrties
 #--------------------------------------------------------------------------------------------------
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great
+# MONAI
+# -----
+
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json ----> STILL RUNNING - very slow?
@@ -25,32 +28,17 @@ submit_job() {
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
 
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop 38381
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop 38381
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop 38382
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running 38383
 
 
-# old
+# CHUCHICHAESTLI
+# --------------
 
-# submit_job celeb_diff_gen/diff_celeb_x128_small.json # model 1.37M = 5MB -> bad
-# submit_job celeb_diff_gen/diff_celeb_x128_small_att.json # model 1.39M = 5.4MB -> bad
-# submit_job celeb_diff_gen/diff_celeb_x128_deeper.json # model 162.24M = 620MB -> better
-# submit_job celeb_diff_gen/diff_celeb_x128_more_layer.json # 2.12M = 8.2 MB -> bad
-# submit_job celeb_diff_gen/diff_celeb_x128_wider.json # 18.46M = 71 MB -> better
-# submit_job celeb_diff_gen/diff_celeb_x128_med.json # 66M = 250MB -> OK
-# submit_job celeb_diff_gen/diff_celeb_x128.json # 3940.48M = 15GB -> OK
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json
+submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
 
-
-# submit_job celeb_diff_gen/diff_celeb_x128_seed_flat.json
-# submit_job celeb_diff_gen/diff_celeb_x128_seed_narrow.json
-# submit_job celeb_diff_gen/diff_celeb_x128_seed_noatt.json
-# submit_job celeb_diff_gen/diff_celeb_x128_seed.json
-
-# submit_job celeb_diff_gen/diff_celeb_x128_moreAtt.json
-# submit_job celeb_diff_gen/diff_celeb_x256.json
-# submit_job celeb_diff_gen/diff_celeb_x256_cos.json
-# submit_job celeb_diff_gen/diff_celeb_x256_linsca.json
-# submit_job celeb_diff_gen/diff_celeb_x256_sig.json
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
