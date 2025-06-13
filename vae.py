@@ -271,11 +271,11 @@ def fdq_test(experiment):
         if norm_to_hu is not None:
             result_hu = norm_to_hu(reconstruction)
             images_gt_hu = norm_to_hu(images_gt)
-            img_list.extend([result_hu, images_gt_hu])
-            labels.extend(["recon_hu", "gt_hu"])
+            img_list.extend([images_gt_hu, result_hu])
+            labels.extend(["gt_hu", "recon_hu"])
             PSNR = experiment.losses["PSNR"](images_gt, reconstruction).item()
             PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
-            log_scalars = {"PSNR": PSNR, "PSNR_hu": PSNR_hu}
+            log_scalars = {"PSNR_test": PSNR, "PSNR_test_HU": PSNR_hu}
         else:
             log_scalars = None
 
@@ -288,6 +288,7 @@ def fdq_test(experiment):
             labels=labels,
             export_transform=t_img_exp,
             show_colorbar=False,
+            apply_global_range=False,
         )
 
         save_wandb(

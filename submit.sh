@@ -25,10 +25,10 @@ submit_job() {
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
 
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running
-
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running
+exit
 
 # old
 
@@ -102,20 +102,20 @@ submit_job() {
 # submit_job cbct_diff_cond_monai/dc_m_cbct_x128_v0.json
 
  # cbct artifact
-submit_job cbct_diff_cond_monai/dc_m_cbct_x128_v1.json
-38318
+# submit_job cbct_diff_cond_monai/dc_m_cbct_x128_v1.json
+# 38318
 
-submit_job cbct_diff_cond_monai/dc_m_cbct_x256_v0.json
-38319
+# submit_job cbct_diff_cond_monai/dc_m_cbct_x256_v0.json
+# 38319
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-submit_job cbct_vae/vae_cbct_x256_v0.json # ok 38320
-submit_job cbct_vae/vae_cbct_x256_v1.json 38321
-submit_job cbct_vae/vae_cbct_x256_v2.json # ok 38322
-submit_job cbct_vae/vae_cbct_x256_v3.json 38323
-submit_job cbct_vae/vae_cbct_x256_v4.json # ok 38324
+submit_job cbct_vae/vae_cbct_x256_v0.json # ok 38320 38338
+# submit_job cbct_vae/vae_cbct_x256_v1.json 38321
+submit_job cbct_vae/vae_cbct_x256_v2.json # ok 38322 38339
+# submit_job cbct_vae/vae_cbct_x256_v3.json 38323
+submit_job cbct_vae/vae_cbct_x256_v4.json # ok 38324 38340
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN

@@ -30,6 +30,7 @@
     },
     "slurm_cluster": {
         "run_train": false,
-        "run_test": true
+        "run_test": true,
+        "gres": "gpu:1"
     }
 }
