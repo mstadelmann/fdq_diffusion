@@ -23,7 +23,7 @@
                 "channels": [
                     64,
                     128,
-                    256
+                    196
                 ],
                 "attention_levels": [
                     false,

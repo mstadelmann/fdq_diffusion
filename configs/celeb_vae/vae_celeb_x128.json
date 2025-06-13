@@ -41,7 +41,7 @@
     },
     "data": {
         "celeb_HDF": {
-            "processor": "~/dev/fdq_diffusion/hdf_preparator.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
@@ -58,11 +58,16 @@
                 "shuffle_val": false,
                 "shuffle_test": false,
                 "drop_last": true,
-                "loader_transforms": {
-                    "train": "resize_norm",
-                    "val": "resize_norm",
-                    "test": "resize_norm"
-                }
+                "hdf_ds_key_request": [
+                    {
+                        "*": "resize_norm"
+                    }
+                ],
+                "hdf_ds_key_request_test": [
+                    {
+                        "*": "resize_norm"
+                    }
+                ]
             }
         }
     },
@@ -134,7 +139,7 @@
         "checkpoint_frequency": 5,
         "use_tensorboard": false,
         "use_wandb": true,
-        "wandb_project": "celeb_vae",
+        "wandb_project": "celeb_vae_x128",
         "wandb_entity": "stmd",
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "norm_to_rgb"

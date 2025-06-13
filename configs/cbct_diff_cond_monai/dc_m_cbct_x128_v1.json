@@ -187,7 +187,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
-            "epochs": 50,
+            "epochs": 180,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
@@ -266,7 +266,7 @@
         "run_train": true,
         "run_test": true,
         "auto_resubmit": true,
-        "resume_chpt_path": null,
+        "resume_chpt_path": "/cluster/home/stmd/data/ML_data/results/CBCT_Diff_Cond_Monai/dc_m_cbct_x128_v1/20250609_01_11_49__zealous_mayer__37635/checkpoint_e120.fdqcpt",
         "additional_pip_packages": [
             "h5py"
         ]

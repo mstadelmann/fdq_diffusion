@@ -41,7 +41,7 @@
     },
     "data": {
         "celeb_HDF": {
-            "processor": "~/dev/fdq_diffusion/hdf_preparator.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
@@ -58,11 +58,16 @@
                 "shuffle_val": false,
                 "shuffle_test": false,
                 "drop_last": true,
-                "loader_transforms": {
-                    "train": "resize_norm",
-                    "val": "resize_norm",
-                    "test": "resize_norm"
-                }
+                "hdf_ds_key_request": [
+                    {
+                        "*": "resize_norm"
+                    }
+                ],
+                "hdf_ds_key_request_test": [
+                    {
+                        "*": "resize_norm"
+                    }
+                ]
             }
         }
     },

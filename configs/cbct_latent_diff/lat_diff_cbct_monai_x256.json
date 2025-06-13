@@ -35,7 +35,7 @@
     },
     "data": {
         "ctrate": {
-            "processor": "~/dev/fdq_diffusion/hdf_preparator.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "train_files_path": [
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_0_v03.hdf",
@@ -62,10 +62,14 @@
                     "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_3_v03.hdf"
                 ],
                 "hdf_ds_key_request": [
-                    "Vol_full"
+                    {
+                        "Vol_full": "HU_to_norm"
+                    }
                 ],
                 "hdf_ds_key_request_test": [
-                    "Vol_full"
+                    {
+                        "Vol_full": "HU_to_norm"
+                    }
                 ],
                 "data_is_3d": true,
                 "file_extension": "hdf",
@@ -81,18 +85,7 @@
                 "shuffle_train": true,
                 "shuffle_val": false,
                 "shuffle_test": false,
-                "drop_last": true,
-                "loader_transforms": {
-                    "train": {
-                        "Vol_full": "HU_to_norm"
-                    },
-                    "val": {
-                        "Vol_full": "HU_to_norm"
-                    },
-                    "test": {
-                        "Vol_full": "HU_to_norm"
-                    }
-                }
+                "drop_last": true
             }
         }
     },

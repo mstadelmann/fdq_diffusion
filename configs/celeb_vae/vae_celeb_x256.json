@@ -22,5 +22,8 @@
                 }
             }
         ]
+    },
+    "store": {
+        "wandb_project": "celeb_vae_x256"
     }
 }
