@@ -6,6 +6,7 @@ from monai.apps.utils import download_url
 from safetensors.torch import load_model
 from torch.nn.modules import Module
 from fdq.ui_functions import startProgBar, iprint
+from fdq.misc import save_wandb
 from image_functions import createSubplots
 
 
@@ -71,6 +72,11 @@ def fdq_test(experiment):
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
+    if "norm_to_HU" in experiment.transformers:
+        norm_to_hu = experiment.transformers["norm_to_HU"]
+    else:
+        norm_to_hu = None
+
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
     maisi_model = load_url(
@@ -79,7 +85,7 @@ def fdq_test(experiment):
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    pbar = startProgBar(data.n_train_batches, "training...")
+    pbar = startProgBar(nb_test_samples, "MAISI inference...")
 
     for nb_tbatch, batch in enumerate(data.test_data_loader):
 
@@ -97,13 +103,34 @@ def fdq_test(experiment):
             z_vae = maisi_model.sampling(z_mu, z_sigma)
             z_vae_decoded = maisi_model.decode(z_vae)
 
+        img_list = [
+            images_gt,
+            z_vae_decoded,
+            torch.abs(images_gt - z_vae_decoded),
+        ]
+
+        labels = ["GT", "Decoded", "Diff: Input - Decoded"]
+
+        if norm_to_hu is not None:
+            result_hu = norm_to_hu(z_vae_decoded)
+            images_gt_hu = norm_to_hu(images_gt)
+            img_list.extend([images_gt_hu, result_hu])
+            labels.extend(["gt_hu", "recon_hu"])
+            PSNR = experiment.losses["PSNR"](images_gt, z_vae_decoded).item()
+            PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
+            log_scalars = {"PSNR_test": PSNR, "PSNR_test_HU": PSNR_hu}
+        else:
+            log_scalars = None
+
         gt_imgs_path = createSubplots(
-            image_list=images_gt,
+            image_list=img_list,
             grayscale=True,
             experiment=experiment,
             histogram=True,
-            figure_title="Input GT",
+            figure_title="Maisi eval",
             export_transform=t_img_exp,
+            labels=labels,
+            apply_global_range=False,
         )
         latent_imgs_path = createSubplots(
             image_list=z_vae[:, :3, ...],
@@ -114,40 +141,13 @@ def fdq_test(experiment):
             export_transform=t_img_exp,
         )
 
-        decoded_imgs_path = createSubplots(
-            image_list=z_vae_decoded,
-            grayscale=True,
-            experiment=experiment,
-            histogram=True,
-            figure_title="Decoded Latent",
-            export_transform=t_img_exp,
-        )
-        diff_imgs_path = createSubplots(
-            image_list=torch.abs(images_gt - z_vae_decoded),
-            grayscale=True,
-            experiment=experiment,
-            histogram=True,
-            figure_title="Diff: Input - Decoded Latent",
-            export_transform=t_img_exp,
-        )
-
         imgs_to_log.extend(
             [
-                {"name": "gt", "path": gt_imgs_path},
+                {"name": "inf_results", "path": gt_imgs_path},
                 {"name": "latent", "path": latent_imgs_path},
-                {
-                    "name": "decoded",
-                    "path": decoded_imgs_path,
-                },
-                {
-                    "name": "diff",
-                    "path": diff_imgs_path,
-                },
             ]
         )
 
         pbar.finish()
 
-        experiment.finalize_epoch(log_images_wandb=imgs_to_log)
-        if experiment.check_early_stop():
-            break
+        save_wandb(experiment=experiment, images=imgs_to_log, scalars=log_scalars)

@@ -188,8 +188,12 @@ def createSubplots(
         else:
             if histogram:
                 for i in range(nb_cols):
-                    axs[1, i].set_yticks([])
-                    axs[1, i].set_yticklabels([])
+                    if np.ndim(axs) == 1:
+                        axs[i].set_yticks([])
+                        axs[i].set_yticklabels([])
+                    else:
+                        axs[1, i].set_yticks([])
+                        axs[1, i].set_yticklabels([])
 
         if save_path is None:
             save_path = experiment.get_next_export_fn()
