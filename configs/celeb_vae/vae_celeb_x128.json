@@ -148,7 +148,7 @@
         "processor": "~/dev/fdq_diffusion/vae.py",
         "test_model": "best",
         "args": {
-            "nb_test_samples": 100,
+            "nb_test_samples": 20,
             "nb_export_samples": 10
         }
     },
