@@ -109,7 +109,7 @@ def fdq_test(experiment):
             torch.abs(images_gt - z_vae_decoded),
         ]
 
-        labels = ["GT", "Decoded", "Diff: Input - Decoded"]
+        labels = ["GT", "Decoded", "abs(GT - Decoded)"]
 
         if norm_to_hu is not None:
             result_hu = norm_to_hu(z_vae_decoded)
@@ -124,21 +124,24 @@ def fdq_test(experiment):
 
         gt_imgs_path = createSubplots(
             image_list=img_list,
+            labels=labels,
             grayscale=True,
             experiment=experiment,
             histogram=True,
             figure_title="Maisi eval",
-            export_transform=t_img_exp,
-            labels=labels,
+            hide_ticks=True,
             apply_global_range=False,
+            export_transform=t_img_exp,
+            show_colorbar=False,
         )
         latent_imgs_path = createSubplots(
             image_list=z_vae[:, :3, ...],
             grayscale=False,
             experiment=experiment,
             histogram=True,
-            figure_title="Latent sample (CH1-3)",
+            figure_title=f"Latent sample (CH1-3). orig shape: {z_vae.shape}",
             export_transform=t_img_exp,
+            hide_ticks=True,
         )
 
         imgs_to_log.extend(
@@ -148,6 +151,6 @@ def fdq_test(experiment):
             ]
         )
 
-        pbar.finish()
-
         save_wandb(experiment=experiment, images=imgs_to_log, scalars=log_scalars)
+
+    pbar.finish()
