@@ -118,43 +118,59 @@ def fdq_train(experiment) -> None:
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        experiment.valLoss = 0  # no validation train_loss_tensor
 
-        # Dummy validation: generate samples
-        idx_to_store = torch.linspace(
-            0,
-            targs.diffusion_nb_steps - 1,
-            targs.get("diffusion_nb_plot_steps", 15),
-            dtype=torch.int,
-        ).tolist()
+        model.eval()
+        pbar = startProgBar(data.n_val_batches, "validation...")
+        val_loss_sum = 0.0
 
-        images = get_sample_from_noise(
-            experiment=experiment,
-            diffuser=chuchi_diffuser,
-            gen_shape=img_shape,
-            idx_to_store=idx_to_store,
-        )
+        with (
+            torch.no_grad(),
+            torch.autocast(device_type=device_type, enabled=experiment.useAMP),
+        ):
+            for nb_vbatch, batch in enumerate(data.val_data_loader):
+                pbar.update(nb_vbatch)
+                images_gt = batch[0].to(experiment.device)
+                noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
+                noise_pred = model(noisy_imgs, t)
+                val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
 
-        history_path = createSubplots(
-            image_list=images,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=True,
-            figure_title="Generative Diffusion Steps",
-            labels=[f"Step {i}" for i in idx_to_store],
-            export_transform=t_img_exp,
-        )
+            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
 
-        imgs_to_log.extend(
-            [
-                {"name": "gen_result", "data": t_img_exp(images[-1])},
-                {"name": "gen_hist", "path": history_path},
-            ]
-        )
+            # Additional dummy validation: generate samples
+            idx_to_store = torch.linspace(
+                0,
+                targs.diffusion_nb_steps - 1,
+                targs.get("diffusion_nb_plot_steps", 15),
+                dtype=torch.int,
+            ).tolist()
 
-        experiment.finalize_epoch(log_images_wandb=imgs_to_log)
-        if experiment.check_early_stop():
-            break
+            images = get_sample_from_noise(
+                experiment=experiment,
+                diffuser=chuchi_diffuser,
+                gen_shape=img_shape,
+                idx_to_store=idx_to_store,
+            )
+
+            history_path = createSubplots(
+                image_list=images,
+                grayscale=is_grayscale,
+                experiment=experiment,
+                histogram=True,
+                figure_title="Generative Diffusion Steps",
+                labels=[f"Step {i}" for i in idx_to_store],
+                export_transform=t_img_exp,
+            )
+
+            imgs_to_log.extend(
+                [
+                    {"name": "gen_result", "data": t_img_exp(images[-1])},
+                    {"name": "gen_hist", "path": history_path},
+                ]
+            )
+
+            experiment.finalize_epoch(log_images_wandb=imgs_to_log)
+            if experiment.check_early_stop():
+                break
 
 
 @torch.no_grad()

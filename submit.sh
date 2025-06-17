@@ -13,7 +13,7 @@ submit_job() {
 # MONAI
 # -----
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great
+# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great, early stop
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json ----> STILL RUNNING - very slow?
@@ -28,7 +28,7 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
 
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop 38381
+# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop, ok but not great
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop 38382
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running 38383
 
@@ -36,15 +36,14 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop 38381
 # CHUCHICHAESTLI
 # --------------
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json
-submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
-
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 38860
+submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
 # submit_job celeb_vae/vae_celeb_x128.json
-submit_job celeb_vae/vae_celeb_x256.json
+# submit_job celeb_vae/vae_celeb_x256.json 38436 # ok
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 
@@ -101,11 +100,17 @@ submit_job celeb_vae/vae_celeb_x256.json
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job cbct_vae/vae_cbct_x256_v0.json # 38423
-# submit_job cbct_vae/vae_cbct_x256_v1.json 38321 - still training
-# submit_job cbct_vae/vae_cbct_x256_v2.json # 38424
-# submit_job cbct_vae/vae_cbct_x256_v3.json # train:  38425
-# submit_job cbct_vae/vae_cbct_x256_v4.json # 38426
+# submit_job cbct_vae/vae_cbct_x256_v0.json
+# submit_job cbct_vae/vae_cbct_x256_v1.json
+# submit_job cbct_vae/vae_cbct_x256_v2.json
+# submit_job cbct_vae/vae_cbct_x256_v3.json # 38756
+# submit_job cbct_vae/vae_cbct_x256_v4.json
+
+#--------------------------------------------------------------------------------------------------
+# CBCT VAE MAESI TEST
+#--------------------------------------------------------------------------------------------------
+
+submit_job cbct_vae/vae_cbct_maisi_x256.json # 38758
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN

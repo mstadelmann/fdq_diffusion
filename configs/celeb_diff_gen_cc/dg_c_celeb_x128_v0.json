@@ -88,11 +88,11 @@
                     "AttnDownBlock"
                 ],
                 "up_block_types": [
-                    "AttnUpBlock",
-                    "AttnUpBlock",
                     "UpBlock",
                     "UpBlock",
-                    "UpBlock"
+                    "UpBlock",
+                    "AttnUpBlock",
+                    "AttnUpBlock"
                 ],
                 "block_out_channel_mults": [
                     1,
@@ -141,6 +141,9 @@
     "losses": {
         "MAE": {
             "class_name": "torch.nn.L1Loss"
+        },
+        "MSE": {
+            "class_name": "torch.nn.MSELoss"
         }
     },
     "store": {
@@ -177,7 +180,7 @@
         "cpus_per_task": 8,
         "gres": "gpu:1",
         "mem": "120G",
-        "partition": "gpu_top",
+        "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
         "run_test": true,

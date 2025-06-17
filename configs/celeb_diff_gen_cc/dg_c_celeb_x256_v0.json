@@ -33,5 +33,8 @@
     },
     "store": {
         "wandb_project": "diff_gen_celeb_x256"
+    },
+    "slurm_cluster": {
+        "partition": "gpu_top"
     }
 }
