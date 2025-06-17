@@ -1,5 +1,6 @@
 import torch
 from fdq.ui_functions import startProgBar, iprint
+from fdq.misc import save_wandb
 from chuchichaestli.diffusion.ddpm import DDPM
 from image_functions import createSubplots
 
@@ -154,3 +155,91 @@ def fdq_train(experiment) -> None:
         experiment.finalize_epoch(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
+
+
+@torch.no_grad()
+def fdq_test(experiment):
+    # This test is only for generative diffusion!
+
+    targs = experiment.exp_def.train.args
+    data = experiment.data[targs.dataloader_name]
+    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
+
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
+
+    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
+        raise ValueError(
+            "Error: Test batch size must be 1 - please change the experiment file."
+        )
+
+    idx_to_store = torch.linspace(
+        0,
+        targs.diffusion_nb_steps - 1,
+        targs.get("diffusion_nb_plot_steps", 15),
+        dtype=torch.int,
+    ).tolist()
+
+    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    test_sample = next(iter(data.test_data_loader))[0]
+    img_shape = test_sample.shape[1:]
+    is_grayscale = img_shape[1] == 1
+
+    chuchi_diffuser = DDPM(
+        num_timesteps=targs.diffusion_nb_steps,
+        device=experiment.device,
+        beta_start=targs.diffusion_shd_beta_start,
+        beta_end=targs.diffusion_shd_beta_end,
+        schedule=targs.diffusion_scheduler,
+    )
+
+    pbar = startProgBar(nb_test_samples, "evaluation...")
+
+    results = []
+
+    for inf_nb in range(nb_test_samples):
+        pbar.update(inf_nb)
+
+        with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+
+            images = get_sample_from_noise(
+                experiment=experiment,
+                diffuser=chuchi_diffuser,
+                gen_shape=img_shape,
+                idx_to_store=idx_to_store,
+            )
+
+        history_path = createSubplots(
+            image_list=images,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=True,
+            figure_title="Generative Diffusion Steps",
+            labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
+        )
+
+        save_wandb(
+            experiment, images={"name": "test_gen_history", "path": history_path}
+        )
+
+        results.append(images[-1].cpu())
+
+    pbar.finish()
+
+    res_path = createSubplots(
+        image_list=results,
+        grayscale=is_grayscale,
+        experiment=experiment,
+        histogram=False,
+        figure_title="Generated test samples",
+        export_transform=t_img_exp,
+        hide_ticks=True,
+        show_colorbar=False,
+    )
+
+    save_wandb(experiment, images={"name": "test_samples", "path": res_path})
