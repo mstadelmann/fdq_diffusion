@@ -119,7 +119,7 @@
     "train": {
         "path": "~/dev/fdq_diffusion/meta_flow_match_train.py",
         "args": {
-            "epochs": 50,
+            "epochs": 150,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,

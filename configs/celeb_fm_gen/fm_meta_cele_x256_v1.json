@@ -64,5 +64,8 @@
     },
     "store": {
         "wandb_project": "fm_m_celeb_x256"
+    },
+    "slurm_cluster": {
+        "gres": "gpu:h200sxm:1"
     }
 }

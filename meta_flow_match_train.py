@@ -1,16 +1,11 @@
+import gc
 import torch
-from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 
-import math
 from flow_matching.path import CondOTProbPath
 
-
 from meta_ema import EMA
-from meta_grad_scaler import NativeScalerWithGradNormCount
 
-from typing import Iterable
-import gc
 
 from meta_flow_match_eval import CFGScaledModel
 from flow_matching.solver.ode_solver import ODESolver
@@ -42,14 +37,9 @@ def fdq_train(experiment) -> None:
     targs = experiment.exp_def.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
-    # lr_schedule = experiment.lr_schedulers[targs.model_name]
-    optimizer = experiment.optimizers[targs.model_name]
-    loss_scaler = NativeScalerWithGradNormCount()
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
-
     train_loader = data.train_data_loader
-
     skewed_timesteps = False
 
     path = CondOTProbPath()
@@ -69,9 +59,6 @@ def fdq_train(experiment) -> None:
             pbar.update(data_iter_step)
 
             samples = batch[0]
-
-            if data_iter_step % experiment.gradacc_iter == 0:
-                optimizer.zero_grad()  # this is done in update_gradients
 
             samples = samples.to(experiment.device, non_blocking=True)
             # labels = labels.to(device, non_blocking=True)
@@ -100,13 +87,17 @@ def fdq_train(experiment) -> None:
 
             train_loss_tensor /= experiment.gradacc_iter
 
-            apply_update = (data_iter_step + 1) % experiment.gradacc_iter == 0
-            loss_scaler(
-                train_loss_tensor,
-                optimizer,
-                parameters=model.parameters(),
-                update_grad=apply_update,
+            if experiment.useAMP:
+                experiment.scaler.scale(train_loss_tensor).backward()
+            else:
+                train_loss_tensor.backward()
+
+            experiment.update_gradients(
+                b_idx=data_iter_step,
+                loader_name=targs.dataloader_name,
+                model_name=targs.model_name,
             )
+
             # if apply_update and isinstance(model, EMA):
             #     model.update_ema()
             # elif (
@@ -119,8 +110,6 @@ def fdq_train(experiment) -> None:
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-
-        # lr_schedule.step()  # this is done in finalize EP
 
         # dummy validation
         experiment.valLoss = 0
@@ -150,10 +139,6 @@ def fdq_train(experiment) -> None:
             label=labels,
             cfg_scale=0.2,
         )
-
-        # Scaling to [0, 1] from [-1, 1]
-        # synthetic_samples = torch.clamp(synthetic_samples * 0.5 + 0.5, min=0.0, max=1.0)
-        # synthetic_samples = torch.floor(synthetic_samples * 255) / 255.0
 
         synthetic_samples = t_img_exp(synthetic_samples)
 

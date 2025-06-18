@@ -61,8 +61,10 @@ submit_job() {
 # CELEB Flow Matching Generative
 #--------------------------------------------------------------------------------------------------
 submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json
+# latest version with FDQ scaler : 39092
 
-submit_job celeb_fm_gen/fm_meta_cele_x256_v0.json
+# submit_job celeb_fm_gen/fm_meta_cele_x256_v0.json
+submit_job celeb_fm_gen/fm_meta_cele_x256_v1.json
 
 ##################################################################################################
 ##################################################################################################
