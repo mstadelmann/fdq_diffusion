@@ -62,8 +62,7 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json
 
-
-
+submit_job celeb_fm_gen/fm_meta_cele_x256_v0.json
 
 ##################################################################################################
 ##################################################################################################
@@ -117,8 +116,8 @@ submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json
 #--------------------------------------------------------------------------------------------------
 
 # submit_job cbct_vae/vae_cbct_maisi_x256.json # 38758
-submit_job cbct_vae/vae_cbct_maisi_x256_v1.json
-submit_job cbct_vae/vae_cbct_maisi_x256_v2.json
+# submit_job cbct_vae/vae_cbct_maisi_x256_v1.json
+# submit_job cbct_vae/vae_cbct_maisi_x256_v2.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
