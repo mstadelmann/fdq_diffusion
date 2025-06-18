@@ -1,6 +1,6 @@
 {
     "globals": {
-        "project": "Celeb_Generation",
+        "project": "Celeb_FM_Generation",
         "author": "Marc"
     },
     "transforms": {
@@ -72,42 +72,39 @@
         }
     },
     "models": {
-        "ccUNET": {
-            "class_name": "chuchichaestli.models.unet.unet.UNet",
+        "metaUNET": {
+            "path": "~/dev/fdq_diffusion/meta_unet.py",
+            "class_name": "UNetModel",
             "args": {
-                "dimensions": 2,
                 "in_channels": 3,
+                "model_channels": 128,
                 "out_channels": 3,
-                "n_channels": 64,
-                "num_layers_per_block": 1,
-                "down_block_types": [
-                    "DownBlock",
-                    "DownBlock",
-                    "DownBlock",
-                    "AttnDownBlock",
-                    "AttnDownBlock"
+                "num_res_blocks": 4,
+                "attention_resolutions": [
+                    2
                 ],
-                "up_block_types": [
-                    "UpBlock",
-                    "UpBlock",
-                    "UpBlock",
-                    "AttnUpBlock",
-                    "AttnUpBlock"
-                ],
-                "block_out_channel_mults": [
-                    1,
-                    2,
+                "dropout": 0.3,
+                "channel_mult": [
                     2,
                     2,
                     2
                 ],
-                "time_embedding": true,
-                "time_channels": 512
+                "conv_resample": false,
+                "dims": 2,
+                "num_classes": null,
+                "use_checkpoint": false,
+                "num_heads": 1,
+                "num_head_channels": -1,
+                "num_heads_upsample": -1,
+                "use_scale_shift_norm": true,
+                "resblock_updown": false,
+                "use_new_attention_order": true,
+                "with_fourier_features": false
             },
             "optimizer": {
                 "class_name": "torch.optim.Adam",
                 "args": {
-                    "lr": 0.00005
+                    "lr": 0.0001
                 }
             },
             "lr_scheduler": {
@@ -120,28 +117,20 @@
         }
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
+        "path": "~/dev/fdq_diffusion/meta_flow_match_train.py",
         "args": {
-            "epochs": 200,
+            "epochs": 50,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 40,
+            "early_stop_val_loss": 50,
             "early_stop_train_loss": 20,
             "early_stop_nan": 5,
-            "diffusion_scheduler": "linear",
-            "diffusion_nb_steps": 800,
-            "diffusion_shd_beta_start": 0.0001,
-            "diffusion_shd_beta_end": 0.02,
-            "diffusion_nb_plot_steps": 10,
             "dataloader_name": "celeb_HDF",
-            "model_name": "ccUNET"
+            "model_name": "metaUNET"
         }
     },
     "losses": {
-        "MAE": {
-            "class_name": "torch.nn.L1Loss"
-        },
         "MSE": {
             "class_name": "torch.nn.MSELoss"
         }
@@ -150,19 +139,19 @@
         "results_path": "~/data/ML_data/results",
         "img_exp_nb": 4,
         "save_last_model": true,
-        "save_best_val_model": false,
+        "save_best_val_model": true,
         "save_best_train_model": true,
-        "checkpoint_frequency": 2,
+        "checkpoint_frequency": 4,
         "use_tensorboard": false,
         "use_wandb": true,
-        "wandb_project": "diff_gen_celeb_x128",
+        "wandb_project": "fm_m_celeb_x128",
         "wandb_entity": "stmd",
         "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "norm_to_rgb"
     },
     "test": {
-        "processor": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
-        "test_model": "best",
+        "processor": "~/dev/fdq_diffusion/meta_flow_match_train.py",
+        "test_model": "last",
         "args": {
             "nb_test_samples": 10
         }
@@ -174,12 +163,12 @@
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
         "log_path": "~/dev/fdq_diffusion/slurm_log",
-        "job_time": 1400,
+        "job_time": 4000,
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 8,
         "gres": "gpu:1",
-        "mem": "120G",
+        "mem": "100G",
         "partition": "gpu",
         "account": "cai_ivs",
         "run_train": true,
@@ -187,7 +176,8 @@
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [
-            "h5py"
+            "h5py",
+            "flow_matching==1.0.10"
         ]
     }
 }

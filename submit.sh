@@ -36,8 +36,8 @@ submit_job() {
 # CHUCHICHAESTLI
 # --------------
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 38860
-submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 38860
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
@@ -55,6 +55,12 @@ submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
 # submit_job celeb_latent_diff/lat_diff_celeb_x256.json
 
 # submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
+
+
+#--------------------------------------------------------------------------------------------------
+# CELEB Flow Matching Generative
+#--------------------------------------------------------------------------------------------------
+submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json
 
 
 
@@ -110,7 +116,9 @@ submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
 # CBCT VAE MAESI TEST
 #--------------------------------------------------------------------------------------------------
 
-submit_job cbct_vae/vae_cbct_maisi_x256.json # 38758
+# submit_job cbct_vae/vae_cbct_maisi_x256.json # 38758
+submit_job cbct_vae/vae_cbct_maisi_x256_v1.json
+submit_job cbct_vae/vae_cbct_maisi_x256_v2.json
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
