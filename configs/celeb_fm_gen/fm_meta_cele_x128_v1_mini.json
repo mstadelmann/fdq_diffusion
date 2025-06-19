@@ -1,0 +1,80 @@
+{
+    "globals": {
+        "project": "Celeb_FM_Generation",
+        "author": "Marc",
+        "parent": "fm_meta_cele_x128_v0.json"
+    },
+    "transforms": {
+        "resize_norm": [
+            "Float32",
+            {
+                "Resize_HW": {
+                    "h": 128,
+                    "w": 128
+                }
+            },
+            {
+                "ReRange": {
+                    "in_min": 0,
+                    "in_max": 255,
+                    "out_min": 0,
+                    "out_max": 1
+                }
+            }
+        ]
+    },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "subset_train": 0.2,
+                "train_batch_size": 8,
+                "val_batch_size": 8,
+                "test_batch_size": 1
+            }
+        }
+    },
+    "models": {
+        "metaUNET": {
+            "path": "~/dev/fdq_diffusion/meta_unet.py",
+            "class_name": "UNetModel",
+            "args": {
+                "in_channels": 3,
+                "model_channels": 128,
+                "out_channels": 3,
+                "num_res_blocks": 4,
+                "attention_resolutions": [
+                    2
+                ],
+                "dropout": 0.3,
+                "channel_mult": [
+                    2,
+                    2,
+                    2
+                ],
+                "conv_resample": false,
+                "dims": 2,
+                "num_classes": null,
+                "use_checkpoint": false,
+                "num_heads": 1,
+                "num_head_channels": -1,
+                "num_heads_upsample": -1,
+                "use_scale_shift_norm": true,
+                "resblock_updown": false,
+                "use_new_attention_order": true,
+                "with_fourier_features": false
+            }
+        }
+    },
+    "train": {
+        "args": {
+            "epochs": 5
+        }
+    },
+    "slurm_cluster": {
+        "gres": "gpu:1",
+        "mem": "50G",
+        "partition": "gpu",
+        "run_train": true,
+        "run_test": true
+    }
+}
