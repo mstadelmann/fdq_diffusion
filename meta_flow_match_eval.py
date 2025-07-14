@@ -138,58 +138,33 @@ def eval_model(
 
         if num_synthetic < fid_samples:
             cfg_scaled_model.reset_nfe_counter()
-            if args.discrete_flow_matching:
-                # Discrete sampling
-                x_0 = (
-                    torch.zeros(samples.shape, dtype=torch.long, device=device)
-                    + MASK_TOKEN
-                )
-                if args.sym_func:
-                    sym = lambda t: 12.0 * torch.pow(t, 2.0) * torch.pow(1.0 - t, 0.25)
-                else:
-                    sym = args.sym
-                if args.sampling_dtype == "float32":
-                    dtype = torch.float32
-                elif args.sampling_dtype == "float64":
-                    dtype = torch.float64
 
-                synthetic_samples = solver.sample(
-                    x_init=x_0,
-                    step_size=1.0 / args.discrete_fm_steps,
-                    verbose=False,
-                    div_free=sym,
-                    dtype_categorical=dtype,
-                    label=labels,
-                    cfg_scale=args.cfg_scale,
-                )
+            # Continuous sampling
+            x_0 = torch.randn(samples.shape, dtype=torch.float32, device=device)
+
+            if args.edm_schedule:
+                time_grid = get_time_discretization(nfes=ode_opts["nfe"])
             else:
-                # Continuous sampling
-                x_0 = torch.randn(samples.shape, dtype=torch.float32, device=device)
+                time_grid = torch.tensor([0.0, 1.0], device=device)
 
-                if args.edm_schedule:
-                    time_grid = get_time_discretization(nfes=ode_opts["nfe"])
-                else:
-                    time_grid = torch.tensor([0.0, 1.0], device=device)
+            synthetic_samples = solver.sample(
+                time_grid=time_grid,
+                x_init=x_0,
+                method=args.ode_method,
+                return_intermediates=False,
+                atol=ode_opts["atol"] if "atol" in ode_opts else 1e-5,
+                rtol=ode_opts["rtol"] if "atol" in ode_opts else 1e-5,
+                step_size=(ode_opts["step_size"] if "step_size" in ode_opts else None),
+                label=labels,
+                cfg_scale=args.cfg_scale,
+            )
 
-                synthetic_samples = solver.sample(
-                    time_grid=time_grid,
-                    x_init=x_0,
-                    method=args.ode_method,
-                    return_intermediates=False,
-                    atol=ode_opts["atol"] if "atol" in ode_opts else 1e-5,
-                    rtol=ode_opts["rtol"] if "atol" in ode_opts else 1e-5,
-                    step_size=(
-                        ode_opts["step_size"] if "step_size" in ode_opts else None
-                    ),
-                    label=labels,
-                    cfg_scale=args.cfg_scale,
-                )
+            # Scaling to [0, 1] from [-1, 1]
+            synthetic_samples = torch.clamp(
+                synthetic_samples * 0.5 + 0.5, min=0.0, max=1.0
+            )
+            synthetic_samples = torch.floor(synthetic_samples * 255)
 
-                # Scaling to [0, 1] from [-1, 1]
-                synthetic_samples = torch.clamp(
-                    synthetic_samples * 0.5 + 0.5, min=0.0, max=1.0
-                )
-                synthetic_samples = torch.floor(synthetic_samples * 255)
             synthetic_samples = synthetic_samples.to(torch.float32) / 255.0
             logger.info(
                 f"{samples.shape[0]} samples generated in {cfg_scaled_model.get_nfe()} evaluations."

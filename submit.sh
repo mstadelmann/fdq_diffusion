@@ -60,8 +60,9 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB Flow Matching Generative
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json
-submit_job celeb_fm_gen/fm_meta_cele_x128_v1_mini.json 
+# submit_job celeb_fm_gen/fm_meta_cele_x128_v0.json # test is missing! -> fixed
+# submit_job celeb_fm_gen/fm_meta_cele_x128_v0_dist2.json # error num workers and HDF (42095)! currently running with nworks=0 (42472)
+
 
 
 # submit_job celeb_fm_gen/fm_meta_cele_x256_v0.json
@@ -108,7 +109,9 @@ submit_job celeb_fm_gen/fm_meta_cele_x128_v1_mini.json
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job cbct_vae/vae_cbct_x256_v0.json
+# submit_job cbct_vae/vae_cbct_x256_v0.json # OK (42096)
+# submit_job cbct_vae/vae_cbct_x256_v0_dist2.json 42564
+# submit_job cbct_vae/vae_cbct_x256_v0_dist3.json 42565
 # submit_job cbct_vae/vae_cbct_x256_v1.json
 # submit_job cbct_vae/vae_cbct_x256_v2.json
 # submit_job cbct_vae/vae_cbct_x256_v3.json # 38756
@@ -120,7 +123,10 @@ submit_job celeb_fm_gen/fm_meta_cele_x128_v1_mini.json
 
 # submit_job cbct_vae/vae_cbct_maisi_x256.json # 38758
 # submit_job cbct_vae/vae_cbct_maisi_x256_v1.json
-# submit_job cbct_vae/vae_cbct_maisi_x256_v2.json
+# submit_job cbct_vae/vae_cbct_maisi_x256_v2.json # 42101 -> best
+
+# submit_job cbct_vae/vae_cbct_maisi_x512.json # 42102
+submit_job cbct_vae/vae_cbct_maisi_x512_v2.json # 42569
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN

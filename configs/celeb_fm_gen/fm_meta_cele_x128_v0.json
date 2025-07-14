@@ -157,7 +157,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.29",
+        "fdq_version": "0.0.48",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
@@ -167,8 +167,11 @@
         "stop_grace_time": 15,
         "ntasks": 1,
         "cpus_per_task": 8,
+        "cpus_per_task_test": 8,
         "gres": "gpu:1",
+        "gres_test": "gpu:1",
         "mem": "100G",
+        "mem_test": "100G",
         "partition": "gpu_top",
         "account": "cai_ivs",
         "run_train": true,

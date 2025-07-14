@@ -1,6 +1,7 @@
 import gc
 import torch
 from fdq.ui_functions import startProgBar, iprint
+from fdq.misc import save_wandb
 
 from flow_matching.path import CondOTProbPath
 
@@ -23,6 +24,56 @@ def skewed_timestep_sample(num_samples: int, device: torch.device) -> torch.Tens
     time = torch.clip(time, min=0.0001, max=1.0)
     return time
 
+
+@torch.no_grad()
+def fdq_test(experiment):
+    targs = experiment.exp_def.train.args
+    model = experiment.models[targs.model_name]
+
+    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
+
+    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    pbar = startProgBar(nb_test_samples, "evaluation...")
+    results = []
+
+    for inf_nb in range(nb_test_samples):
+        pbar.update(inf_nb)
+
+        batch_size = 16
+        sample_resolution = 128
+
+        labels = torch.tensor(
+            list(range(batch_size)), dtype=torch.int32, device=experiment.device
+        )
+
+        cfg_weighted_model = CFGScaledModel(model=model)
+
+        x_0 = torch.randn(
+            [batch_size, 3, sample_resolution, sample_resolution],
+            dtype=torch.float32,
+            device=experiment.device,
+        )
+        solver = ODESolver(velocity_model=cfg_weighted_model)
+
+        synthetic_samples = solver.sample(
+            time_grid=torch.tensor([0.0, 1.0], device=experiment.device),
+            x_init=x_0,
+            method="midpoint",
+            atol=None,
+            rtol=None,
+            step_size=0.01,
+            label=labels,
+            cfg_scale=0.2,
+        )
+
+        synthetic_samples = t_img_exp(synthetic_samples)
+
+        save_wandb(experiment=experiment,images=[{"name": "eval_samples", "data": synthetic_samples}])
 
 def fdq_train(experiment) -> None:
     iprint("Meta FlowMatching Training")
@@ -48,6 +99,11 @@ def fdq_train(experiment) -> None:
         experiment.current_epoch = epoch
         iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
         imgs_to_log = []
+
+        if experiment.is_distributed():
+            # necessary to make shuffling work properly
+            data.train_sampler.set_epoch(epoch)
+            data.val_sampler.set_epoch(epoch)
 
         model.train(True)
         train_loss_sum = 0.0

@@ -64,6 +64,12 @@ def fdq_train(experiment) -> None:
         train_recon_loss_sum = 0.0
         pbar = startProgBar(data.n_train_batches, "training...")
 
+
+        if experiment.is_distributed():
+            # necessary to make shuffling work properly
+            data.train_sampler.set_epoch(epoch)
+            data.val_sampler.set_epoch(epoch)
+
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             images_gt = batch[0].to(experiment.device)

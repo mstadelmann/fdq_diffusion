@@ -66,6 +66,12 @@ def fdq_train(experiment) -> None:
         iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
         imgs_to_log = []
 
+
+        if experiment.is_distributed():
+            # necessary to make shuffling work properly
+            data.train_sampler.set_epoch(epoch)
+            data.val_sampler.set_epoch(epoch)
+
         unet_model.train()
         train_loss_sum = 0.0
         pbar = startProgBar(data.n_train_batches, "training...")

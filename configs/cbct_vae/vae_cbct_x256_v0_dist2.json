@@ -1,0 +1,23 @@
+{
+    "globals": {
+        "project": "CBCT_VAE",
+        "author": "Marc",
+        "parent": "vae_cbct_x256_v0.json"
+    },
+    "data": {
+        "ctrate": {
+            "args": {
+                "num_workers": 0
+            }
+        }
+    },
+    "slurm_cluster": {
+        "world_size": 2,
+        "cpus_per_task": 16,
+        "cpus_per_task_test": 8,
+        "gres": "gpu:h200sxm:2",
+        "gres_test": "gpu:h200sxm:1",
+        "mem": "180G",
+        "mem_test": "120G"
+    }
+}

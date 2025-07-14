@@ -51,24 +51,10 @@
             "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
                 "train_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_0_v03.hdf"
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_512/v01/final_hdfs/nproj_491/ct_rate_train_batch_0_v01.hdf"
                 ],
                 "test_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_0_v03.hdf"
-                ],
-                "_train_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_0_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_1_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_2_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_3_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_4_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_train_batch_5_v03.hdf"
-                ],
-                "_test_files_path": [
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_0_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_1_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_2_v03.hdf",
-                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_256/v03/final_hdfs/nproj_491/ct_rate_test_batch_3_v03.hdf"
+                    "/cluster/projects/ac3t/data/ac3t_ct_rate/size_512/v01/final_hdfs/nproj_491/ct_rate_test_batch_0_v01.hdf"
                 ],
                 "hdf_ds_key_request": [
                     {

@@ -1,0 +1,16 @@
+{
+    "globals": {
+        "project": "Celeb_FM_Generation",
+        "author": "Marc",
+        "parent": "fm_meta_cele_x128_v0.json"
+    },
+    "slurm_cluster": {
+        "world_size": 3,
+        "cpus_per_task": 24,
+        "cpus_per_task_test": 8,
+        "gres": "gpu:h200sxm:3",
+        "gres_test": "gpu:1",
+        "mem": "180G",
+        "mem_test": "100G"
+    }
+}

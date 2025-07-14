@@ -771,14 +771,33 @@ def create_datasets(experiment, args=None):
     elif is_train:
         wprint("WARNING: no validation set defined!")
 
+    train_sampler = torch.utils.data.DistributedSampler(
+        train_sub,
+        num_replicas=experiment.world_size,
+        rank=experiment.rank,
+        shuffle=args.shuffle_train,
+    )
+    val_sampler = torch.utils.data.DistributedSampler(
+        val_sub,
+        num_replicas=experiment.world_size,
+        rank=experiment.rank,
+        shuffle=args.shuffle_val,
+    )
+    test_sampler = torch.utils.data.DistributedSampler(
+        test_sub,
+        num_replicas=experiment.world_size,
+        rank=experiment.rank,
+        shuffle=args.shuffle_test,
+    )
+
     if len(train_sub) > 0:
         train_data_loader = torch.utils.data.DataLoader(
             train_sub,
             batch_size=args.train_batch_size,
-            shuffle=args.shuffle_train,
             pin_memory=args.pin_memory,
             num_workers=args.num_workers,
             drop_last=args.drop_last,
+            sampler=train_sampler,
         )
     else:
         train_data_loader = None
@@ -787,10 +806,10 @@ def create_datasets(experiment, args=None):
         val_data_loader = torch.utils.data.DataLoader(
             val_sub,
             batch_size=args.val_batch_size,
-            shuffle=args.shuffle_val,
             pin_memory=args.pin_memory,
             num_workers=args.num_workers,
             drop_last=args.drop_last,
+            sampler=val_sampler,
         )
     else:
         val_data_loader = None
@@ -799,10 +818,10 @@ def create_datasets(experiment, args=None):
         test_data_loader = torch.utils.data.DataLoader(
             test_sub,
             batch_size=args.test_batch_size,
-            shuffle=args.shuffle_test,
             pin_memory=args.pin_memory,
             num_workers=args.num_workers,
             drop_last=args.drop_last,
+            sampler=test_sampler,
         )
     else:
         test_data_loader = None
@@ -811,6 +830,9 @@ def create_datasets(experiment, args=None):
         "train_data_loader": train_data_loader,
         "val_data_loader": val_data_loader,
         "test_data_loader": test_data_loader,
+        "train_sampler": train_sampler,
+        "val_sampler": val_sampler,
+        "test_sampler": test_sampler,
         "n_train_samples": len(train_sub),
         "n_val_samples": len(val_sub) if val_data_loader is not None else 0,
         "n_test_samples": len(test_sub),
