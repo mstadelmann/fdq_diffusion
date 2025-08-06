@@ -157,7 +157,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.48",
+        "fdq_version": "0.0.58",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",
@@ -174,7 +174,7 @@
         "mem_test": "100G",
         "partition": "gpu_top",
         "account": "cai_ivs",
-        "run_train": true,
+        "run_train": false,
         "run_test": true,
         "auto_resubmit": true,
         "resume_chpt_path": null,

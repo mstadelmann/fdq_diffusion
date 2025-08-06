@@ -1,0 +1,14 @@
+{
+    "globals": {
+        "project": "Celeb_VAE",
+        "author": "Marc",
+        "parent": "vae_celeb_x128.json"
+    },
+    "data": {
+        "celeb_HDF": {
+            "args": {
+                "num_workers": 0
+            }
+        }
+    }
+}

@@ -39,10 +39,15 @@ submit_job() {
 # submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 38860
 # submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
 
+
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_vae/vae_celeb_x128.json
+submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
+submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
+submit_job celeb_vae/vae_celeb_x128_dist2_nbw4.json 
+submit_job celeb_vae/vae_celeb_x128_nbw0.json 
+submit_job celeb_vae/vae_celeb_x128.json 
 # submit_job celeb_vae/vae_celeb_x256.json 38436 # ok
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
@@ -112,6 +117,7 @@ submit_job() {
 # submit_job cbct_vae/vae_cbct_x256_v0.json # OK (42096)
 # submit_job cbct_vae/vae_cbct_x256_v0_dist2.json 42564
 # submit_job cbct_vae/vae_cbct_x256_v0_dist3.json 42565
+
 # submit_job cbct_vae/vae_cbct_x256_v1.json
 # submit_job cbct_vae/vae_cbct_x256_v2.json
 # submit_job cbct_vae/vae_cbct_x256_v3.json # 38756
@@ -126,7 +132,7 @@ submit_job() {
 # submit_job cbct_vae/vae_cbct_maisi_x256_v2.json # 42101 -> best
 
 # submit_job cbct_vae/vae_cbct_maisi_x512.json # 42102
-submit_job cbct_vae/vae_cbct_maisi_x512_v2.json # 42569
+# submit_job cbct_vae/vae_cbct_maisi_x512_v2.json # 42569
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
