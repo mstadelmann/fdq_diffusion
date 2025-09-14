@@ -7,7 +7,6 @@ from image_functions import createSubplots
 
 @torch.no_grad()
 def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
-
     targs = experiment.exp_def.train.args
     model = experiment.models[targs.model_name]
     model.eval()
@@ -60,15 +59,9 @@ def fdq_train(experiment) -> None:
     is_grayscale = False
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
-        experiment.current_epoch = epoch
-        iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
+        experiment.on_epoch_start(epoch=epoch)
+
         imgs_to_log = []
-
-
-        if experiment.is_distributed():
-            # necessary to make shuffling work properly
-            data.train_sampler.set_epoch(epoch)
-            data.val_sampler.set_epoch(epoch)
 
         model.train()
         train_loss_sum = 0.0
@@ -174,7 +167,8 @@ def fdq_train(experiment) -> None:
                 ]
             )
 
-            experiment.finalize_epoch(log_images_wandb=imgs_to_log)
+            experiment.on_epoch_end(log_images_wandb=imgs_to_log)
+
             if experiment.check_early_stop():
                 break
 
@@ -227,7 +221,6 @@ def fdq_test(experiment):
         pbar.update(inf_nb)
 
         with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-
             images = get_sample_from_noise(
                 experiment=experiment,
                 diffuser=chuchi_diffuser,

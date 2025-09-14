@@ -47,7 +47,7 @@ def fdq_train(experiment) -> None:
     path = CondOTProbPath()
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
-        experiment.current_epoch = epoch
+        experiment.on_epoch_start(epoch=epoch)
         iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
         imgs_to_log = []
 
@@ -144,6 +144,6 @@ def fdq_train(experiment) -> None:
 
         synthetic_samples = t_img_exp(synthetic_samples)
 
-        experiment.finalize_epoch(
+        experiment.on_epoch_end(
             log_images_wandb=[{"name": "samples", "data": synthetic_samples}]
         )

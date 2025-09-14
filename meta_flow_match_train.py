@@ -73,7 +73,11 @@ def fdq_test(experiment):
 
         synthetic_samples = t_img_exp(synthetic_samples)
 
-        save_wandb(experiment=experiment,images=[{"name": "eval_samples", "data": synthetic_samples}])
+        save_wandb(
+            experiment=experiment,
+            images=[{"name": "eval_samples", "data": synthetic_samples}],
+        )
+
 
 def fdq_train(experiment) -> None:
     iprint("Meta FlowMatching Training")
@@ -96,14 +100,7 @@ def fdq_train(experiment) -> None:
     path = CondOTProbPath()
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
-        experiment.current_epoch = epoch
-        iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
-        imgs_to_log = []
-
-        if experiment.is_distributed():
-            # necessary to make shuffling work properly
-            data.train_sampler.set_epoch(epoch)
-            data.val_sampler.set_epoch(epoch)
+        experiment.on_epoch_start(epoch=epoch)
 
         model.train(True)
         train_loss_sum = 0.0
@@ -198,6 +195,6 @@ def fdq_train(experiment) -> None:
 
         synthetic_samples = t_img_exp(synthetic_samples)
 
-        experiment.finalize_epoch(
+        experiment.on_epoch_end(
             log_images_wandb=[{"name": "samples", "data": synthetic_samples}]
         )

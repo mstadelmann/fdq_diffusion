@@ -55,20 +55,13 @@ def fdq_train(experiment) -> None:
     # )
 
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
-        experiment.current_epoch = epoch
-        iprint(f"\nEpoch: {epoch + 1} / {experiment.nb_epochs}")
+        experiment.on_epoch_start(epoch=epoch)
 
         model.train()
         train_loss_sum = 0.0
         train_kl_loss_sum = 0.0
         train_recon_loss_sum = 0.0
         pbar = startProgBar(data.n_train_batches, "training...")
-
-
-        if experiment.is_distributed():
-            # necessary to make shuffling work properly
-            data.train_sampler.set_epoch(epoch)
-            data.val_sampler.set_epoch(epoch)
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
@@ -213,7 +206,7 @@ def fdq_train(experiment) -> None:
                 # {"name": "val_sample", "data": z_sample[:nb_imgs, ...]},
             ]
 
-        experiment.finalize_epoch(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
+        experiment.on_epoch_end(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
 

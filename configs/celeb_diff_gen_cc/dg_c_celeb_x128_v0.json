@@ -79,7 +79,7 @@
                 "in_channels": 3,
                 "out_channels": 3,
                 "n_channels": 64,
-                "num_layers_per_block": 1,
+                "num_blocks_per_level": 1,
                 "down_block_types": [
                     "DownBlock",
                     "DownBlock",
@@ -122,12 +122,12 @@
     "train": {
         "path": "~/dev/fdq_diffusion/diffusion_chuchichaestli.py",
         "args": {
-            "epochs": 200,
+            "epochs": 250,
             "use_GPU": true,
             "use_AMP": true,
             "accumulate_grad_batches": 1,
-            "early_stop_val_loss": 40,
-            "early_stop_train_loss": 20,
+            "early_stop_val_loss": 50,
+            "early_stop_train_loss": 50,
             "early_stop_nan": 5,
             "diffusion_scheduler": "linear",
             "diffusion_nb_steps": 800,
@@ -168,9 +168,11 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.60",
+        "fdq_test_repo": false,
+        "fdq_version": "0.0.69",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
+        "cuda_env_module": "cuda/12.8.0",
         "scratch_results_path": "/scratch/fdq_results/",
         "scratch_data_path": "/scratch/fdq_data/",
         "log_path": "~/dev/fdq_diffusion/slurm_log",
@@ -187,7 +189,8 @@
         "auto_resubmit": true,
         "resume_chpt_path": null,
         "additional_pip_packages": [
-            "h5py"
+            "h5py",
+            "chuchichaestli==0.2.14"
         ]
     }
 }
