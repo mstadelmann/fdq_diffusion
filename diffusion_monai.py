@@ -92,12 +92,17 @@ def fdq_train(experiment) -> None:
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
-            images_gt = batch[0].to(experiment.device)
 
-            if len(batch) == 2:
-                condition = batch[1].to(experiment.device)
-                monai_mode = "concat"
+            if isinstance(batch, (list, tuple)):
+                images_gt = batch[0].to(experiment.device)
+                if len(batch) == 2:
+                    condition = batch[1].to(experiment.device)
+                    monai_mode = "concat"
+                else:
+                    condition = None
+                    monai_mode = "crossattn"  # default MONAI mode
             else:
+                images_gt = batch.to(experiment.device)
                 condition = None
                 monai_mode = "crossattn"  # default MONAI mode
 
@@ -187,10 +192,14 @@ def fdq_train(experiment) -> None:
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
 
-                images_gt = batch[0].to(experiment.device)
-                if len(batch) == 2:
-                    condition = batch[1].to(experiment.device)
+                if isinstance(batch, (list, tuple)):
+                    images_gt = batch[0].to(experiment.device)
+                    if len(batch) == 2:
+                        condition = batch[1].to(experiment.device)
+                    else:
+                        condition = None
                 else:
+                    images_gt = batch.to(experiment.device)
                     condition = None
 
                 noise = torch.randn_like(images_gt).to(experiment.device)
