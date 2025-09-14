@@ -41,7 +41,7 @@
     },
     "data": {
         "celeb_HDF": {
-            "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
+            "processor": "~/dev/fdq_diffusion/hdf_preparator_celeb.py",
             "args": {
                 "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
@@ -68,6 +68,16 @@
                         "*": "resize_norm"
                     }
                 ]
+            },
+            "caching": {
+                "enabled": true,
+                "cache_dir": "/scratch/fdq_cache/",
+                "shuffle_train": true,
+                "shuffle_val": false,
+                "shuffle_test": false,
+                "pin_memory": false,
+                "num_workers": 4,
+                "compress_cache": true
             }
         }
     },

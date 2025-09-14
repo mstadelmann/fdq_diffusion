@@ -5,7 +5,6 @@
         "parent": "dg_m_cele_x128_v0.json"
     },
     "train": {
-        "path": "~/dev/fdq_diffusion/diffusion_monai.py",
         "args": {
             "diffusion_scheduler": "scaled_linear_beta"
         }

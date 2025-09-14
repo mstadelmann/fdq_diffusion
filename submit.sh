@@ -14,39 +14,43 @@ submit_job() {
 # MONAI
 # -----
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json ----> STILL RUNNING - very slow?
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # ok
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # mostly good
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # okayish
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # black
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json # bad
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json # bright
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json # funny
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json # mostly good
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # 8 min/EP
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # ----> STILL RUNNING - very slow?
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # ok
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # mostly good
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # okayish
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # black
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json # bad
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json # bright
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json # funny
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json # mostly good
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
 
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop, ok but not great
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop 38382
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running 38383
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop, ok but not great
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop 38382
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running 38383
 
 
 # CHUCHICHAESTLI
 # --------------
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached1.json 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached2.json 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached3.json 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached4.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 7 min -> flipped this to new loader with caching
 
+# RM these:
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached1.json # 40 sec -> caching settings seems to have no major impact on speed
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached2.json # 40 sec
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached3.json # 40 sec
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached4.json # 40 sec
+
+# does this work with new loader?
 submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json # TypeError: h5py objects cannot be pickled
 
+
 submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
-submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0_cached1.json
+
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
@@ -57,7 +61,7 @@ submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0_cached1.json
 # submit_job celeb_vae/vae_celeb_x128_nbw0.json 
 submit_job celeb_vae/vae_celeb_x128.json 
 
-# submit_job celeb_vae/vae_celeb_x256.json 38436 # ok
+submit_job celeb_vae/vae_celeb_x256.json # 38436 # ok
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 

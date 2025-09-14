@@ -65,7 +65,11 @@ def fdq_train(experiment) -> None:
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
-            images_gt = batch[0].to(experiment.device)
+            if isinstance(batch, (list, tuple)):
+                # Legacy loader compatibility: TODO cleanup!
+                images_gt = batch[0].to(experiment.device)
+            else:
+                images_gt = batch.to(experiment.device)
 
             is_grayscale = images_gt.shape[1] == 1
 
@@ -108,7 +112,11 @@ def fdq_train(experiment) -> None:
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
 
-                images_gt = batch[0].to(experiment.device)
+                if isinstance(batch, (list, tuple)):
+                    # Legacy loader compatibility: TODO cleanup!
+                    images_gt = batch[0].to(experiment.device)
+                else:
+                    images_gt = batch.to(experiment.device)
 
                 reconstruction, z_mu, z_sigma = model(images_gt)
                 # z_mu, z_sigma = model.encode(images_gt)
