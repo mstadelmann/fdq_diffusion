@@ -1,0 +1,12 @@
+{
+    "globals": {
+        "project": "Celeb_Generation",
+        "author": "Marc",
+        "parent": "dg_c_celeb_x128_v0.json"
+    },
+    "slurm_cluster": {
+        "world_size": 2,
+        "cpus_per_task": 16,
+        "gres": "gpu:a100sxm:2"
+    }
+}

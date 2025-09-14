@@ -3,6 +3,7 @@
 submit_job() {
     root_path="/cluster/home/stmd/dev/fdq_diffusion/configs/"
     python3 /cluster/home/stmd/dev/fonduecaquelon/fdq_submit.py $root_path$1
+    sleep 5
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -13,7 +14,7 @@ submit_job() {
 # MONAI
 # -----
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # ok, but not great, early stop
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # 
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json ----> STILL RUNNING - very slow?
@@ -36,18 +37,26 @@ submit_job() {
 # CHUCHICHAESTLI
 # --------------
 
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 38860
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json # 38861
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached1.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached2.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached3.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached4.json 
 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
+
+submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
+submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0_cached1.json
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
-submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
-submit_job celeb_vae/vae_celeb_x128_dist2_nbw4.json 
-submit_job celeb_vae/vae_celeb_x128_nbw0.json 
+# submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
+# submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
+# submit_job celeb_vae/vae_celeb_x128_dist2_nbw4.json 
+# submit_job celeb_vae/vae_celeb_x128_nbw0.json 
 submit_job celeb_vae/vae_celeb_x128.json 
+
 # submit_job celeb_vae/vae_celeb_x256.json 38436 # ok
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
