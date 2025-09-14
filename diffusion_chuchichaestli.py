@@ -69,7 +69,11 @@ def fdq_train(experiment) -> None:
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
-            images_gt = batch[0].to(experiment.device)
+            if batch.dim() > 4:
+                # Legacy loader compatibility: TODO cleanup!
+                images_gt = batch[0].to(experiment.device)
+            else:
+                images_gt = batch.to(experiment.device)
 
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
@@ -128,7 +132,12 @@ def fdq_train(experiment) -> None:
         ):
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
-                images_gt = batch[0].to(experiment.device)
+                if batch.dim() > 4:
+                    # Legacy loader compatibility: TODO cleanup!
+                    images_gt = batch[0].to(experiment.device)
+                else:
+                    images_gt = batch.to(experiment.device)
+
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
                 noise_pred = model(noisy_imgs, t)
                 val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()

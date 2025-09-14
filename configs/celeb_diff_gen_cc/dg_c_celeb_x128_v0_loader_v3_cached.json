@@ -2,7 +2,7 @@
     "globals": {
         "project": "Celeb_Generation",
         "author": "Marc",
-        "parent": "dg_c_celeb_x128_v0.json"
+        "parent": "dg_c_celeb_x128_v0_loader_v3.json"
     },
     "data": {
         "celeb_HDF": {
@@ -14,7 +14,7 @@
                 "shuffle_test": false,
                 "pin_memory": false,
                 "num_workers": 0,
-                "compress_cache": false
+                "compress_cache": true
             }
         }
     }

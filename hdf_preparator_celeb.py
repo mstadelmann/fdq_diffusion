@@ -20,22 +20,7 @@ class DatasetType(Enum):
 
 
 class H5Dataset(data.Dataset):
-    """
-    HDF5 dataset loader.
-
-    Data itself is stored in self.hdf_data_tensor.
-    self.hdf_data_tensor is a list of lists of lists of tensors.
-    where the outermost list is per file, the second list is per group, and the innermost list is per dataset.
-    The tensors are the actual data samples in the files (e.g. [C,H,W] or [D,C,H,W] format).
-    """
-
     def __init__(self, file_paths, experiment, transform=None):
-        """
-        file_paths (list): List of file paths.
-        data_transform : already initialized data transformer.
-        data_is_3d (bool, optional): Defaults to False.
-        """
-
         super().__init__()
 
         self.dataset_file_paths = file_paths
