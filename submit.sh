@@ -43,7 +43,7 @@ submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached2.json
 submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached3.json 
 submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached4.json 
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json # TypeError: h5py objects cannot be pickled
 
 submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
 submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0_cached1.json

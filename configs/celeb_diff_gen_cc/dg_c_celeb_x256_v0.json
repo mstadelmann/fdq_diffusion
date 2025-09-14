@@ -35,6 +35,7 @@
         "wandb_project": "diff_gen_celeb_x256"
     },
     "slurm_cluster": {
-        "partition": "gpu_top"
+        "partition": "gpu_top",
+        "gres": "gpu:h200sxm:1"
     }
 }
