@@ -111,10 +111,6 @@ class H5Dataset(data.Dataset):
         # groups_are_sample_pairs = True
         # means that one "data sample" corresponds
         # to one dataset in each group
-        self.datasets_are_sample_pairs = None
-        # datasets_are_sample_pairs = True means that one "data sample" corresponds
-        # to one index in each HDF dataset
-        # e.g. one dataset for the image, one dataset for the mask
 
         self.hdf_data_tensor = []  # -> [[[]]]  -> list per file, per group, per dataset
 
@@ -140,20 +136,6 @@ class H5Dataset(data.Dataset):
                 isinstance(self.hdf_ds_key_request, list)
                 and len(self.hdf_ds_key_request) > 0
             )
-
-            datasets_are_sample_pairs = has_key_requests and all(
-                elt in root_keys for elt in self.hdf_ds_key_request
-            )
-            # datasets_are_sample_pairs: one file has two datasets. One for images, one for labels.
-            # image.shape = [10,1,30,30] and label.shape = [10,1,1,1]
-            # see test scenario 1
-            # pairs can also triplets, quadruplets or more, e.g. image, label, mask
-            if self.datasets_are_sample_pairs is None:
-                self.datasets_are_sample_pairs = datasets_are_sample_pairs
-            elif self.datasets_are_sample_pairs != datasets_are_sample_pairs:
-                raise ValueError(
-                    "Datasets are either sample pairs or not! This cannot change!"
-                )
 
             has_groups = isinstance(h5_file[root_keys[0]], h5py._hl.group.Group)
 
@@ -187,23 +169,10 @@ class H5Dataset(data.Dataset):
                     data_is_3d=data_is_3d,
                 )
 
-            elif self.datasets_are_sample_pairs:
-                if data_is_3d:
-                    raise NotImplementedError(
-                        "Update HDF loader to handle this input data format! E1"
-                    )
-                nb_samples_per_dataset_per_group = [
-                    [
-                        self._process_dataset_samples(
-                            h5_file=h5_file, fp=fp, print_pbar=not pbar_over_files
-                        )
-                    ]
-                ]
-
             else:
                 if data_is_3d:
                     raise NotImplementedError(
-                        "Update HDF loader to handle this input data format! E2"
+                        "Update HDF loader to handle this input data format!"
                     )
                 nb_samples_per_dataset_per_group = self._process_samples(
                     group_names, root_keys, h5_file, fp, print_pbar=not pbar_over_files
@@ -272,30 +241,8 @@ class H5Dataset(data.Dataset):
 
         return [nb_samples_per_dataset_per_group[0]]
 
-    def _process_dataset_samples(self, h5_file, fp, print_pbar=False):
-        pbar = startProgBar(
-            len(self.hdf_ds_key_request),
-            f"Processing {os.path.basename(fp)} (tot. nb. ds: {len(self.hdf_ds_key_request)})",
-            is_active=print_pbar,
-        )
-
-        tensor_per_dataset = []
-        # load all required hdf files
-        for i, req_ds in enumerate(self.hdf_ds_key_request):
-            pbar.update(i)
-            tensor_per_dataset.append(to_BCHW(h5_file[req_ds]))
-
-        tensor_per_group = [tensor_per_dataset]
-        self.hdf_data_tensor.append(tensor_per_group)
-
-        if not len({t.shape[0] for t in tensor_per_dataset}) == 1:
-            raise ValueError(f"Number of samples per dataset in {fp} does not match!")
-
-        pbar.finish()
-        return tensor_per_group[0][0].shape[0]
-
     def _process_samples(self, group_names, root_keys, h5_file, fp, print_pbar=False):
-        nb_samples_per_dataset_per_group = []
+        nb_samples_per_dataset_per_group = []  # used in celeb
         tensor_per_group = []
         for hdf_group in group_names:
             nb_samples_per_dataset = []
@@ -517,23 +464,6 @@ class H5Dataset(data.Dataset):
 
         return tuple(all_data)
 
-    def _get_dataset_sample(self, index, file_idx):
-        raise NotImplementedError("This case is currently not supported! E2")
-        # all_data = []
-
-        # offset_file = int(torch.sum(self.nb_smpls_per_ds_per_grp_per_fn[:file_idx]))
-        # sample_idx = index - offset_file
-
-        # for i, req_ds in enumerate(self.hdf_ds_key_request):
-        #     ds = self.hdf_data_tensor[file_idx][0][i][sample_idx]
-        #     transform = self._get_transform(req_ds)
-        #     if transform is None:
-        #         all_data.append(ds)
-        #     else:
-        #         all_data.append(transform(ds))
-
-        # return tuple(all_data)
-
     def __getitem__(self, index):
         # Select file
         for file_idx in range(len(self.dataset_file_paths)):
@@ -544,11 +474,8 @@ class H5Dataset(data.Dataset):
             if index < nb_samples_current_file:
                 break
 
-        if self.groups_are_sample_pairs:  # celeb: false
+        if self.groups_are_sample_pairs:  # celeb: false | cbct: true
             sample = self._get_group_sample(index, file_idx)
-
-        elif self.datasets_are_sample_pairs:  # celeb: false
-            sample = self._get_dataset_sample(index, file_idx)
 
         else:  # celeb: true
             sample = self._get_sample(index, file_idx)
@@ -586,30 +513,15 @@ def create_datasets(experiment, args=None):
     - TODO: dont store full data in ram if subset is used.
     """
 
-    # def _cleanup_hdf_keys(requests):
-    #     if requests is None:
-    #         return None
-    #     if not isinstance(requests, list):
-    #         raise ValueError("hdf_ds_key_request must be [str,..] or [{str: str},..] !")
-    #     if isinstance(requests[0], dict):
-    #         return [k for d in args.hdf_ds_key_request for k in d.keys()]
-    #     else:
-    #         return args.hdf_ds_key_request
-
-    # hdf_ds_key_request = _cleanup_hdf_keys(args.hdf_ds_key_request)
-    # hdf_ds_key_request_test = _cleanup_hdf_keys(args.hdf_ds_key_request_test)
     hdf_ds_key_request = args.hdf_ds_key_request
     hdf_ds_key_request_test = args.hdf_ds_key_request_test
     if hdf_ds_key_request_test is None:
         hdf_ds_key_request_test = hdf_ds_key_request
 
     file_extension = args.get("file_extension", "hdf")
-
     data_files = {}
-
     data_basePath = args.base_path
 
-    # use dataBasePath (searches for all files in this folder)
     if args.base_path is not None:
         if (
             args.train_files_path is not None
@@ -620,7 +532,6 @@ def create_datasets(experiment, args=None):
                 "This combination of data path definitions is not allowed!!"
             )
 
-        # look for files in subdirectories
         for data_dir in DatasetType:
             if data_dir == DatasetType.All:
                 data_path = Path(data_basePath)
@@ -636,7 +547,6 @@ def create_datasets(experiment, args=None):
             iprint(f"File extension filter: {file_extension}")
             raise ValueError(f"No data files found in {args.base_path} !")
 
-        # no specific train set defined -> use all data for training
         if len(data_files[DatasetType.Train]) == 0:
             if (
                 len(data_files[DatasetType.Test]) != 0
@@ -647,7 +557,6 @@ def create_datasets(experiment, args=None):
                 )
             data_files[DatasetType.Train] = data_files[DatasetType.All]
 
-    # define files directly in form of a list of paths
     elif data_basePath is None:
         if args.train_files_path is not None:
             data_files[DatasetType.Train] = [Path(p) for p in args.train_files_path]
@@ -664,7 +573,6 @@ def create_datasets(experiment, args=None):
         else:
             data_files[DatasetType.Test] = []
 
-    # load train & val only in the case of training
     is_train = experiment.mode.op_mode.train
     if is_train:
         iprint("Preparing training dataset")
