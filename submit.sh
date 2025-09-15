@@ -14,54 +14,48 @@ submit_job() {
 # MONAI
 # -----
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # 8 min/EP
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # ok, not much difference to v0
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # some great, some look like ghosts
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # ----> STILL RUNNING - very slow?
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # ok
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # mostly good
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # okayish
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # black
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json # bad
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json # bright
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json # funny
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json # mostly good
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # baseline
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # resblock off
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # 3 att levels
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow! try on hopper!
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # more att head channels
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d1.json # [0,1] norm
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_d2.json # random flipping
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t1.json # 1000 steps
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t2.json # sigmoid beta
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t3.json # smaller LR
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json # -> early stop, ok but not great
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json # -> early stop 38382
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json # still running 38383
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json #
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json #
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json #
 
 
 # CHUCHICHAESTLI
 # --------------
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json # 7 min -> flipped this to new loader with caching
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json #
 
-# RM these:
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached1.json # 40 sec -> caching settings seems to have no major impact on speed
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached2.json # 40 sec
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached3.json # 40 sec
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_cached4.json # 40 sec
-
-# does this work with new loader?
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json # TypeError: h5py objects cannot be pickled
+# test DDP
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json # AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
 
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json
+submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
 
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
+submit_job celeb_vae/vae_celeb_x128.json 
 # submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
 # submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
 # submit_job celeb_vae/vae_celeb_x128_dist2_nbw4.json 
 # submit_job celeb_vae/vae_celeb_x128_nbw0.json 
-submit_job celeb_vae/vae_celeb_x128.json 
 
-submit_job celeb_vae/vae_celeb_x256.json # 38436 # ok
+submit_job celeb_vae/vae_celeb_x256.json #
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 
