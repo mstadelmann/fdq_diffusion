@@ -1,7 +1,8 @@
 {
     "globals": {
         "project": "Celeb_FM_Generation",
-        "author": "Marc"
+        "author": "Marc",
+        "parent": "../keys.json"
     },
     "transforms": {
         "resize_norm": [
@@ -146,7 +147,6 @@
         "use_wandb": true,
         "wandb_project": "fm_m_celeb_x128",
         "wandb_entity": "stmd",
-        "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "norm_to_rgb"
     },
     "test": {
@@ -157,7 +157,7 @@
         }
     },
     "slurm_cluster": {
-        "fdq_version": "0.0.70",
+        "fdq_version": "0.0.73",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "scratch_results_path": "/scratch/fdq_results/",

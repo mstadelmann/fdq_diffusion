@@ -1,0 +1,9 @@
+{
+    "globals": {
+        "project": "wandb Key",
+        "author": "Marc"
+    },
+    "store": {
+        "wandb_key": "..."
+    }
+}

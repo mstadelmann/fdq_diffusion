@@ -1,7 +1,8 @@
 {
     "globals": {
         "project": "Celeb_Generation",
-        "author": "Marc"
+        "author": "Marc",
+        "parent": "../keys.json"
     },
     "transforms": {
         "resize_norm": [
@@ -167,7 +168,6 @@
         "use_wandb": true,
         "wandb_project": "diff_gen_celeb_x128",
         "wandb_entity": "stmd",
-        "wandb_key": "126aea51c74a8e5533f79411f171a1a2860a2e3a",
         "img_exp_transform": "norm_to_rgb"
     },
     "test": {
@@ -179,7 +179,7 @@
     },
     "slurm_cluster": {
         "fdq_test_repo": false,
-        "fdq_version": "0.0.70",
+        "fdq_version": "0.0.73",
         "python_env_module": "python/3.12.4",
         "uv_env_module": "uv/0.6.12",
         "cuda_env_module": "cuda/12.8.0",

@@ -260,7 +260,12 @@ def fdq_test(experiment):
             break
 
         pbar.update(nb_tbatch)
-        images_gt = batch[0].to(experiment.device)
+        if isinstance(batch, (list, tuple)):
+            # Legacy loader compatibility: TODO cleanup!
+            images_gt = batch[0].to(experiment.device)
+        else:
+            images_gt = batch.to(experiment.device)
+
         reconstruction, z_mu, z_sigma = model(images_gt)
 
         results.append(reconstruction.cpu())
