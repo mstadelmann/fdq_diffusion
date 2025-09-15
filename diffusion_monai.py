@@ -342,7 +342,10 @@ def fdq_test(experiment):
     inferer = DiffusionInferer(scheduler)
 
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
-    test_sample = next(iter(test_loader))[0]
+    test_sample = next(iter(test_loader))
+    # legacy compatibility
+    if isinstance(test_sample, (list, tuple)):
+        test_sample = test_sample[0]
 
     pbar = startProgBar(nb_test_samples, "evaluation...")
 

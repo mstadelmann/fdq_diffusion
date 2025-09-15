@@ -210,7 +210,11 @@ def fdq_test(experiment):
     ).tolist()
 
     nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
-    test_sample = next(iter(data.test_data_loader))[0]
+    test_sample = next(iter(data.test_data_loader))
+    # legacy compatibility
+    if isinstance(test_sample, (list, tuple)):
+        test_sample = test_sample[0]
+
     img_shape = test_sample.shape[1:]
     is_grayscale = img_shape[1] == 1
 

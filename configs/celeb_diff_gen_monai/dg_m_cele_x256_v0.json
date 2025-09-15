@@ -38,6 +38,6 @@
         "gres": "gpu:1",
         "partition": "gpu_top",
         "job_time": 1400,
-        "run_train": false
+        "run_train": true
     }
 }
