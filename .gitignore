@@ -1,3 +1,4 @@
 __pycache__
 slurm_log
 configs/celeb_diff_gen_diffusers
+**/*keys_orig.json
