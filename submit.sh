@@ -15,9 +15,9 @@ submit_job() {
 # -----
 
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # baseline
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # resblock off
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # res-block off
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # 3 att levels
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow! try on hopper!
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow; try on hopper!
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # more att head channels
@@ -39,9 +39,8 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json #
 
 submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json #
 
-# test DDP
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json # AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
-
+# DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
+# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
 
 submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
 
