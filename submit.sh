@@ -49,8 +49,12 @@ submit_job() {
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
 submit_job celeb_vae/vae_celeb_x128.yaml
+submit_job celeb_vae/vae_celeb_x128_dist2.yaml
+submit_job celeb_vae/vae_celeb_x128_dist4.yaml
 submit_job celeb_vae/vae_celeb_x128_caching_nbw0.yaml
 submit_job celeb_vae/vae_celeb_x128_caching_nbw4.yaml
+submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
+submit_job celeb_vae/vae_celeb_x128_caching_dist4.yaml
 
 # submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
 # submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
