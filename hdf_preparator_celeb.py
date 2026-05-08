@@ -77,13 +77,13 @@ def create_datasets(experiment, args=None):
 
     file_extension = args.get("file_extension", "hdf")
     data_files = {}
-    data_basePath = args.base_path
+    data_basePath = args.get("base_path")
 
-    if args.base_path is not None:
+    if data_basePath is not None:
         if (
-            args.train_files_path is not None
-            or args.test_files_path is not None
-            or args.val_files_path is not None
+            args.get("train_files_path") is not None
+            or args.get("test_files_path") is not None
+            or args.get("val_files_path") is not None
         ):
             raise ValueError(
                 "This combination of data path definitions is not allowed!!"
@@ -115,17 +115,17 @@ def create_datasets(experiment, args=None):
             data_files[DatasetType.Train] = data_files[DatasetType.All]
 
     elif data_basePath is None:
-        if args.train_files_path is not None:
+        if args.get("train_files_path") is not None:
             data_files[DatasetType.Train] = [Path(p) for p in args.train_files_path]
         else:
             raise ValueError("No Train Data Files defined!")
 
-        if args.val_files_path is not None:
+        if args.get("val_files_path") is not None:
             data_files[DatasetType.Val] = [Path(p) for p in args.val_files_path]
         else:
             data_files[DatasetType.Val] = []
 
-        if args.test_files_path is not None:
+        if args.get("test_files_path") is not None:
             data_files[DatasetType.Test] = [Path(p) for p in args.test_files_path]
         else:
             data_files[DatasetType.Test] = []
