@@ -44,9 +44,9 @@ data:
       base_path: ~/data_ML/celeba_hq_256/celeb_train_and_test/
       file_extension: hdf
       val_from_train_ratio: 0.1
-      subset_train: 0.2
-      subset_val: 0.2
-      subset_test: 0.2
+      subset_train: 1.0
+      subset_val: 1.0
+      subset_test: 1.0
       pin_memory: true
       num_workers: 4
       train_batch_size: 32
@@ -104,7 +104,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/vae.py
   args:
-    epochs: 20
+    epochs: 50
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
@@ -141,7 +141,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: true
-  fdq_version: 0.1.7.dev1
+  fdq_version: 0.1.7.dev2
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0

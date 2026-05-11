@@ -11,7 +11,7 @@ from image_functions import createSubplots
 def fdq_train(experiment) -> None:
     iprint("MONAI Diffusion Training")
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
@@ -23,7 +23,7 @@ def fdq_train(experiment) -> None:
     else:
         norm_to_hu = None
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
@@ -64,7 +64,6 @@ def fdq_train(experiment) -> None:
     if scheduler_args is None:
         scheduler_args = {}
     else:
-        scheduler_args = scheduler_args.to_dict()
         for param in scheduler_args.keys():
             if param not in supported_scheduler_args:
                 raise ValueError(

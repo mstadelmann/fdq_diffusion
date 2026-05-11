@@ -8,13 +8,13 @@ submit_job() {
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
-# dg_m_cele_ = DiffuionGenerative_MONAI_Celebrties
+# dg_m_cele_ = DiffusionGenerative_MONAI_Celebrities
 #--------------------------------------------------------------------------------------------------
 
 # MONAI
 # -----
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v0.json # baseline
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # res-block off
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # 3 att levels
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow; try on hopper!
@@ -48,22 +48,17 @@ submit_job() {
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-submit_job celeb_vae/vae_celeb_x128.yaml
+# submit_job celeb_vae/vae_celeb_x128.yaml
 submit_job celeb_vae/vae_celeb_x128_dist2.yaml
-submit_job celeb_vae/vae_celeb_x128_dist4.yaml
 submit_job celeb_vae/vae_celeb_x128_caching_nbw0.yaml
-submit_job celeb_vae/vae_celeb_x128_caching_nbw4.yaml
-submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
-submit_job celeb_vae/vae_celeb_x128_caching_dist4.yaml
+# submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
 
-# submit_job celeb_vae/vae_celeb_x128_dist4_nbw0.json 
-# submit_job celeb_vae/vae_celeb_x128_dist2_nbw0.json 
-# submit_job celeb_vae/vae_celeb_x128_dist2_nbw4.json 
-# submit_job celeb_vae/vae_celeb_x128_nbw0.json 
+
+submit_job celeb_vae/vae_celeb_x256.yaml
 
 exit
 
-submit_job celeb_vae/vae_celeb_x256.json #
+
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
 
