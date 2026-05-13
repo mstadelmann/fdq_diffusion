@@ -1,0 +1,52 @@
+defaults:
+  - wandb_keys
+  - dg_m_cele_x128_00_base
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+models:
+  monaiUNET:
+    args:
+      attention_levels:
+      - true
+      - true
+      - true
+      - true
+      - true
+
+slurm_cluster:
+  fdq_test_repo: true
+  fdq_version: 0.1.7.dev2
+  python_env_module: python/3.12.4
+  uv_env_module: uv/0.6.12
+  cuda_env_module: cuda/12.8.0
+  scratch_results_path: /scratch/fdq_results/
+  scratch_data_path: /scratch/fdq_data/
+  log_path: ~/dev/fdq_diffusion/slurm_log
+  job_time: 1400
+  stop_grace_time: 15
+  ntasks: 1
+  cpus_per_task: 8
+  gres: gpu:a100pcie:1
+  mem: 120G
+  partition: gpu_top
+  account: cai_ivs
+  run_train: true
+  run_test: true
+  auto_resubmit: true
+  resume_chpt_path: null
+  additional_pip_packages:
+  - h5py
+  - monai==1.5.2

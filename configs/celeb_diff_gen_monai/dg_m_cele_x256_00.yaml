@@ -28,6 +28,9 @@ transforms:
       out_min: -1
       out_max: 1
 
+store:
+  wandb_project: diff_gen_celeb_x256
+
 
 slurm_cluster:
   fdq_test_repo: true

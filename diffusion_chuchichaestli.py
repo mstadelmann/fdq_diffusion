@@ -7,7 +7,7 @@ from image_functions import createSubplots
 
 @torch.no_grad()
 def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     model = experiment.models[targs.model_name]
     model.eval()
 
@@ -33,14 +33,14 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
@@ -186,18 +186,18 @@ def fdq_train(experiment) -> None:
 def fdq_test(experiment):
     # This test is only for generative diffusion!
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
-    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
+    if experiment.cfg.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(
             "Error: Test batch size must be 1 - please change the experiment file."
         )
@@ -209,7 +209,7 @@ def fdq_test(experiment):
         dtype=torch.int,
     ).tolist()
 
-    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     test_sample = next(iter(data.test_data_loader))
     # legacy compatibility
     if isinstance(test_sample, (list, tuple)):

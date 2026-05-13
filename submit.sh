@@ -15,8 +15,13 @@ submit_job() {
 # -----
 
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v1.json # res-block off
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v2.json # 3 att levels
+
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # all att levels
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_04.yaml # 4 layers only
+
+
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow; try on hopper!
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
@@ -29,15 +34,16 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v0.json #
+submit_job celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json #
 # submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json #
+
 
 
 # CHUCHICHAESTLI
 # --------------
 
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0.json #
+submit_job celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 
 # DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
 # submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
@@ -56,8 +62,8 @@ submit_job celeb_vae/vae_celeb_x128_caching_nbw0.yaml
 
 submit_job celeb_vae/vae_celeb_x256.yaml
 
-exit
 
+exit
 
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
