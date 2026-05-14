@@ -113,7 +113,7 @@
         }
     },
     "store": {
-        "results_path": "~/data/ML_data/results",
+        "results_path": "~/ML_data/results",
         "img_exp_nb": 8,
         "use_wandb": true,
         "wandb_project": "cbct_vae",
