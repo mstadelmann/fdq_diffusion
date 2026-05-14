@@ -15,14 +15,12 @@ submit_job() {
 # -----
 
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
-
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # all att levels
+submit_job celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # all att levels -> out of mem
 submit_job celeb_diff_gen_monai/dg_m_cele_x128_04.yaml # 4 layers only
 
 
-# submit_job celeb_diff_gen_monai/dg_m_cele_x128_v3.json # all att layers - very slow; try on hopper!
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v6.json # more att head channels
@@ -35,8 +33,7 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x128_04.yaml # 4 layers only
 
 
 submit_job celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v4.json #
-# submit_job celeb_diff_gen_monai/dg_m_cele_x256_v7.json #
+
 
 
 
@@ -54,10 +51,10 @@ submit_job celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_vae/vae_celeb_x128.yaml
+submit_job celeb_vae/vae_celeb_x128.yaml
 submit_job celeb_vae/vae_celeb_x128_dist2.yaml
 submit_job celeb_vae/vae_celeb_x128_caching_nbw0.yaml
-# submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
+submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
 
 
 submit_job celeb_vae/vae_celeb_x256.yaml
