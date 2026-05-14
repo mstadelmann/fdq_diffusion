@@ -1,5 +1,5 @@
 defaults:
-  - vae_celeb_x128
+  - vae_celeb_x128_00_base
   - _self_
 
 globals:

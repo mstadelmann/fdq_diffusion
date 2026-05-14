@@ -13,9 +13,9 @@
 # MONAI
 # -----
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 
 
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
@@ -29,7 +29,7 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 
 
 
@@ -47,13 +47,14 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128.yaml
-# fdq_submit configs/celeb_vae/vae_celeb_x128_dist2.yaml
-# fdq_submit configs/celeb_vae/vae_celeb_x128_caching_nbw0.yaml
-# fdq_submit configs/celeb_vae/vae_celeb_x128_caching_dist2.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
 
 
-fdq_submit configs/celeb_vae/vae_celeb_x256.yaml
+# fdq_submit configs/celeb_vae/vae_celeb_x256.yaml
 
 
 # fdq_submit celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
@@ -63,7 +64,8 @@ fdq_submit configs/celeb_vae/vae_celeb_x256.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
+# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
+# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml
 
 # fdq_submit celeb_latent_diff/lat_diff_celeb_x256.json
 
