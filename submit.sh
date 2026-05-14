@@ -1,10 +1,9 @@
 #!/bin/bash
 
-submit_job() {
-    root_path="/cluster/home/stmd/dev/fdq_diffusion/configs/"
-    python3 /cluster/home/stmd/dev/fonduecaquelon/fdq_submit.py $root_path$1
-    sleep 5
-}
+# Preparations:
+# 1) create/enable PY env
+# 2) pip install fdq[submit]
+
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
@@ -13,12 +12,10 @@ submit_job() {
 
 # MONAI
 # -----
-
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # all att levels -> out of mem
-submit_job celeb_diff_gen_monai/dg_m_cele_x128_04.yaml # 4 layers only
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 
 
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
@@ -32,7 +29,7 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x128_04.yaml # 4 layers only
 # submit_job celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-submit_job celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+submit_job configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 
 
 
@@ -40,27 +37,24 @@ submit_job celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 # CHUCHICHAESTLI
 # --------------
 
-submit_job celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+submit_job configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 
 # DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
-
-# submit_job celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
+# submit_job configs/celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
+# submit_job configs/celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
 
 
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-submit_job celeb_vae/vae_celeb_x128.yaml
-submit_job celeb_vae/vae_celeb_x128_dist2.yaml
-submit_job celeb_vae/vae_celeb_x128_caching_nbw0.yaml
-submit_job celeb_vae/vae_celeb_x128_caching_dist2.yaml
+submit_job configs/celeb_vae/vae_celeb_x128.yaml
+# submit_job configs/celeb_vae/vae_celeb_x128_dist2.yaml
+# submit_job configs/celeb_vae/vae_celeb_x128_caching_nbw0.yaml
+# submit_job configs/celeb_vae/vae_celeb_x128_caching_dist2.yaml
 
 
-submit_job celeb_vae/vae_celeb_x256.yaml
+submit_job configs/celeb_vae/vae_celeb_x256.yaml
 
-
-exit
 
 # submit_job celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
 # submit_job celeb_vae/vae_celeb_x256_less_kl.json
@@ -69,7 +63,8 @@ exit
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-# submit_job celeb_latent_diff/lat_diff_celeb_x128.json
+submit_job configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
+
 # submit_job celeb_latent_diff/lat_diff_celeb_x256.json
 
 # submit_job celeb_Ldiff_gen_monai/dgL_m_cele_x256_v0.json
