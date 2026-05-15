@@ -6,6 +6,24 @@
 
 
 #--------------------------------------------------------------------------------------------------
+# CELEB VAE
+#--------------------------------------------------------------------------------------------------
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
+
+
+# fdq_submit configs/celeb_vae/vae_celeb_x256.yaml
+
+
+# fdq_submit celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
+# fdq_submit celeb_vae/vae_celeb_x256_less_kl.json
+
+
+
+#--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 # dg_m_cele_ = DiffusionGenerative_MONAI_Celebrities
 #--------------------------------------------------------------------------------------------------
@@ -32,8 +50,6 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 
 
-
-
 # CHUCHICHAESTLI
 # --------------
 
@@ -44,28 +60,12 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
 
 
-#--------------------------------------------------------------------------------------------------
-# CELEB VAE
-#--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
-
-
-# fdq_submit configs/celeb_vae/vae_celeb_x256.yaml
-
-
-# fdq_submit celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
-# fdq_submit celeb_vae/vae_celeb_x256_less_kl.json
-
 
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
-# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml
 
 # fdq_submit celeb_latent_diff/lat_diff_celeb_x256.json
 

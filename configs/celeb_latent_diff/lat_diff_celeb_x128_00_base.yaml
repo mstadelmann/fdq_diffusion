@@ -64,7 +64,7 @@ data:
 models:
   monaivae:
     class_name: monai.networks.nets.AutoencoderKL
-    trained_model_path: /cluster/home/stmd/data/ML_data/results/Celeb_VAE/celeb_vae_x128/20250525_03_03_49__vigorous_elbakyan__34881/best_val_monaivae_e97.fdqm
+    trained_model_path: /cluster/home/stmd/data_ML/results/Celeb_VAE/vae_celeb_x128/20260514_13_29_19__jolly_chaplygin__18182/best_val_monaivae_e9.fdqm
     freeze: true
     args:
       spatial_dims: 2
@@ -149,7 +149,7 @@ losses:
     class_name: torch.nn.L1Loss
 
 store:
-  results_path: ~/ML_data/results
+  results_path: ~/data_ML/results
   img_exp_nb: 8
   save_last_model: true
   save_best_val_model: false
@@ -170,9 +170,10 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.9
+  fdq_version: 0.1.10
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
+  cuda_env_module: cuda/12.8.0
   scratch_results_path: /scratch/fdq_results/
   scratch_data_path: /scratch/fdq_data/
   log_path: ~/dev/fdq_diffusion/slurm_log
@@ -188,3 +189,5 @@ slurm_cluster:
   resume_chpt_path: null
   additional_pip_packages:
   - h5py
+  - chuchichaestli==0.2.17
+  - monai==1.5.2

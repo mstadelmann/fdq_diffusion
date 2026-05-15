@@ -44,7 +44,7 @@
         "celeb_HDF": {
             "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
-                "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
+                "base_path": "~/data_ML/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
                 "val_from_train_ratio": 0.1,
                 "subset_train": 1.0,
@@ -75,7 +75,7 @@
     "models": {
         "monaivae": {
             "class_name": "monai.networks.nets.AutoencoderKL",
-            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/Celeb_VAE/vae_celeb_x256/20250528_21_47_29__agitated_euler__35578/best_val_monaivae_e149.fdqm",
+            "trained_model_path": "/cluster/home/stmd/data/data_ML/results/Celeb_VAE/vae_celeb_x256/20250528_21_47_29__agitated_euler__35578/best_val_monaivae_e149.fdqm",
             "freeze": true,
             "args": {
                 "spatial_dims": 2,
@@ -174,7 +174,7 @@
         }
     },
     "store": {
-        "results_path": "~/ML_data/results",
+        "results_path": "~/data_ML/results",
         "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": false,

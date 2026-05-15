@@ -202,7 +202,7 @@
         }
     },
     "store": {
-        "results_path": "~/ML_data/results",
+        "results_path": "~/data_ML/results",
         "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": true,

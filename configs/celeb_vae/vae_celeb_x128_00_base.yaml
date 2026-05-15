@@ -120,7 +120,7 @@ losses:
     class_name: torch.nn.L1Loss
 
 store:
-  results_path: ~/ML_data/results
+  results_path: ~/data_ML/results
   img_exp_nb: 8
   save_last_model: true
   save_best_val_model: true
@@ -141,7 +141,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.9
+  fdq_version: 0.1.10
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0

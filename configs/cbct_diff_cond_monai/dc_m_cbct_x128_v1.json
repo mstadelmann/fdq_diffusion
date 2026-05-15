@@ -229,7 +229,7 @@
         }
     },
     "store": {
-        "results_path": "~/ML_data/results",
+        "results_path": "~/data_ML/results",
         "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": true,
@@ -266,7 +266,7 @@
         "run_train": true,
         "run_test": true,
         "auto_resubmit": true,
-        "resume_chpt_path": "/cluster/home/stmd/data/ML_data/results/CBCT_Diff_Cond_Monai/dc_m_cbct_x128_v1/20250609_01_11_49__zealous_mayer__37635/checkpoint_e120.fdqcpt",
+        "resume_chpt_path": "/cluster/home/stmd/data/data_ML/results/CBCT_Diff_Cond_Monai/dc_m_cbct_x128_v1/20250609_01_11_49__zealous_mayer__37635/checkpoint_e120.fdqcpt",
         "additional_pip_packages": [
             "h5py"
         ]
