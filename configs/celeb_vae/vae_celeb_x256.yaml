@@ -30,7 +30,6 @@ transforms:
 store:
   wandb_project: celeb_vae_x256
 
-
 slurm_cluster:
   fdq_test_repo: false
   fdq_version: 0.1.11
@@ -42,15 +41,15 @@ slurm_cluster:
   log_path: ~/dev/fdq_diffusion/slurm_log
   job_time: 3000
   stop_grace_time: 15
-  cpus_per_task: 8
-  gres: gpu:a100sxm:1
+  cpus_per_task: 16
+  gres: gpu:a100sxm:2
   gres_test: gpu:a100sxm:1
   mem: 120G
   mem_test: 120G
   partition: gpu
   account: cai_ivs
   auto_resubmit: true
-  world_size: 1
+  world_size: 2
   additional_pip_packages:
   - h5py
   - monai==1.5.2
