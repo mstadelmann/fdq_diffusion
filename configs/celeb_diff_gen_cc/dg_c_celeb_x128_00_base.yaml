@@ -137,7 +137,7 @@ store:
   results_path: ~/data_ML/results
   img_exp_nb: 4
   save_last_model: true
-  save_best_val_model: false
+  save_best_val_model: true
   save_best_train_model: true
   checkpoint_frequency: 2
   use_tensorboard: false
@@ -154,7 +154,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.10
+  fdq_version: 0.1.11
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
