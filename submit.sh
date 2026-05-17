@@ -62,7 +62,9 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
 # CHUCHICHAESTLI
 # --------------
 
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
 # DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
