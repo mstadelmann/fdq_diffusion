@@ -1,0 +1,29 @@
+defaults:
+  - dg_c_celeb_x128_00_base
+  - wandb_keys
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+train:
+  args:
+    diffusion_scheduler@p: [linear:cosine:sigmoid]
+    diffusion_nb_steps: 800
+    diffusion_shd_beta_start: 0.0001
+    diffusion_shd_beta_end: 0.02
+    diffusion_nb_plot_steps: 10
+    dataloader_name: celeb_HDF
+    model_name: ccUNET
+
+

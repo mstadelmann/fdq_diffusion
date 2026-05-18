@@ -8,22 +8,20 @@
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-# fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 18464, 250ep, 4h31
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 18464, 250ep, 4h31
+fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw4.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01
+fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
+
 # fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml # 18465, 250ep, 4h39
 # fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml # 18466, 250ep, 5h40
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again!
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist4.yaml # 18665, 216ep, 3h08 -> no gain with 4gpus
+fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again!
 # fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
 # --> small is the worst, the others are qualitatively very similar!
 
 
-# fdq_submit configs/celeb_vae/vae_celeb_x256.yaml # 18666, 315ep 7h43
-
-
-# fdq_submit celeb_vae/vae_celeb_x256_more_kl.json # -> this results in poor results (mu nicely centered at 0, but img quality bad)
-# fdq_submit celeb_vae/vae_celeb_x256_less_kl.json
-
+fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43
 
 
 #--------------------------------------------------------------------------------------------------
@@ -39,10 +37,11 @@
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 
 # play with data norm
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_04.yaml
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_05.yaml
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_06.yaml
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_04.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_05.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_06.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
+# --> did not help!
 
 
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
@@ -62,9 +61,12 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
 # CHUCHICHAESTLI
 # --------------
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
 # DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
@@ -75,8 +77,8 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml # 18667
-# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml # 18668, 86 EP, 1h10
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml # 18667
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml # 18668, 86 EP, 1h10
 
 
 fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml

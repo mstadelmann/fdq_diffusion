@@ -112,12 +112,12 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_chuchichaestli.py
   args:
-    epochs: 250
+    epochs: 350
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
-    early_stop_val_loss: 50
-    early_stop_train_loss: 50
+    early_stop_val_loss: 70
+    early_stop_train_loss: 70
     early_stop_nan: 5
     diffusion_scheduler: linear
     diffusion_nb_steps: 800
@@ -169,10 +169,7 @@ slurm_cluster:
   mem: 120G
   partition: gpu
   account: cai_ivs
-  run_train: true
-  run_test: true
   auto_resubmit: true
-  resume_chpt_path: null
   additional_pip_packages:
   - h5py
   - chuchichaestli==0.2.17

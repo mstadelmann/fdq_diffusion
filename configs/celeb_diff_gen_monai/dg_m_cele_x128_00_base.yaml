@@ -165,10 +165,7 @@ slurm_cluster:
   mem: 120G
   partition: gpu
   account: cai_ivs
-  run_train: true
-  run_test: true
   auto_resubmit: true
-  resume_chpt_path: null
   additional_pip_packages:
   - h5py
   - monai==1.5.2
