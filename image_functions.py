@@ -45,7 +45,11 @@ def createSubplots(
         if ndim == 2:
             return axis[r, c]
 
+    fig = None
     try:
+        if save_path is None and experiment is not None:
+            if hasattr(experiment, "is_main_process") and not experiment.is_main_process():
+                return None
 
         if not isinstance(image_list, list):
             image_list = [image_list]
@@ -196,7 +200,12 @@ def createSubplots(
                         axs[1, i].set_yticklabels([])
 
         if save_path is None:
+            if experiment is None:
+                raise ValueError("createSubplots requires save_path or experiment.")
             save_path = experiment.get_next_export_fn()
+
+        if save_path is None:
+            return None
 
         plt.savefig(save_path)
 
@@ -205,3 +214,6 @@ def createSubplots(
     except Exception as e:
         print(f"An error occurred while creating subplots: {e}")
         return None
+    finally:
+        if fig is not None:
+            plt.close(fig)
