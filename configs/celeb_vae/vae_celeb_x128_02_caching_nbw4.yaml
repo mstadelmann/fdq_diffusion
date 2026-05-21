@@ -18,34 +18,11 @@ mode:
 data:
   celeb_HDF:
     caching:
-      enabled: false
+      enabled: true
       cache_dir: /scratch/fdq_cache/
       shuffle_train: true
       shuffle_val: false
       shuffle_test: false
-      pin_memory: false
+      pin_memory: true
       num_workers: 4
-      compress_cache: true
-
-slurm_cluster:
-  fdq_test_repo: false
-  fdq_version: 0.1.11
-  python_env_module: python/3.12.4
-  uv_env_module: uv/0.6.12
-  cuda_env_module: cuda/12.8.0
-  scratch_results_path: /scratch/fdq_results/
-  scratch_data_path: /scratch/fdq_data/
-  log_path: ~/dev/fdq_diffusion/slurm_log
-  job_time: 3000
-  stop_grace_time: 15
-  cpus_per_task: 8
-  gres: gpu:1
-  gres_test: gpu:1
-  mem: 120G
-  mem_test: 120G
-  partition: gpu
-  account: cai_ivs
-  auto_resubmit: true
-  additional_pip_packages:
-  - h5py
-  - monai==1.5.2
+      compress_cache: false

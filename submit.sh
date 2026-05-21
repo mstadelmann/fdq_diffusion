@@ -9,19 +9,29 @@
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 18464, 250ep, 4h31
-fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw4.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01
-fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
-fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
-
 # fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml # 18465, 250ep, 4h39
-# fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml # 18466, 250ep, 5h40
-fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again!
+fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml # 18466, 250ep, 5h40
+fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw4.yaml # 19871, 364ep, 8h26
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01, # 19871 -> crashed at the end! , run again
+# fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again! # 19875 243ep, 4h42
+# fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
+# fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
+
+# speed to beat = +- 38sec/ep
+
+
+
 # fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
 # --> small is the worst, the others are qualitatively very similar!
 
 
-fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43
+fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43, # 19876 crashed after 195rp
+
+
+# after job 21065 look for fixes of
+# - An error occurred while creating subplots: 'NoneType' object has no attribute 'write'
+# -RuntimeWarning: More than 20 figures have been opened
+# - DDP crash
 
 
 #--------------------------------------------------------------------------------------------------
@@ -63,8 +73,12 @@ fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43
 
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
+# 19877... -> p001, 002, 004 gut; 003, 005 schlecht
+
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml
+# 19882... 001-003ok,  001 scheint am besten
+ 
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml # 19885: crashed after 99ep!
 
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
