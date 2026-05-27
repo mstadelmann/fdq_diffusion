@@ -9,16 +9,14 @@
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 18464, 250ep, 4h31
-# fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching_dist2.yaml # 18465, 250ep, 4h39
-fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw0.yaml # 18466, 250ep, 5h40
-fdq_submit configs/celeb_vae/vae_celeb_x128_02_caching_nbw4.yaml # 19871, 364ep, 8h26
 fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01, # 19871 -> crashed at the end! , run again
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again! # 19875 243ep, 4h42
+fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again! # 19875 243ep, 4h42
 # fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
 # fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
 
 # speed to beat = +- 38sec/ep
 
+exit
 
 
 # fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
