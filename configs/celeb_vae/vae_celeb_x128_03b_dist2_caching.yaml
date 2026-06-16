@@ -20,12 +20,12 @@ data:
     args:
       ddp_num_workers: 4
     caching:
-      enabled: false
+      enabled: true
       cache_dir: /scratch/fdq_cache/
       shuffle_train: true
       shuffle_val: false
       shuffle_test: false
-      pin_memory: false
+      pin_memory: true
       num_workers: 4
       compress_cache: false
 

@@ -8,9 +8,11 @@
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 18464, 250ep, 4h31
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 18467, 250ep, 3h01, # 19871 -> crashed at the end! , run again
-fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # 18664, 250ep, 5h13 -> crashed at the end, try again! # 19875 243ep, 4h42
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 23386, 1m30/ep, stopped after 287eps
+fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching.yaml # 23666, 0m34/ep, stopped after 133eps
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 23387. 0m50/ep, stopped after 213eps, 23386 is slightly better than this
+fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # crashed -> dist caching seems problematic. check if single GPU caching provides a benefit. set pin_mem=true, try again
+                                                                   # 23667: 1m30/ep, stopped after 320eps
 # fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
 # fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
 

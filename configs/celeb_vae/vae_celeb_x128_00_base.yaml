@@ -60,15 +60,6 @@ data:
       - '*': resize_norm
       hdf_ds_key_request_test:
       - '*': resize_norm
-    # caching:
-    #   enabled: false
-    #   cache_dir: /scratch/fdq_cache/
-    #   shuffle_train: true
-    #   shuffle_val: false
-    #   shuffle_test: false
-    #   pin_memory: false
-    #   num_workers: 4
-    #   compress_cache: true
 
 models:
   monaivae:
