@@ -8,31 +8,12 @@
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml # 23386, 1m30/ep, stopped after 287eps
-fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching.yaml # 23666, 0m34/ep, stopped after 133eps
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml # 23387. 0m50/ep, stopped after 213eps, 23386 is slightly better than this
-fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # crashed -> dist caching seems problematic. check if single GPU caching provides a benefit. set pin_mem=true, try again
-                                                                   # 23667: 1m30/ep, stopped after 320eps
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03c_dist2_more_kl.yaml
-# fdq_submit configs/celeb_vae/vae_celeb_x128_03d_dist2_less_kl.yaml
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # A100: 52s/ep
+fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching.yaml        # A100: 33s/ep
+fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml          # A100: 37s/ep
+fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # A100: 19s/ep
 
-# speed to beat = +- 38sec/ep
-
-exit
-
-
-# fdq_submit configs/celeb_vae/vae_celeb_x128_04_small.yaml
-# --> small is the worst, the others are qualitatively very similar!
-
-
-fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43, # 19876 crashed after 195rp
-
-
-# after job 21065 look for fixes of
-# - An error occurred while creating subplots: 'NoneType' object has no attribute 'write'
-# -RuntimeWarning: More than 20 figures have been opened
-# - DDP crash
-
+fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml  
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
@@ -41,7 +22,8 @@ fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43, #
 
 # MONAI
 # -----
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
@@ -71,13 +53,9 @@ fdq_submit configs/celeb_vae/vae_celeb_x256_00_dist2.yaml # 18666, 315ep 7h43, #
 # CHUCHICHAESTLI
 # --------------
 
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
-# 19877... -> p001, 002, 004 gut; 003, 005 schlecht
-
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
-# 19882... 001-003ok,  001 scheint am besten
- 
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml # 19885: crashed after 99ep!
 
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
@@ -87,6 +65,8 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml # 19885: cras
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
 
 
+
+exit
 
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion

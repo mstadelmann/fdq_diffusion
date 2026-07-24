@@ -1,6 +1,5 @@
 defaults:
   - dg_c_celeb_x128_00_base
-  - wandb_keys
   - _self_
 
 globals:
@@ -16,29 +15,17 @@ mode:
   print_model_summary: false
   resume_chpt_path: null
 
+data:
+  celeb_HDF:
+    args:
+      ddp_num_workers: 2 # num_workers in DDP is set to 0, as depending on the dataloader, it might be problematic. Use ddp_num_workers to overwrite this.
+
 slurm_cluster:
-  fdq_test_repo: false
-  fdq_version: 0.1.14
-  python_env_module: python/3.12.4
-  uv_env_module: uv/0.6.12
-  cuda_env_module: cuda/12.8.0
-  scratch_results_path: /scratch/fdq_results/
-  scratch_data_path: /scratch/fdq_data/
-  log_path: ~/dev/fdq_diffusion/slurm_log
-  job_time: 1400
-  stop_grace_time: 15
-  ntasks: 1
   cpus_per_task: 16
   gres: gpu:a100sxm:2
   gres_test: gpu:a100sxm:1
   mem: 120G
-  partition: gpu
-  account: cai_ivs
+  mem_test: 120G
+  partition: gpu_top
   world_size: 2
-  auto_resubmit: true
-  additional_pip_packages:
-  - h5py
-  - chuchichaestli==0.2.17
-
-
 

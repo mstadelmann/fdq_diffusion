@@ -67,7 +67,6 @@ data:
       shuffle_val: false
       shuffle_test: false
       pin_memory: false
-      num_workers: 4
       compress_cache: true
 
 models:
