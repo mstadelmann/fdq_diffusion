@@ -49,6 +49,7 @@ data:
       subset_test: 1.0
       pin_memory: true
       num_workers: 4
+      prefetch_factor: 2
       train_batch_size: 32
       val_batch_size: 32
       test_batch_size: 1
@@ -132,7 +133,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.13
+  fdq_version: 0.1.14
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
