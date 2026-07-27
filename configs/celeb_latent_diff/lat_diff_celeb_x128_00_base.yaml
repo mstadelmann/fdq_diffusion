@@ -49,6 +49,7 @@ data:
       subset_test: 1.0
       pin_memory: true
       num_workers: 4
+      prefetch_factor: 2
       train_batch_size: 32
       val_batch_size: 32
       test_batch_size: 1
@@ -60,11 +61,19 @@ data:
       - '*': resize_norm
       hdf_ds_key_request_test:
       - '*': resize_norm
+    caching:
+      enabled: true
+      cache_dir: /scratch/fdq_cache/
+      shuffle_train: true
+      shuffle_val: false
+      shuffle_test: false
+      pin_memory: false
+      compress_cache: false
 
 models:
   monaivae:
     class_name: monai.networks.nets.AutoencoderKL
-    trained_model_path: /cluster/home/stmd/data_ML/results/Celeb_VAE/vae_celeb_x128_00_base/20260515_02_30_53__clever_aryabhata__18464/best_val_monaivae_e247.fdqm
+    trained_model_path: /cluster/home/stmd/data_ML/results/Celeb_VAE/vae_celeb_x128_00_base/20260724_10_32_19__upbeat_nobel__38342/last_monaivae_e276.fdqm
     freeze: true
     args:
       spatial_dims: 2
