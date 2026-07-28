@@ -8,12 +8,10 @@
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # A100: 52s/ep
-fdq_submit configs/celeb_vae/vae_celeb_x128_01_caching.yaml        # A100: 33s/ep
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml          # A100: 37s/ep
-fdq_submit configs/celeb_vae/vae_celeb_x128_03b_dist2_caching.yaml # A100: 19s/ep
+# fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # A100: 33s/ep
+# fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml          # A100: 19s/ep
 
-fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30s/ep
+# fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30s/ep
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
@@ -22,18 +20,18 @@ fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30
 
 # MONAI
 # -----
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline, 2m40/ep
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml # baseline, 2m40/ep
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml # 1m40 / ep -> DDP works
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml # res-block off
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml # 3 att levels
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 
 
 # play with data norm
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_04.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_05.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_06.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_04.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_05.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_06.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
 # --> did not help!
 
 
@@ -48,30 +46,24 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml # 4 layers only
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
 
 
 # CHUCHICHAESTLI
 # --------------
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml # 19885: crashed after 99ep!
 
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
-
-# DDP not currently working: AttributeError: Can't pickle local object 'FCQmode._create_setter.<locals>.setter'
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_v0_dist2.json 
-# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_v0.json #
-
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
 
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml # 18667
-# fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_01_small.yaml # 18668, 86 EP, 1h10
 
 
 # fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml

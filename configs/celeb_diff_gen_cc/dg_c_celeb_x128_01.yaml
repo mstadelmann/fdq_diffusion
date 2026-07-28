@@ -1,6 +1,5 @@
 defaults:
   - dg_c_celeb_x128_00_base
-  - wandb_keys
   - _self_
 
 globals:
@@ -21,7 +20,7 @@ models:
     optimizer:
       class_name: torch.optim.Adam
       args:
-        lr@p: [0.00001:0.005:5]
+        lr@p: [0.00001:0.005:4]
     lr_scheduler:
       class_name: torch.optim.lr_scheduler.StepLR
       args:

@@ -67,7 +67,7 @@ data:
       shuffle_train: true
       shuffle_val: false
       shuffle_test: false
-      pin_memory: false
+      pin_memory: true
       compress_cache: false
 
 models:

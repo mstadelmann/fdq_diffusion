@@ -141,8 +141,8 @@ train:
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
-    early_stop_val_loss: 50
-    early_stop_train_loss: 50
+    early_stop_val_loss: 70
+    early_stop_train_loss: 70
     early_stop_nan: 5
     diffusion_scheduler: linear
     diffusion_nb_steps: 800

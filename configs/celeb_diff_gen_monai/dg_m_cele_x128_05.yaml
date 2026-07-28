@@ -1,6 +1,5 @@
 defaults:
-  - wandb_keys
-  - dg_m_cele_x128_00_base
+  - dg_m_cele_x128_00_base_dist2
   - _self_
 
 globals:

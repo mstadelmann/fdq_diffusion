@@ -1,6 +1,5 @@
 defaults:
   - dg_c_celeb_x128_00_base
-  - wandb_keys
   - _self_
 
 globals:
