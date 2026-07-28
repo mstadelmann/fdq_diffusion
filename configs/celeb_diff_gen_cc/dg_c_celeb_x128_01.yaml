@@ -1,0 +1,31 @@
+defaults:
+  - dg_c_celeb_x128_00_base
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+models:
+  ccUNET:
+    optimizer:
+      class_name: torch.optim.Adam
+      args:
+        lr@p: [0.00001:0.005:4]
+    lr_scheduler:
+      class_name: torch.optim.lr_scheduler.StepLR
+      args:
+        step_size: 20
+        gamma: 0.95
+
+
+

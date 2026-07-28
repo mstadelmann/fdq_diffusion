@@ -10,13 +10,13 @@ from image_functions import createSubplots
 
 @torch.no_grad()
 def fdq_test(experiment):
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
@@ -28,7 +28,7 @@ def fdq_test(experiment):
     else:
         norm_to_hu = None
 
-    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
+    if experiment.cfg.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(
             "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
         )
@@ -39,7 +39,6 @@ def fdq_test(experiment):
     if scheduler_args is None:
         scheduler_args = {}
     else:
-        scheduler_args = scheduler_args.to_dict()
         for param in scheduler_args.keys():
             if param not in supported_scheduler_args:
                 raise ValueError(
@@ -56,7 +55,7 @@ def fdq_test(experiment):
 
     results = []
 
-    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     pbar = startProgBar(nb_test_samples, "testing...")
     model.eval()
 

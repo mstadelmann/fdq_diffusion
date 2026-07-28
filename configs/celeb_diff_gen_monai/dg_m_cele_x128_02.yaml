@@ -1,0 +1,27 @@
+defaults:
+  - dg_m_cele_x128_00_base_dist2
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+models:
+  monaiUNET:
+    args:
+      attention_levels:
+      - false
+      - false
+      - true
+      - true
+      - true
+

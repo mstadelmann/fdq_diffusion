@@ -44,7 +44,7 @@
         "celeb_HDF": {
             "processor": "~/dev/fdq_diffusion/hdf_preparator_v2.py",
             "args": {
-                "base_path": "~/data/ML_data/celeba_hq_256/celeb_train_and_test/",
+                "base_path": "~/data_ML/celeba_hq_256/celeb_train_and_test/",
                 "file_extension": "hdf",
                 "val_from_train_ratio": 0.05,
                 "subset_train": 1.0,
@@ -137,7 +137,7 @@
         }
     },
     "store": {
-        "results_path": "~/data/ML_data/results",
+        "results_path": "~/data_ML/results",
         "img_exp_nb": 4,
         "save_last_model": true,
         "save_best_val_model": true,

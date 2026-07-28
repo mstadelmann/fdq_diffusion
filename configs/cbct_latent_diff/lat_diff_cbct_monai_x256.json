@@ -93,7 +93,7 @@
     "models": {
         "monaivae": {
             "class_name": "monai.networks.nets.AutoencoderKL",
-            "trained_model_path": "/cluster/home/stmd/data/ML_data/results/CBCT_VAE/vae_cbct_x256/20250607_03_34_14__fervent_archimedes__37466/best_val_monaivae_e149.fdqm",
+            "trained_model_path": "/cluster/home/stmd/data/data_ML/results/CBCT_VAE/vae_cbct_x256/20250607_03_34_14__fervent_archimedes__37466/best_val_monaivae_e149.fdqm",
             "freeze": true,
             "args": {
                 "spatial_dims": 3,
@@ -187,7 +187,7 @@
         }
     },
     "store": {
-        "results_path": "~/data/ML_data/results",
+        "results_path": "~/data_ML/results",
         "img_exp_nb": 8,
         "save_last_model": true,
         "save_best_val_model": false,

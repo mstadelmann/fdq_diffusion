@@ -1,4 +1,5 @@
 import torch
+from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
 from image_functions import createSubplots
@@ -30,14 +31,14 @@ def get_sample_from_noise(model, diffuser, gen_shape, idx_to_store=None):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     unet_model = experiment.models[targs.model_name]
     vae_model = experiment.models[targs.encoder_name]
@@ -65,7 +66,7 @@ def fdq_train(experiment) -> None:
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
-            images_gt = batch[0].to(experiment.device)
+            images_gt = batch.to(experiment.device)
             z_mu, z_sigma = vae_model.encode(images_gt)
             z_vae = vae_model.sampling(z_mu, z_sigma)
 
@@ -200,3 +201,147 @@ def fdq_train(experiment) -> None:
         experiment.on_epoch_end(log_images_wandb=imgs_to_log)
         if experiment.check_early_stop():
             break
+
+
+@torch.no_grad()
+def fdq_test(experiment):
+    # This test is only for generative latent diffusion!
+
+    targs = experiment.cfg.train.args
+    data = experiment.data[targs.dataloader_name]
+    unet_model = experiment.models[targs.model_name]
+    vae_model = experiment.models[targs.encoder_name]
+    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
+
+    exp_trans_name = experiment.cfg.store.img_exp_transform
+    if exp_trans_name is None:
+        raise ValueError(
+            "Experiment definition must contain an 'img_exp_transform' entry!"
+        )
+    t_img_exp = experiment.transformers[exp_trans_name]
+
+    if experiment.cfg.data.get(targs.dataloader_name).args.test_batch_size != 1:
+        raise ValueError(
+            "Error: Test batch size must be 1 - please change the experiment file."
+        )
+
+    idx_to_store = torch.linspace(
+        0,
+        targs.diffusion_nb_steps - 1,
+        targs.get("diffusion_nb_plot_steps", 15),
+        dtype=torch.int,
+    ).tolist()
+
+    test_sample = next(iter(data.test_data_loader))
+    # Legacy loader compatibility: TODO cleanup!
+    if isinstance(test_sample, (list, tuple)):
+        test_sample = test_sample[0]
+    test_sample = test_sample.to(experiment.device)
+
+    vae_model.eval()
+    _, z_sigma = vae_model.encode(test_sample)
+    img_shape = z_sigma.shape[1:]
+    is_grayscale = test_sample.shape[1] == 1
+
+    chuchi_diffuser = DDPM(
+        num_timesteps=targs.diffusion_nb_steps,
+        device=experiment.device,
+        beta_start=targs.diffusion_shd_beta_start,
+        beta_end=targs.diffusion_shd_beta_end,
+        schedule=targs.diffusion_scheduler,
+    )
+
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
+    pbar = startProgBar(nb_test_samples, "evaluation...")
+
+    results = []
+
+    for inf_nb in range(nb_test_samples):
+        pbar.update(inf_nb)
+
+        with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+            diff_history_latent = get_sample_from_noise(
+                model=unet_model,
+                diffuser=chuchi_diffuser,
+                gen_shape=img_shape,
+                idx_to_store=idx_to_store,
+            )
+            diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
+
+        history_path_latent = createSubplots(
+            image_list=diff_history_latent,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=True,
+            figure_title="Generative Diffusion Steps - Latent",
+            labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+
+        history_path = createSubplots(
+            image_list=diff_history_norm,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=True,
+            figure_title="Generative Diffusion Steps - Pixel",
+            labels=[f"Step {i}" for i in idx_to_store],
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+
+        save_wandb(
+            experiment,
+            images=[
+                {"name": "test_gen_history_lat", "path": history_path_latent},
+                {"name": "test_gen_history", "path": history_path},
+            ],
+        )
+
+        results.append(diff_history_norm[-1].cpu())
+
+    pbar.finish()
+
+    res_path = createSubplots(
+        image_list=results,
+        grayscale=is_grayscale,
+        experiment=experiment,
+        histogram=False,
+        figure_title="Generated test samples",
+        export_transform=t_img_exp,
+        hide_ticks=True,
+        show_colorbar=False,
+    )
+
+    images = [{"name": "test_samples", "path": res_path}]
+
+    # sagital and coronal planes
+    if "extract_2d_from_3d_sag" in experiment.transformers:
+        res_path_sag = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples sag",
+            export_transform=experiment.transformers["extract_2d_from_3d_sag"],
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+        images.append({"name": "test_samples sag", "path": res_path_sag})
+
+    if "extract_2d_from_3d_cor" in experiment.transformers:
+        res_path_cor = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples cor",
+            export_transform=experiment.transformers["extract_2d_from_3d_cor"],
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+        images.append({"name": "test_samples cor", "path": res_path_cor})
+
+    save_wandb(experiment, images=images)

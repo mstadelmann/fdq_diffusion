@@ -63,9 +63,9 @@ def fdq_train(experiment) -> None:
 def fdq_test(experiment):
     iprint("MAISI Encode/Decode Test")
 
-    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
@@ -77,7 +77,7 @@ def fdq_test(experiment):
     else:
         norm_to_hu = None
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     maisi_model = load_url(
         AutoencoderKlMaisi(**MAISI_ARGS), url=MAISI_URL, freeze=True

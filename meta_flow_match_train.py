@@ -27,17 +27,17 @@ def skewed_timestep_sample(num_samples: int, device: torch.device) -> torch.Tens
 
 @torch.no_grad()
 def fdq_test(experiment):
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     model = experiment.models[targs.model_name]
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
-    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     pbar = startProgBar(nb_test_samples, "evaluation...")
     results = []
 
@@ -82,14 +82,14 @@ def fdq_test(experiment):
 def fdq_train(experiment) -> None:
     iprint("Meta FlowMatching Training")
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 

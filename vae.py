@@ -31,7 +31,7 @@ def KL_loss(z_mu, z_sigma):
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
@@ -40,7 +40,7 @@ def fdq_train(experiment) -> None:
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
@@ -140,7 +140,7 @@ def fdq_train(experiment) -> None:
             # epsilon = torch.randn_like(z_sigma)
             # z_sample = z_mu + z_sigma * epsilon
             nb_imgs = min(
-                experiment.exp_def.store.get("img_exp_nb", 4), images_gt.shape[0]
+                experiment.cfg.store.get("img_exp_nb", 4), images_gt.shape[0]
             )
 
             log_scalars = {
@@ -223,11 +223,11 @@ def fdq_train(experiment) -> None:
 def fdq_test(experiment):
     """Basic VAE evaluation."""
 
-    targs = experiment.exp_def.train.args
+    targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
-    exp_trans_name = experiment.exp_def.store.img_exp_transform
+    exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
         raise ValueError(
             "Experiment definition must contain an 'img_exp_transform' entry!"
@@ -240,9 +240,9 @@ def fdq_test(experiment):
         norm_to_hu = None
 
     test_loader = data.test_data_loader
-    nb_test_samples = experiment.exp_def.test.args.get("nb_test_samples", 10)
+    nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
 
-    if experiment.exp_def.data.get(targs.dataloader_name).args.test_batch_size != 1:
+    if experiment.cfg.data.get(targs.dataloader_name).args.test_batch_size != 1:
         raise ValueError(
             "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
         )
@@ -316,7 +316,7 @@ def fdq_test(experiment):
         recon_loss = experiment.losses["MAE"](images_gt, reconstruction).detach().item()
         recon_losses.append(recon_loss)
         weighted_loss = (
-            recon_loss + experiment.exp_def.train.args.kl_loss_weight * kl_loss
+            recon_loss + experiment.cfg.train.args.kl_loss_weight * kl_loss
         )
         weighted_losses.append(weighted_loss)
 

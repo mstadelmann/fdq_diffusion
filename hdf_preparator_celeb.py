@@ -77,13 +77,35 @@ def create_datasets(experiment, args=None):
 
     file_extension = args.get("file_extension", "hdf")
     data_files = {}
-    data_basePath = args.base_path
+    data_basePath = args.get("base_path")
+    
+    num_workers = args.num_workers
+    prefetch_factor = args.get("prefetch_factor", None)
+    persistent_workers = args.get("persistent_workers")
+    multiprocessing_context = args.get("multiprocessing_context", None)
 
-    if args.base_path is not None:
+    if multiprocessing_context not in {None, "fork", "spawn", "forkserver"}:
+        raise ValueError(
+            f"Invalid multiprocessing_context: {multiprocessing_context}. "
+            "Must be one of None, 'fork', 'spawn', or 'forkserver'."
+        )
+    if multiprocessing_context is None and experiment.is_distributed() and num_workers > 0:
+        multiprocessing_context = "forkserver"
+
+    if num_workers > 0 and persistent_workers is None:
+        persistent_workers = True
+        wprint(
+            f"DataLoader num_workers={num_workers}: setting persistent_workers=True. "
+            "Set persistent_workers: false in the data args to disable this."
+        )
+    elif num_workers == 0:
+        persistent_workers = False
+
+    if data_basePath is not None:
         if (
-            args.train_files_path is not None
-            or args.test_files_path is not None
-            or args.val_files_path is not None
+            args.get("train_files_path") is not None
+            or args.get("test_files_path") is not None
+            or args.get("val_files_path") is not None
         ):
             raise ValueError(
                 "This combination of data path definitions is not allowed!!"
@@ -115,17 +137,17 @@ def create_datasets(experiment, args=None):
             data_files[DatasetType.Train] = data_files[DatasetType.All]
 
     elif data_basePath is None:
-        if args.train_files_path is not None:
+        if args.get("train_files_path") is not None:
             data_files[DatasetType.Train] = [Path(p) for p in args.train_files_path]
         else:
             raise ValueError("No Train Data Files defined!")
 
-        if args.val_files_path is not None:
+        if args.get("val_files_path") is not None:
             data_files[DatasetType.Val] = [Path(p) for p in args.val_files_path]
         else:
             data_files[DatasetType.Val] = []
 
-        if args.test_files_path is not None:
+        if args.get("test_files_path") is not None:
             data_files[DatasetType.Test] = [Path(p) for p in args.test_files_path]
         else:
             data_files[DatasetType.Test] = []
@@ -272,9 +294,12 @@ def create_datasets(experiment, args=None):
             train_sub,
             batch_size=args.train_batch_size,
             pin_memory=args.pin_memory,
-            num_workers=args.num_workers,
+            num_workers=num_workers,
             drop_last=args.drop_last,
             sampler=train_sampler,
+            prefetch_factor=prefetch_factor if num_workers > 0 else None,
+            persistent_workers=persistent_workers,
+            multiprocessing_context=multiprocessing_context,
         )
     else:
         train_data_loader = None
@@ -284,9 +309,12 @@ def create_datasets(experiment, args=None):
             val_sub,
             batch_size=args.val_batch_size,
             pin_memory=args.pin_memory,
-            num_workers=args.num_workers,
+            num_workers=num_workers,
             drop_last=args.drop_last,
             sampler=val_sampler,
+            prefetch_factor=prefetch_factor if num_workers > 0 else None,
+            persistent_workers=persistent_workers,
+            multiprocessing_context=multiprocessing_context,
         )
     else:
         val_data_loader = None
@@ -296,9 +324,12 @@ def create_datasets(experiment, args=None):
             test_sub,
             batch_size=args.test_batch_size,
             pin_memory=args.pin_memory,
-            num_workers=args.num_workers,
+            num_workers=num_workers,
             drop_last=args.drop_last,
             sampler=test_sampler,
+            prefetch_factor=prefetch_factor if num_workers > 0 else None,
+            persistent_workers=persistent_workers,
+            multiprocessing_context=multiprocessing_context,
         )
     else:
         test_data_loader = None
