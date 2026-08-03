@@ -109,7 +109,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_monai.py
   args:
-    epochs: 250
+    epochs: 350
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1

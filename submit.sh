@@ -34,6 +34,8 @@
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
 # --> did not help!
 
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_08_zero_snr.yaml # 40112 stopped after 118ep, why? run again: 41399
+
 
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
@@ -46,16 +48,16 @@
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_01_zero_snr.yaml
 
 
 # CHUCHICHAESTLI
 # --------------
 
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_03_dist2.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml # LR param
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml # lin/cos/sig param
 
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
@@ -63,9 +65,8 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml # 18667
-
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml # train samples good, test poor
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml # train samples good, test poor
 
 
 #--------------------------------------------------------------------------------------------------

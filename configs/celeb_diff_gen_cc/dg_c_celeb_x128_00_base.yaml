@@ -61,6 +61,8 @@ data:
       - '*': resize_norm
       hdf_ds_key_request_test:
       - '*': resize_norm
+      ddp_num_workers: 2 # num_workers in DDP is set to 0, as depending on the dataloader, it might be problematic. Use ddp_num_workers to overwrite this.
+
     caching:
       enabled: true
       cache_dir: /scratch/fdq_cache/
@@ -164,10 +166,12 @@ slurm_cluster:
   job_time: 1400
   stop_grace_time: 15
   ntasks: 1
-  cpus_per_task: 8
-  gres: gpu:a100sxm:1
+  world_size: 2
+  cpus_per_task: 16
+  gres: gpu:a100sxm:2
   gres_test: gpu:a100sxm:1
   mem: 120G
+  mem_test: 120G
   partition: gpu_top
   account: cai_ivs
   auto_resubmit: true

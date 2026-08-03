@@ -4,6 +4,29 @@ from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer
 from monai.networks.schedulers import DDPMScheduler
 from image_functions import createSubplots
+from zero_snr_scheduler import ZeroSNRDDPMScheduler
+
+
+def _build_scheduler(targs, scheduler_args):
+    prediction_type = targs.get("diffusion_prediction_type", "epsilon")
+    zero_terminal_snr = targs.get("diffusion_zero_terminal_snr", False)
+
+    if zero_terminal_snr and prediction_type != "v_prediction":
+        raise ValueError(
+            "diffusion_zero_terminal_snr=True requires diffusion_prediction_type='v_prediction'. "
+            "With epsilon prediction, alpha_prod_t hits exactly 0 at the last training timestep, "
+            "which makes the predicted-x0 division blow up to +/-inf on the first sampling step."
+        )
+
+    scheduler_cls = ZeroSNRDDPMScheduler if zero_terminal_snr else DDPMScheduler
+    scheduler = scheduler_cls(
+        num_train_timesteps=targs.diffusion_nb_steps,
+        schedule=targs.diffusion_scheduler,
+        prediction_type=prediction_type,
+        **scheduler_args,
+    )
+    return scheduler, prediction_type
+
 
 # https://github.com/Project-MONAI/tutorials/blob/main/generation/2d_ddpm/2d_ddpm_tutorial.ipynb
 
@@ -71,11 +94,7 @@ def fdq_train(experiment) -> None:
                     f"Supported arguments are: {supported_scheduler_args}"
                 )
 
-    scheduler = DDPMScheduler(
-        num_train_timesteps=targs.diffusion_nb_steps,
-        schedule=targs.diffusion_scheduler,
-        **scheduler_args,
-    )
+    scheduler, prediction_type = _build_scheduler(targs, scheduler_args)
     inferer = DiffusionInferer(scheduler)
 
     img_shape = None
@@ -159,8 +178,13 @@ def fdq_train(experiment) -> None:
                     mode=monai_mode,
                 )
 
+                target = (
+                    noise
+                    if prediction_type == "epsilon"
+                    else scheduler.get_velocity(images_gt, noise, timesteps)
+                )
                 train_loss_tensor = (
-                    experiment.losses["MSE"](noise, noise_pred)
+                    experiment.losses["MSE"](target, noise_pred)
                     / experiment.gradacc_iter
                 )
                 if experiment.useAMP:
@@ -218,7 +242,12 @@ def fdq_train(experiment) -> None:
                     mode=monai_mode,
                 )
 
-                val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
+                target = (
+                    noise
+                    if prediction_type == "epsilon"
+                    else scheduler.get_velocity(images_gt, noise, timesteps)
+                )
+                val_loss_sum += experiment.losses["MSE"](target, noise_pred).item()
 
             experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
             pbar.finish()
@@ -332,11 +361,7 @@ def fdq_test(experiment):
                     f"Supported arguments are: {supported_scheduler_args}"
                 )
 
-    scheduler = DDPMScheduler(
-        num_train_timesteps=targs.diffusion_nb_steps,
-        schedule=targs.diffusion_scheduler,
-        **scheduler_args,
-    )
+    scheduler, _ = _build_scheduler(targs, scheduler_args)
     inferer = DiffusionInferer(scheduler)
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
