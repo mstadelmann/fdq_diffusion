@@ -36,7 +36,6 @@
 
 # fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_08_zero_snr.yaml # 40112 stopped after 118ep, why? run again: 41399
 
-
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v4.json # larger net, two att
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v5.json # deeper net, one att
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_v6.json # more att head channels
@@ -48,18 +47,18 @@
 # fdq_submit celeb_diff_gen_monai/dg_m_cele_x128_t4.json # linear beta
 
 
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_01_zero_snr.yaml
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_00.yaml
+# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_01_zero_snr.yaml
 
 
 # CHUCHICHAESTLI
 # --------------
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml # LR param
 # fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml # lin/cos/sig param
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
+# fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml # 41425 OK
 
 
 #--------------------------------------------------------------------------------------------------

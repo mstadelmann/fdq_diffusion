@@ -147,9 +147,23 @@ def fdq_train(experiment) -> None:
 
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        experiment.valLoss = 0  # no validation train_loss_tensor
 
-        # Dummy validation: generate samples
+        unet_model.eval()
+        val_loss_sum = 0.0
+        with torch.no_grad():
+            for batch in data.val_data_loader:
+                images_gt = batch.to(experiment.device)
+                z_mu, z_sigma = vae_model.encode(images_gt)
+                z_vae = vae_model.sampling(z_mu, z_sigma)
+                with torch.autocast(
+                    device_type=device_type, enabled=experiment.useAMP
+                ):
+                    noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
+                    noise_pred = unet_model(noisy_imgs, t)
+                    val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
+        experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+
+        # generate samples for preview
         idx_to_store = torch.linspace(
             0,
             targs.diffusion_nb_steps - 1,
@@ -211,7 +225,6 @@ def fdq_test(experiment):
     data = experiment.data[targs.dataloader_name]
     unet_model = experiment.models[targs.model_name]
     vae_model = experiment.models[targs.encoder_name]
-    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
     exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
@@ -259,14 +272,13 @@ def fdq_test(experiment):
     for inf_nb in range(nb_test_samples):
         pbar.update(inf_nb)
 
-        with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-            diff_history_latent = get_sample_from_noise(
-                model=unet_model,
-                diffuser=chuchi_diffuser,
-                gen_shape=img_shape,
-                idx_to_store=idx_to_store,
-            )
-            diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
+        diff_history_latent = get_sample_from_noise(
+            model=unet_model,
+            diffuser=chuchi_diffuser,
+            gen_shape=img_shape,
+            idx_to_store=idx_to_store,
+        )
+        diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
 
         history_path_latent = createSubplots(
             image_list=diff_history_latent,
