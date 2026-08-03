@@ -1,5 +1,5 @@
 defaults:
-  - dg_m_cele_x256_00
+  - dg_m_cele_x128_00_base_dist2
   - _self_
 
 globals:
@@ -15,7 +15,26 @@ mode:
   print_model_summary: false
   resume_chpt_path: null
 
+transforms:
+  resize_norm:
+  - Float32
+  - Resize_HW:
+      h: 256
+      w: 256
+  - ReRange:
+      in_min: 0
+      in_max: 255
+      out_min: -1
+      out_max: 1
+
 train:
   args:
     diffusion_prediction_type: v_prediction
     diffusion_zero_terminal_snr: true
+
+store:
+  wandb_project: diff_gen_celeb_x256
+
+slurm_cluster:
+  gres: gpu:h200sxm:2
+  gres_test: gpu:h200sxm:1
