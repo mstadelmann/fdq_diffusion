@@ -17,4 +17,5 @@ mode:
 
 models:
   monaiUNET:
+    args:
       resblock_updown: false

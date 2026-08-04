@@ -16,6 +16,7 @@ fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 # dg_m_cele_ = DiffusionGenerative_MONAI_Celebrities
+# dg_c_cele_ = DiffusionGenerative_Chuchichaestli_Celebrities
 #--------------------------------------------------------------------------------------------------
 
 # MONAI
@@ -59,13 +60,12 @@ fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB Flow Matching Generative
 #--------------------------------------------------------------------------------------------------
-fdq_submit celeb_fm_gen/fm_meta_cele_x128_v0.json # test is missing! -> fixed
-fdq_submit celeb_fm_gen/fm_meta_cele_x128_v0_dist2.json # error num workers and HDF (42095)! currently running with nworks=0 (42472)
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0.yaml # test is missing! -> fixed
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0_dist2.yaml # error num workers and HDF (42095)! currently running with nworks=0 (42472)
 
 
-
-# fdq_submit celeb_fm_gen/fm_meta_cele_x256_v0.json
-# fdq_submit celeb_fm_gen/fm_meta_cele_x256_v1.json
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v1.yaml
 
 ##################################################################################################
 ##################################################################################################

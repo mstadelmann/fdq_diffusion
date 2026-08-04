@@ -111,7 +111,7 @@ def fdq_train(experiment) -> None:
         for data_iter_step, batch in enumerate(train_loader):
             pbar.update(data_iter_step)
 
-            samples = batch[0]
+            samples = batch[0] if isinstance(batch, (list, tuple)) else batch
 
             samples = samples.to(experiment.device, non_blocking=True)
             # labels = labels.to(device, non_blocking=True)

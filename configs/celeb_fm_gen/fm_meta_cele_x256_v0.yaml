@@ -1,0 +1,41 @@
+defaults:
+  - fm_meta_cele_x128_v0
+  - _self_
+
+globals:
+  project: Celeb_FM_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+transforms:
+  resize_norm:
+  - Float32
+  - Resize_HW:
+      h: 256
+      w: 256
+  - ReRange:
+      in_min: 0
+      in_max: 255
+      out_min: 0
+      out_max: 1
+
+data:
+  celeb_HDF:
+    args:
+      train_batch_size: 4
+      val_batch_size: 4
+
+store:
+  wandb_project: fm_m_celeb_x256
+
+slurm_cluster:
+  gres: gpu:h200sxm:1
+  gres_test: gpu:h200sxm:1
