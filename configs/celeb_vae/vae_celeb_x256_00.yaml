@@ -28,7 +28,7 @@ transforms:
       out_max: 1
 
 data:
-  celeb_HF:
+  celeb_HDF:
     caching:
       enabled: true
       cache_dir: /scratch/fdq_cache/
@@ -38,16 +38,12 @@ data:
       pin_memory: true
       compress_cache: false
 
-train:
-  args:
-    epochs: 400
-
 store:
   wandb_project: celeb_vae_x256
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.22
+  fdq_version: 0.1.15
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
@@ -66,5 +62,5 @@ slurm_cluster:
   auto_resubmit: true
   world_size: 1
   additional_pip_packages:
-  - datasets
+  - h5py
   - monai==1.5.2
