@@ -50,7 +50,7 @@ data:
       pin_memory: true
       num_workers: 4
       prefetch_factor: 2
-      train_batch_size: 16
+      train_batch_size: 32
       val_batch_size: 8
       test_batch_size: 1
       shuffle_train: true
@@ -112,7 +112,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/meta_flow_match_train.py
   args:
-    epochs: 150
+    epochs: 250
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
@@ -160,8 +160,8 @@ slurm_cluster:
   ntasks: 1
   cpus_per_task: 8
   cpus_per_task_test: 8
-  gres: gpu:1
-  gres_test: gpu:1
+  gres: gpu:h200sxm:1
+  gres_test: gpu:h200sxm:1
   mem: 100G
   mem_test: 100G
   partition: gpu_top

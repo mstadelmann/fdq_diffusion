@@ -1,5 +1,5 @@
 defaults:
-  - fm_meta_cele_x128_v0
+  - fm_meta_cele_x128_v0_dist2
   - _self_
 
 globals:
@@ -37,5 +37,5 @@ store:
   wandb_project: fm_m_celeb_x256
 
 slurm_cluster:
-  gres: gpu:h200sxm:1
+  gres: gpu:h200sxm:2
   gres_test: gpu:h200sxm:1
