@@ -1,18 +1,34 @@
 import gc
+import logging
+import math
+
 import torch
+from torch.nn import Module, Parameter, ParameterList
+from torchvision.utils import make_grid
 from fdq.ui_functions import startProgBar, iprint
 from fdq.misc import save_wandb
 
 from flow_matching.path import CondOTProbPath
-
-from meta_ema import EMA
-
-
-from meta_flow_match_eval import CFGScaledModel
+from flow_matching.utils import ModelWrapper
 from flow_matching.solver.ode_solver import ODESolver
+
+logger = logging.getLogger(__name__)
 
 MASK_TOKEN = 256
 PRINT_FREQUENCY = 50
+
+
+def wandb_image_entry(name: str, images: torch.Tensor, as_grid: bool) -> dict:
+    """Build a save_wandb/on_epoch_end image entry.
+
+    If `as_grid` is True, the batch is merged into a single grid image (one glance
+    overview). Otherwise each image is logged individually, as before (click-through
+    gallery in the wandb UI).
+    """
+    if as_grid:
+        nrow = max(1, math.isqrt(images.shape[0]))
+        images = make_grid(images, nrow=nrow, padding=2)
+    return {"name": name, "data": images}
 
 
 def skewed_timestep_sample(num_samples: int, device: torch.device) -> torch.Tensor:
@@ -23,6 +39,107 @@ def skewed_timestep_sample(num_samples: int, device: torch.device) -> torch.Tens
     time = 1 / (1 + sigma)
     time = torch.clip(time, min=0.0001, max=1.0)
     return time
+
+
+class CFGScaledModel(ModelWrapper):
+    def __init__(self, model: torch.nn.Module):
+        super().__init__(model)
+        self.nfe_counter = 0
+
+    def forward(self, x: torch.Tensor, t: torch.Tensor, cfg_scale: float, label: torch.Tensor):
+        t = torch.zeros(x.shape[0], device=x.device) + t
+
+        if cfg_scale != 0.0:
+            with torch.amp.autocast("cuda"), torch.no_grad():
+                conditional = self.model(x, t, extra={"label": label})
+                condition_free = self.model(x, t, extra={})
+            result = (1.0 + cfg_scale) * conditional - cfg_scale * condition_free
+        else:
+            # Model is fully conditional, no cfg weighting needed
+            with torch.amp.autocast("cuda"), torch.no_grad():
+                result = self.model(x, t, extra={"label": label})
+
+        self.nfe_counter += 1
+        return result.to(dtype=torch.float32)
+
+    def reset_nfe_counter(self) -> None:
+        self.nfe_counter = 0
+
+    def get_nfe(self) -> int:
+        return self.nfe_counter
+
+
+# Exponential moving average of model weights, kept for potential future use (currently
+# unused/unwired). To enable: wrap the model once after creation (`model = EMA(model)`),
+# call `model.update_ema()` right after each optimizer step, and use `model.eval()` /
+# `model.train()` as usual — EMA swaps the averaged weights in/out automatically. EMA
+# weights typically generalize/sample better than the raw training weights, especially
+# for diffusion/flow-matching models.
+class EMA(Module):
+    def __init__(self, model: Module, decay: float = 0.999):
+        super().__init__()
+        self.model = model
+        self.decay = decay
+
+        # Put this in a buffer so that it gets included in the state dict
+        self.register_buffer("num_updates", torch.tensor(0))
+
+        self.shadow_params: ParameterList = ParameterList(
+            [
+                Parameter(p.clone().detach(), requires_grad=False)
+                for p in model.parameters()
+                if p.requires_grad
+            ]
+        )
+        self.backup_params: list[torch.Tensor] = []
+
+    def train(self, mode: bool) -> None:
+        if self.training == mode:
+            super().train(mode)
+            return
+
+        if not mode:
+            logger.info(
+                "EMA: Switching from train to eval, backing up parameters and copying EMA params"
+            )
+            self.backup()
+            self.copy_to_model()
+        else:
+            logger.info("EMA: Switching from eval to train, restoring saved parameters")
+            self.restore_to_model()
+
+        super().train(mode)
+
+    def update_ema(self) -> None:
+        self.num_updates += 1
+        num_updates = self.num_updates.item()
+        decay = min(self.decay, (1 + num_updates) / (10 + num_updates))
+        with torch.no_grad():
+            params = [p for p in self.model.parameters() if p.requires_grad]
+            for shadow, param in zip(self.shadow_params, params):
+                shadow.sub_((1 - decay) * (shadow - param))
+
+    def forward(self, *args, **kwargs) -> torch.Tensor:
+        return self.model(*args, **kwargs)
+
+    def copy_to_model(self) -> None:
+        params = [p for p in self.model.parameters() if p.requires_grad]
+        for shadow, param in zip(self.shadow_params, params):
+            param.data.copy_(shadow.data)
+
+    def backup(self) -> None:
+        assert (
+            self.training
+        ), "Backup can only be created in train mode to avoid backing-up ema weights."
+        if len(self.backup_params) > 0:
+            for p, b in zip(self.model.parameters(), self.backup_params):
+                b.data.copy_(p.data)
+        else:
+            self.backup_params = [param.clone() for param in self.model.parameters()]
+
+    def restore_to_model(self) -> None:
+        for param, backup in zip(self.model.parameters(), self.backup_params):
+            param.data.copy_(backup.data)
 
 
 @torch.no_grad()
@@ -36,6 +153,7 @@ def fdq_test(experiment):
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
+    log_as_grid = experiment.cfg.store.get("wandb_img_as_grid", True)
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     pbar = startProgBar(nb_test_samples, "evaluation...")
@@ -75,7 +193,7 @@ def fdq_test(experiment):
 
         save_wandb(
             experiment=experiment,
-            images=[{"name": "eval_samples", "data": synthetic_samples}],
+            images=[wandb_image_entry("eval_samples", synthetic_samples, log_as_grid)],
         )
 
 
@@ -88,6 +206,7 @@ def fdq_train(experiment) -> None:
             "Experiment definition must contain an 'img_exp_transform' entry!"
         )
     t_img_exp = experiment.transformers[exp_trans_name]
+    log_as_grid = experiment.cfg.store.get("wandb_img_as_grid", True)
 
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
@@ -164,8 +283,41 @@ def fdq_train(experiment) -> None:
         pbar.finish()
         experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
 
-        # dummy validation
-        experiment.valLoss = 0
+        model.eval()
+        val_loader = data.val_data_loader
+        val_loss_sum = 0.0
+        pbar = startProgBar(data.n_val_batches, "validation...")
+
+        with torch.no_grad():
+            for val_iter_step, batch in enumerate(val_loader):
+                pbar.update(val_iter_step)
+
+                samples = batch[0] if isinstance(batch, (list, tuple)) else batch
+                samples = samples.to(experiment.device, non_blocking=True)
+
+                conditioning = {}
+                noise = torch.randn_like(samples).to(experiment.device)
+
+                if skewed_timesteps:
+                    t = skewed_timestep_sample(samples.shape[0], device=experiment.device)
+                else:
+                    t = torch.rand(samples.shape[0]).to(experiment.device)
+
+                path_sample = path.sample(t=t, x_0=noise, x_1=samples)
+                x_t = path_sample.x_t
+                u_t = path_sample.dx_t
+
+                with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+                    val_loss_tensor = experiment.losses["MSE"](
+                        model(x_t, t, extra=conditioning), u_t
+                    )
+
+                val_loss_sum += val_loss_tensor.item()
+
+        pbar.finish()
+        experiment.valLoss = val_loss_sum / len(val_loader.dataset)
+
+        # generate samples for wandb logging
         batch_size = 16
         sample_resolution = 128
 
@@ -196,5 +348,5 @@ def fdq_train(experiment) -> None:
         synthetic_samples = t_img_exp(synthetic_samples)
 
         experiment.on_epoch_end(
-            log_images_wandb=[{"name": "samples", "data": synthetic_samples}]
+            log_images_wandb=[wandb_image_entry("samples", synthetic_samples, log_as_grid)]
         )

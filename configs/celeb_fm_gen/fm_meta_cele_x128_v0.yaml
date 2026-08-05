@@ -138,6 +138,7 @@ store:
   wandb_project: fm_m_celeb_x128
   wandb_entity: stmd
   img_exp_transform: norm_to_rgb
+  wandb_img_as_grid: true
 
 test:
   processor: ~/dev/fdq_diffusion/meta_flow_match_train.py
