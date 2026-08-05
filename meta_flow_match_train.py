@@ -69,10 +69,12 @@ class CFGScaledModel(ModelWrapper):
         return self.nfe_counter
 
 
-# Exponential moving average of model weights. Wired into fdq_train: shadow params are
-# updated after every optimizer step, then swapped into the model (via backup/copy_to_model
-# /restore_to_model) for sample generation and checkpointing, so training itself always
-# resumes from the raw (non-averaged) weights.
+# Exponential moving average of model weights, kept for potential future use (currently
+# unused/unwired). To enable: wrap the model once after creation (`model = EMA(model)`),
+# call `model.update_ema()` right after each optimizer step, and use `model.eval()` /
+# `model.train()` as usual — EMA swaps the averaged weights in/out automatically. EMA
+# weights typically generalize/sample better than the raw training weights, especially
+# for diffusion/flow-matching models.
 class EMA(Module):
     def __init__(self, model: Module, decay: float = 0.999):
         super().__init__()
@@ -143,8 +145,7 @@ class EMA(Module):
 @torch.no_grad()
 def fdq_test(experiment):
     targs = experiment.cfg.train.args
-    model = experiment.models_no_ddp[targs.model_name]
-    data = experiment.data[targs.dataloader_name]
+    model = experiment.models[targs.model_name]
 
     exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
@@ -154,15 +155,6 @@ def fdq_test(experiment):
     t_img_exp = experiment.transformers[exp_trans_name]
     log_as_grid = experiment.cfg.store.get("wandb_img_as_grid", True)
 
-    # infer the resolution to generate at from the actual (post-transform) test
-    # images - a hardcoded value here silently mismatches configs that train/test
-    # at a resolution other than 128 (e.g. the x256 experiments), producing
-    # incoherent samples since the model never trained at that resolution.
-    test_sample = next(iter(data.test_data_loader))
-    if isinstance(test_sample, (list, tuple)):
-        test_sample = test_sample[0]
-    sample_resolution = test_sample.shape[-1]
-
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     pbar = startProgBar(nb_test_samples, "evaluation...")
     results = []
@@ -171,6 +163,7 @@ def fdq_test(experiment):
         pbar.update(inf_nb)
 
         batch_size = 16
+        sample_resolution = 128
 
         labels = torch.tensor(
             list(range(batch_size)), dtype=torch.int32, device=experiment.device
@@ -204,22 +197,6 @@ def fdq_test(experiment):
         )
 
 
-def _epoch_mean_loss(experiment, loss_sum: float, sample_count: int) -> float:
-    """Reduce a rank-local (loss_sum, sample_count) pair to the true epoch-wide mean loss.
-
-    Each rank only sums the loss over its own DistributedSampler shard, so under DDP
-    the local sum/count must be all-reduced across ranks before dividing - otherwise
-    the logged loss depends on world_size instead of just reflecting the model's fit.
-    """
-    if experiment.is_distributed():
-        stats = torch.tensor(
-            [loss_sum, sample_count], dtype=torch.float64, device=experiment.device
-        )
-        torch.distributed.all_reduce(stats, op=torch.distributed.ReduceOp.SUM)
-        loss_sum, sample_count = stats[0].item(), stats[1].item()
-    return loss_sum / sample_count
-
-
 def fdq_train(experiment) -> None:
     iprint("Meta FlowMatching Training")
 
@@ -234,10 +211,6 @@ def fdq_train(experiment) -> None:
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
-    model_no_ddp = experiment.models_no_ddp[targs.model_name]
-
-    ema_decay = targs.get("ema_decay")
-    ema = EMA(model_no_ddp, decay=ema_decay) if ema_decay else None
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
     train_loader = data.train_data_loader
@@ -250,7 +223,6 @@ def fdq_train(experiment) -> None:
 
         model.train(True)
         train_loss_sum = 0.0
-        train_sample_count = 0
         pbar = startProgBar(data.n_train_batches, "training...")
         gc.collect()
 
@@ -285,36 +257,35 @@ def fdq_train(experiment) -> None:
                     model(x_t, t, extra=conditioning) - u_t, 2
                 ).mean()
 
-            batch_size = samples.shape[0]
-            train_loss_sum += train_loss_tensor.detach().item() * batch_size
-            train_sample_count += batch_size
-
-            train_loss_tensor = train_loss_tensor / experiment.gradacc_iter
+            train_loss_tensor /= experiment.gradacc_iter
 
             if experiment.useAMP:
                 experiment.scaler.scale(train_loss_tensor).backward()
             else:
                 train_loss_tensor.backward()
 
-            apply_update = ((data_iter_step + 1) % experiment.gradacc_iter == 0) or (
-                data_iter_step + 1 == data.n_train_batches
-            )
             experiment.update_gradients(
                 b_idx=data_iter_step,
                 loader_name=targs.dataloader_name,
                 model_name=targs.model_name,
             )
 
-            if apply_update and ema is not None:
-                ema.update_ema()
+            # if apply_update and isinstance(model, EMA):
+            #     model.update_ema()
+            # elif (
+            #     apply_update
+            #     and isinstance(model, DistributedDataParallel)
+            #     and isinstance(model.module, EMA)
+            # ):
+            #     model.module.update_ema()
+            train_loss_sum += train_loss_tensor.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = _epoch_mean_loss(experiment, train_loss_sum, train_sample_count)
+        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
 
         model.eval()
         val_loader = data.val_data_loader
         val_loss_sum = 0.0
-        val_sample_count = 0
         pbar = startProgBar(data.n_val_batches, "validation...")
 
         with torch.no_grad():
@@ -341,35 +312,20 @@ def fdq_train(experiment) -> None:
                         model(x_t, t, extra=conditioning), u_t
                     )
 
-                batch_size = samples.shape[0]
-                val_loss_sum += val_loss_tensor.item() * batch_size
-                val_sample_count += batch_size
+                val_loss_sum += val_loss_tensor.item()
 
         pbar.finish()
-        experiment.valLoss = _epoch_mean_loss(experiment, val_loss_sum, val_sample_count)
+        experiment.valLoss = val_loss_sum / len(val_loader.dataset)
 
-        # swap in EMA weights for sample generation + checkpointing, so the logged
-        # preview and the saved/resumable model reflect the smoothed weights rather
-        # than this epoch's raw weights
-        if ema is not None:
-            ema.backup()
-            ema.copy_to_model()
-
-        # generate samples for wandb logging - resolution follows the actual
-        # (post-transform) training images, not a hardcoded value, so previews stay
-        # consistent with whatever resolution this config actually trains at
+        # generate samples for wandb logging
         batch_size = 16
-        sample_resolution = samples.shape[-1]
+        sample_resolution = 128
 
         labels = torch.tensor(
             list(range(batch_size)), dtype=torch.int32, device=experiment.device
         )
 
-        # use the un-wrapped module for sampling: repeatedly running forward-only
-        # inference through the DDP-wrapped model (no matching backward) can
-        # desync DDP's reducer bookkeeping across ranks and eventually hang the
-        # next real training-step all-reduce.
-        cfg_weighted_model = CFGScaledModel(model=model_no_ddp)
+        cfg_weighted_model = CFGScaledModel(model=model)
 
         x_0 = torch.randn(
             [batch_size, 3, sample_resolution, sample_resolution],
@@ -394,6 +350,3 @@ def fdq_train(experiment) -> None:
         experiment.on_epoch_end(
             log_images_wandb=[wandb_image_entry("samples", synthetic_samples, log_as_grid)]
         )
-
-        if ema is not None:
-            ema.restore_to_model()
