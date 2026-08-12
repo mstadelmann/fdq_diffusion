@@ -60,9 +60,9 @@ fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml
 #--------------------------------------------------------------------------------------------------
 # CELEB Flow Matching Generative
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0.yaml # 55 GB -> inc batch size, restarted
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0_dist2.yaml # 49GB / GPU -> inc batch size, restarted
-
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0.yaml
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v1.yaml
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v2.yaml
 
 fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml
 
