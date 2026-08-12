@@ -112,12 +112,12 @@ models:
 train:
   path: ~/dev/fdq_diffusion/meta_flow_match_train.py
   args:
-    epochs: 250
+    epochs: 650
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
     early_stop_val_loss: 50
-    early_stop_train_loss: 20
+    early_stop_train_loss: 50
     early_stop_nan: 5
     dataloader_name: celeb_HDF
     model_name: metaUNET
@@ -147,6 +147,7 @@ test:
     nb_test_samples: 10
 
 slurm_cluster:
+  world_size: 2
   fdq_test_repo: false
   fdq_version: 0.1.15
   python_env_module: python/3.12.4
@@ -158,11 +159,11 @@ slurm_cluster:
   job_time: 1400
   stop_grace_time: 15
   ntasks: 1
-  cpus_per_task: 8
+  cpus_per_task: 16
   cpus_per_task_test: 8
-  gres: gpu:h200sxm:1
+  gres: gpu:h200sxm:2
   gres_test: gpu:h200sxm:1
-  mem: 100G
+  mem: 150G
   mem_test: 100G
   partition: gpu_top
   account: cai_ivs
