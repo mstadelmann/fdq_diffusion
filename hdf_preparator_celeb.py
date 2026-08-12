@@ -5,11 +5,16 @@ import bisect
 import h5py
 import numpy as np
 import torch
+import torch.multiprocessing
 from torch.utils import data
 from torch.utils.data import random_split
 import itertools
 
 from fdq.ui_functions import startProgBar, iprint, wprint
+
+# Avoid "RuntimeError: Too many open files" from the default file_descriptor
+# IPC strategy when iterating many samples with num_workers > 0.
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 class DatasetType(Enum):

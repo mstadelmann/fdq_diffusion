@@ -4,7 +4,7 @@ defaults:
 
 globals:
   project: Celeb_Generation
-  author: Marc
+  author: Minh
 
 mode:
   run_train: true
@@ -41,7 +41,7 @@ data:
   celeb_HDF:
     processor: ~/dev/fdq_diffusion/hdf_preparator_celeb.py
     args:
-      base_path: ~/data_ML/celeba_hq_256/celeb_train_and_test/
+      base_path: /cluster/projects/0000_datasets/celeba_hq_256/celeb_train_and_test
       file_extension: hdf
       val_from_train_ratio: 0.05
       subset_train: 1.0
@@ -136,7 +136,7 @@ losses:
     class_name: torch.nn.MSELoss
 
 store:
-  results_path: ~/data_ML/results
+  results_path: ~/dev/fdq_diffusion/data
   img_exp_nb: 4
   save_last_model: true
   save_best_val_model: true
@@ -145,7 +145,7 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: diff_gen_celeb_x128
-  wandb_entity: stmd
+  wandb_entity: mnguyen1337-zhaw
   img_exp_transform: norm_to_rgb
 
 test:
@@ -173,7 +173,7 @@ slurm_cluster:
   mem: 120G
   mem_test: 120G
   partition: gpu_top
-  account: cai_ivs
+  account: cai_leg
   auto_resubmit: true
   additional_pip_packages:
   - h5py
