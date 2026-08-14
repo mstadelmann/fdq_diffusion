@@ -66,16 +66,23 @@ fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
+
+
 fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
 
+
+# add x256
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE MAESI TEST
 #--------------------------------------------------------------------------------------------------
 
-# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml # 38758
+fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
+
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml
 # fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v1.yaml
 # fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml # 42101 -> best
+
 
 # fdq_submit configs/cbct_vae/vae_cbct_maisi_x512.yaml # 42102
 # fdq_submit configs/cbct_vae/vae_cbct_maisi_x512_v2.yaml # 42569
