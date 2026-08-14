@@ -1,0 +1,38 @@
+defaults:
+  - vae_cbct_x256_v0
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+mode:
+  run_train: false
+  run_test_auto: true
+
+data:
+  ctrate:
+    args:
+      train_batch_size: 1
+      val_batch_size: 1
+
+train:
+  args:
+    accumulate_grad_batches: 4
+
+models:
+  monaivae:
+    args:
+      channels:
+      - 64
+      - 128
+      - 256
+      - 256
+      attention_levels:
+      - false
+      - false
+      - false
+      - false
+
+slurm_cluster:
+  gres: gpu:1

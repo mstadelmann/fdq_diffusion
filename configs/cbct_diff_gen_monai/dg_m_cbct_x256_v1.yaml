@@ -1,0 +1,11 @@
+defaults:
+  - dg_m_cbct_x256_v0
+  - _self_
+
+globals:
+  project: CBCT_Diff_Gen
+  author: Marc
+
+train:
+  args:
+    accumulate_grad_batches: 4
