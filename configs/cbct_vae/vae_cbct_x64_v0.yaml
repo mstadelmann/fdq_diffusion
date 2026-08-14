@@ -61,8 +61,8 @@ data:
       # unlike the raw CT-RATE release - no metadata_dir/RescaleSlope lookup needed here.
       # Cap how many volumes are actually used per split - the full train split still has
       # ~19k patients / ~22k matching files. Set to null to use every discovered file instead.
-      max_train_samples: 500
-      max_test_samples: 100
+      max_train_samples: 2000
+      max_test_samples: 200
       # "sequential" = first N files in sorted order (deterministic).
       # "random" = seeded random subset (same sample_seed -> same files every run).
       sample_selection: sequential
@@ -74,7 +74,7 @@ data:
       subset_val: 1.0
       subset_test: 1.0
       pin_memory: true
-      train_batch_size: 2
+      train_batch_size: 10
       val_batch_size: 2
       test_batch_size: 1
       shuffle_train: true
