@@ -169,3 +169,4 @@ slurm_cluster:
   auto_resubmit: true
   additional_pip_packages:
   - h5py
+  - safetensors

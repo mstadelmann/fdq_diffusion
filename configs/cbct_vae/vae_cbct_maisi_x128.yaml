@@ -89,6 +89,10 @@ data:
 train:
   path: ~/dev/fdq_diffusion/maisi.py
   args:
+    # maisi.py's fdq_train() always raises NotImplementedError (this is a test-only
+    # script), so this value is never actually used - it just has to be present
+    # because fdqExperiment.__init__ reads cfg.train.args.epochs unconditionally.
+    epochs: 1
     use_GPU: true
     use_AMP: true
     dataloader_name: ctrate
@@ -110,9 +114,10 @@ losses:
 store:
   results_path: ~/data_ML/results
   img_exp_nb: 8
+  checkpoint_frequency: 5
   use_wandb: true
   wandb_project: cbct_vae_maisi_x128
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:
@@ -144,3 +149,5 @@ slurm_cluster:
   additional_pip_packages:
   - h5py
   - nibabel
+  - monai==1.5.2
+  - safetensors
