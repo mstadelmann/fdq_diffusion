@@ -26,14 +26,6 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # 1m
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml              # res-block off
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml              # 3 att levels
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml              # 4 layers only
-
-# play with data norm
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_04.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_05.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_06.yaml
-# fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_07.yaml
-# --> did not help!
-
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_08_zero_snr.yaml
 
 
@@ -69,68 +61,65 @@ fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml
 ##################################################################################################
 ##################################################################################################
 
+#--------------------------------------------------------------------------------------------------
+# CBCT VAE
+#--------------------------------------------------------------------------------------------------
+fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml
+fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
+# fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml 42564
+
+
+
+#--------------------------------------------------------------------------------------------------
+# CBCT VAE MAESI TEST
+#--------------------------------------------------------------------------------------------------
+
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml # 38758
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v1.yaml
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml # 42101 -> best
+
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x512.yaml # 42102
+# fdq_submit configs/cbct_vae/vae_cbct_maisi_x512_v2.yaml # 42569
 
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF GEN
 #--------------------------------------------------------------------------------------------------
 
-# fdq_submit cbct_diff_gen_monai/dg_m_cbct_x128_v0.json
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml
 
-# fdq_submit cbct_diff_gen/diff_cbct_x256.json # -> noisy
-# fdq_submit cbct_diff_gen/diff_cbct_x256_minmax_norm.json
-# fdq_submit cbct_diff_gen/diff_cbct_x256_sig1000.json
-# fdq_submit cbct_diff_gen/diff_cbct_x256_attv1.json
-# fdq_submit cbct_diff_gen/diff_cbct_x256_attv2.json
-# fdq_submit cbct_diff_gen/diff_cbct_x256_01norm.json
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256.yaml # -> noisy
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_minmax_norm.yaml
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_sig1000.yaml
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_attv1.yaml
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_attv2.yaml
+# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_01norm.yaml
 
-# fdq_submit cbct_diff_gen_monai/dg_m_cbct_x256_v0.json
-# fdq_submit cbct_diff_gen_monai/dg_m_cbct_x256_v1.json
-# fdq_submit cbct_diff_gen_monai/dg_m_cbct_x256_v2.json
-# fdq_submit cbct_diff_gen_monai/dg_m_cbct_x256_v3.json
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0.yaml
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v1.yaml
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v2.yaml
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v3.yaml
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF Cnd
 #--------------------------------------------------------------------------------------------------
 # blur
-# fdq_submit cbct_diff_cond_monai/dc_m_cbct_x128_v0.json
+# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v0.yaml
 
 # cbct artifact
-# fdq_submit cbct_diff_cond_monai/dc_m_cbct_x128_v1.json
+# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v1.yaml
 # test: 38420
 # resume: 38421
 
-# fdq_submit cbct_diff_cond_monai/dc_m_cbct_x256_v0.json
+# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x256_v0.yaml
 # 38319
 
 
-#--------------------------------------------------------------------------------------------------
-# CBCT VAE
-#--------------------------------------------------------------------------------------------------
-# fdq_submit cbct_vae/vae_cbct_x256_v0.json # OK (42096)
-# fdq_submit cbct_vae/vae_cbct_x256_v0_dist2.json 42564
-# fdq_submit cbct_vae/vae_cbct_x256_v0_dist3.json 42565
-
-# fdq_submit cbct_vae/vae_cbct_x256_v1.json
-# fdq_submit cbct_vae/vae_cbct_x256_v2.json
-# fdq_submit cbct_vae/vae_cbct_x256_v3.json # 38756
-# fdq_submit cbct_vae/vae_cbct_x256_v4.json
-
-#--------------------------------------------------------------------------------------------------
-# CBCT VAE MAESI TEST
-#--------------------------------------------------------------------------------------------------
-
-# fdq_submit cbct_vae/vae_cbct_maisi_x256.json # 38758
-# fdq_submit cbct_vae/vae_cbct_maisi_x256_v1.json
-# fdq_submit cbct_vae/vae_cbct_maisi_x256_v2.json # 42101 -> best
-
-# fdq_submit cbct_vae/vae_cbct_maisi_x512.json # 42102
-# fdq_submit cbct_vae/vae_cbct_maisi_x512_v2.json # 42569
 
 #--------------------------------------------------------------------------------------------------
 # CBCT LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-# fdq_submit cbct_latent_diff/lat_diff_cbct_maisi_x256.json
-# fdq_submit cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.json
+# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256.yaml
+# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.yaml
 
-# fdq_submit cbct_latent_diff/lat_diff_cbct_monai_x256.json
+# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_monai_x256.yaml

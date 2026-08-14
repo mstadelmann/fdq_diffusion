@@ -1,0 +1,15 @@
+defaults:
+  - vae_cbct_x64_v0
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/ac3t/data/ac3t_ct_rate/processed_128
+
+store:
+  wandb_project: cbct_vae_x128
