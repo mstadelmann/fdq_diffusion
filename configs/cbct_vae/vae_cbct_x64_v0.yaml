@@ -5,6 +5,7 @@ defaults:
 globals:
   project: CBCT_VAE
   author: Marc
+  uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
   run_train: true

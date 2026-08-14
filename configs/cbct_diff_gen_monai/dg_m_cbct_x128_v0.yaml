@@ -5,9 +5,10 @@ defaults:
 globals:
   project: CBCT_Diff_Gen
   author: Marc
+  uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
-  run_train: false
+  run_train: true
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
@@ -35,65 +36,41 @@ transforms:
 
 data:
   ctrate:
-    processor: ~/dev/fdq_diffusion/hdf_preparator_v2.py
+    processor: ~/dev/fdq_diffusion/nifity_preparator.py
     args:
-      test_files_path:
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_0_v03_sca_05__138samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_1_v03_sca_05__152samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_2_v03_sca_05__158samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_test_batch_3_v03_sca_05__148samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_test_batch_0_v03_sca_05__138samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_test_batch_1_v03_sca_05__152samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_test_batch_2_v03_sca_05__158samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_test_batch_3_v03_sca_05__148samples.hdf
-      train_files_path:
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_0_v03_sca_05__141samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_1_v03_sca_05__146samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_2_v03_sca_05__146samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_3_v03_sca_05__139samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_4_v03_sca_05__134samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_5_v03_sca_05__156samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_6_v03_sca_05__149samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_7_v03_sca_05__148samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_8_v03_sca_05__144samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_9_v03_sca_05__131samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_10_v03_sca_05__142samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_11_v03_sca_05__141samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_12_v03_sca_05__138samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_491/ct_rate_train_batch_13_v03_sca_05__146samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_0_v03_sca_05__141samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_1_v03_sca_05__146samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_2_v03_sca_05__146samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_3_v03_sca_05__139samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_4_v03_sca_05__134samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_5_v03_sca_05__156samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_6_v03_sca_05__149samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_7_v03_sca_05__148samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_8_v03_sca_05__144samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_9_v03_sca_05__131samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_10_v03_sca_05__142samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_11_v03_sca_05__141samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_12_v03_sca_05__138samples.hdf
-      - /cluster/projects/ac3t/data/ac3t_ct_rate/size_128_debug/size_128/nproj_697/ct_rate_train_batch_13_v03_sca_05__146samples.hdf
-      hdf_ds_key_request:
-      - Vol_full: HU_to_norm
-      hdf_ds_key_request_test:
-      - Vol_full: HU_to_norm
-      data_is_3d: true
-      file_extension: hdf
+      root_path: /cluster/projects/ac3t/data/ac3t_ct_rate/processed_128
+      base_path: null
+      train_dir: train
+      test_dir: valid
+      file_extension: _1.nii.gz
+      max_train_samples: 2000
+      max_test_samples: 200
+      sample_selection: sequential
+      sample_seed: 42
+      transform_train: HU_to_norm
+      transform_test: HU_to_norm
       val_from_train_ratio: 0.1
       subset_train: 1.0
       subset_val: 1.0
       subset_test: 1.0
       pin_memory: true
-      num_workers: 4
-      train_batch_size: 1
-      val_batch_size: 1
+      train_batch_size: 10
+      val_batch_size: 2
       test_batch_size: 1
+      shuffle_train: true
+      shuffle_val: true
+      shuffle_test: false
+      drop_last: true
+      num_workers: 4
+      ddp_num_workers: 2
+    caching:
+      enabled: true
+      cache_dir: /scratch/fdq_cache/
       shuffle_train: true
       shuffle_val: false
       shuffle_test: false
-      drop_last: true
+      pin_memory: true
+      compress_cache: false
 
 models:
   monaiUNET:
@@ -163,7 +140,7 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: diff_gen_cbct_x128
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:
@@ -194,3 +171,5 @@ slurm_cluster:
   auto_resubmit: true
   additional_pip_packages:
   - h5py
+  - nibabel
+  - monai==1.5.2
