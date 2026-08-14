@@ -1,5 +1,5 @@
 defaults:
-  - vae_cbct_x64_v0
+  - vae_cbct_x64_v0_dist2
   - _self_
 
 globals:

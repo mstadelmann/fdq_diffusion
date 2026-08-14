@@ -65,9 +65,8 @@ fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml
+fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
 fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
-# fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml 42564
-
 
 
 #--------------------------------------------------------------------------------------------------

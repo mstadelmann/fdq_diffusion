@@ -74,7 +74,6 @@ data:
       subset_val: 1.0
       subset_test: 1.0
       pin_memory: true
-      num_workers: 4
       train_batch_size: 2
       val_batch_size: 2
       test_batch_size: 1
@@ -82,6 +81,16 @@ data:
       shuffle_val: true
       shuffle_test: false
       drop_last: true
+      num_workers: 4
+      ddp_num_workers: 2
+    caching:
+      enabled: true
+      cache_dir: /scratch/fdq_cache/
+      shuffle_train: true
+      shuffle_val: false
+      shuffle_test: false
+      pin_memory: true
+      compress_cache: false
 
 models:
   monaivae:
@@ -117,7 +126,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/vae.py
   args:
-    epochs: 200
+    epochs: 10
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
@@ -152,7 +161,7 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: cbct_vae_x64
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:
@@ -184,3 +193,4 @@ slurm_cluster:
   additional_pip_packages:
   - h5py
   - nibabel
+  - monai==1.5.2

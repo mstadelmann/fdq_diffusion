@@ -6,11 +6,6 @@ globals:
   project: CBCT_VAE
   author: Marc
 
-data:
-  ctrate:
-    args:
-      num_workers: 0
-
 slurm_cluster:
   world_size: 2
   cpus_per_task: 16
