@@ -95,11 +95,6 @@ fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml
 # fdq_submit configs/cbct_diff_gen/diff_cbct_x256_attv2.yaml
 # fdq_submit configs/cbct_diff_gen/diff_cbct_x256_01norm.yaml
 
-# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0.yaml
-# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v1.yaml
-# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v2.yaml
-# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v3.yaml
-
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF Cnd
 #--------------------------------------------------------------------------------------------------

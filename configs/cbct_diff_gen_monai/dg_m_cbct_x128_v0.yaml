@@ -54,7 +54,7 @@ data:
       subset_val: 1.0
       subset_test: 1.0
       pin_memory: true
-      train_batch_size: 10
+      train_batch_size: 4
       val_batch_size: 2
       test_batch_size: 1
       shuffle_train: true
