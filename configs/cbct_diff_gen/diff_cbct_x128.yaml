@@ -51,8 +51,8 @@ data:
       file_extension: _1.nii.gz
       # processed_128 volumes are already HU-calibrated and clipped to [-1000, 1000] -
       # no metadata_dir/RescaleSlope lookup needed here.
-      max_train_samples: 2000
-      max_test_samples: 200
+      max_train_samples: 10000
+      max_test_samples: 500
       sample_selection: sequential
       sample_seed: 42
       transform_train: HU_to_norm
@@ -119,7 +119,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_chuchichaestli.py
   args:
-    epochs: 150
+    epochs: 500
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1

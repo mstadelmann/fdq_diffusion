@@ -43,8 +43,8 @@ data:
       train_dir: train
       test_dir: valid
       file_extension: _1.nii.gz
-      max_train_samples: 2000
-      max_test_samples: 200
+      max_train_samples: 10000
+      max_test_samples: 500
       sample_selection: sequential
       sample_seed: 42
       transform_train: HU_to_norm
@@ -108,7 +108,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_monai.py
   args:
-    epochs: 200
+    epochs: 500
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
