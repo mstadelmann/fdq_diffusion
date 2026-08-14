@@ -5,6 +5,7 @@ defaults:
 globals:
   project: CBCT_LatentDiff
   author: Marc
+  uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
   run_train: true
@@ -170,3 +171,4 @@ slurm_cluster:
   additional_pip_packages:
   - h5py
   - safetensors
+  - chuchichaestli==0.2.17

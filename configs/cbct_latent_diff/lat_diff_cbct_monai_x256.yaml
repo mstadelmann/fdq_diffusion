@@ -202,3 +202,4 @@ slurm_cluster:
   auto_resubmit: true
   additional_pip_packages:
   - h5py
+  - chuchichaestli==0.2.17

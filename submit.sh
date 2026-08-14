@@ -88,12 +88,9 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
 
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml
 
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256.yaml # -> noisy
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_minmax_norm.yaml
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_sig1000.yaml
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_attv1.yaml
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_attv2.yaml
-# fdq_submit configs/cbct_diff_gen/diff_cbct_x256_01norm.yaml
+fdq_submit configs/cbct_diff_gen/diff_cbct_x128.yaml
+
+# add 256x !
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF Cnd
