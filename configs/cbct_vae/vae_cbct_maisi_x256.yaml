@@ -83,10 +83,6 @@ data:
 train:
   path: ~/dev/fdq_diffusion/maisi.py
   args:
-    # maisi.py's fdq_train() always raises NotImplementedError (this is a test-only
-    # script), so this value is never actually used - it just has to be present
-    # because fdqExperiment.__init__ reads cfg.train.args.epochs unconditionally.
-    epochs: 1
     use_GPU: true
     use_AMP: true
     dataloader_name: ctrate
@@ -122,7 +118,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.15
+  fdq_version: 0.1.16
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
