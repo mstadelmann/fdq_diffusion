@@ -65,6 +65,7 @@ def fdq_train(experiment) -> None:
 
         model.train()
         train_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -74,6 +75,8 @@ def fdq_train(experiment) -> None:
                 images_gt = batch[0].to(experiment.device)
             else:
                 images_gt = batch.to(experiment.device)
+
+            n_train_processed += images_gt.shape[0]
 
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
@@ -120,11 +123,12 @@ def fdq_train(experiment) -> None:
             train_loss_sum += train_loss_tensor.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
 
         model.eval()
         pbar = startProgBar(data.n_val_batches, "validation...")
         val_loss_sum = 0.0
+        n_val_processed = 0
 
         with (
             torch.no_grad(),
@@ -138,11 +142,12 @@ def fdq_train(experiment) -> None:
                 else:
                     images_gt = batch.to(experiment.device)
 
+                n_val_processed += images_gt.shape[0]
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
                 noise_pred = model(noisy_imgs, t)
                 val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
 
-            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+            experiment.valLoss = val_loss_sum / n_val_processed
 
             # Additional dummy validation: generate samples
             idx_to_store = torch.linspace(

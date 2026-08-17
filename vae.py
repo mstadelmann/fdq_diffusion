@@ -61,6 +61,7 @@ def fdq_train(experiment) -> None:
         train_loss_sum = 0.0
         train_kl_loss_sum = 0.0
         train_recon_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -71,6 +72,7 @@ def fdq_train(experiment) -> None:
             else:
                 images_gt = batch.to(experiment.device)
 
+            n_train_processed += images_gt.shape[0]
             is_grayscale = images_gt.shape[1] == 1
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
@@ -98,15 +100,16 @@ def fdq_train(experiment) -> None:
             train_recon_loss_sum += recon_loss.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        train_kl_loss_sum = train_kl_loss_sum / len(data.val_data_loader.dataset)
-        train_recon_loss_sum = train_recon_loss_sum / len(data.val_data_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
+        train_kl_loss_sum = train_kl_loss_sum / n_train_processed
+        train_recon_loss_sum = train_recon_loss_sum / n_train_processed
 
         model.eval()
         pbar = startProgBar(data.n_val_batches, "validation...")
         val_loss_sum = 0.0
         val_kl_loss_sum = 0.0
         val_recon_loss_sum = 0.0
+        n_val_processed = 0
 
         with torch.no_grad():
             for nb_vbatch, batch in enumerate(data.val_data_loader):
@@ -118,6 +121,7 @@ def fdq_train(experiment) -> None:
                 else:
                     images_gt = batch.to(experiment.device)
 
+                n_val_processed += images_gt.shape[0]
                 reconstruction, z_mu, z_sigma = model(images_gt)
                 # z_mu, z_sigma = model.encode(images_gt)
                 # z_vae = model.sampling(z_mu, z_sigma)
@@ -132,9 +136,9 @@ def fdq_train(experiment) -> None:
                 val_recon_loss_sum += recon_loss.detach().item()
                 val_kl_loss_sum += kl_loss.detach().item()
 
-            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
-            val_recon_loss_sum = val_recon_loss_sum / len(data.val_data_loader.dataset)
-            val_kl_loss_sum = val_kl_loss_sum / len(data.val_data_loader.dataset)
+            experiment.valLoss = val_loss_sum / n_val_processed
+            val_recon_loss_sum = val_recon_loss_sum / n_val_processed
+            val_kl_loss_sum = val_kl_loss_sum / n_val_processed
             pbar.finish()
 
             # epsilon = torch.randn_like(z_sigma)

@@ -62,11 +62,13 @@ def fdq_train(experiment) -> None:
 
         unet_model.train()
         train_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             images_gt = batch.to(experiment.device)
+            n_train_processed += images_gt.shape[0]
             z_mu, z_sigma = vae_model.encode(images_gt)
             z_vae = vae_model.sampling(z_mu, z_sigma)
 
@@ -146,13 +148,15 @@ def fdq_train(experiment) -> None:
             train_loss_sum += train_loss_tensor.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
 
         unet_model.eval()
         val_loss_sum = 0.0
+        n_val_processed = 0
         with torch.no_grad():
             for batch in data.val_data_loader:
                 images_gt = batch.to(experiment.device)
+                n_val_processed += images_gt.shape[0]
                 z_mu, z_sigma = vae_model.encode(images_gt)
                 z_vae = vae_model.sampling(z_mu, z_sigma)
                 with torch.autocast(
@@ -161,7 +165,7 @@ def fdq_train(experiment) -> None:
                     noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
                     noise_pred = unet_model(noisy_imgs, t)
                     val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
-        experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+        experiment.valLoss = val_loss_sum / n_val_processed
 
         # generate samples for preview
         idx_to_store = torch.linspace(

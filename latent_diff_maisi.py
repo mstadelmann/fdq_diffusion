@@ -112,6 +112,7 @@ def fdq_train(experiment) -> None:
 
         unet_model.train()
         train_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -121,6 +122,7 @@ def fdq_train(experiment) -> None:
                 images_gt = batch[0].to(experiment.device)
             else:
                 images_gt = batch.to(experiment.device)
+            n_train_processed += images_gt.shape[0]
             z_mu, z_sigma = maisi_model.encode(images_gt)
             z_vae = maisi_model.sampling(z_mu, z_sigma)
 
@@ -205,7 +207,7 @@ def fdq_train(experiment) -> None:
             train_loss_sum += train_loss_tensor.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
         experiment.valLoss = 0  # no validation train_loss_tensor
 
         # Dummy validation: generate samples
