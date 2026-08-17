@@ -16,5 +16,5 @@ slurm_cluster:
   cpus_per_task_test: 8
   gres: gpu:h200sxm:2
   gres_test: gpu:h200sxm:1
-  mem: 180G
-  mem_test: 120G
+  mem: 280G
+  mem_test: 180G
