@@ -87,6 +87,7 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
 #--------------------------------------------------------------------------------------------------
 
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml
 
 fdq_submit configs/cbct_diff_gen/diff_cbct_x128.yaml
 
