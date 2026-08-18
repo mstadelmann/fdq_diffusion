@@ -138,7 +138,7 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: cbct_lat_diff
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:

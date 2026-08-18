@@ -108,7 +108,7 @@ store:
   checkpoint_frequency: 5
   use_wandb: true
   wandb_project: cbct_vae
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:

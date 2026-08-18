@@ -176,7 +176,7 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: diff_cond_cbct_x128
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 
 test:
