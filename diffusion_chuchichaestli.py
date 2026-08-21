@@ -87,7 +87,7 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = images_gt.shape[1:]
-                if img_shape[1] == 1:
+                if img_shape[0] == 1:
                     is_grayscale = True
 
                 # first test batch: store inputs
@@ -221,7 +221,7 @@ def fdq_test(experiment):
         test_sample = test_sample[0]
 
     img_shape = test_sample.shape[1:]
-    is_grayscale = img_shape[1] == 1
+    is_grayscale = img_shape[0] == 1
 
     chuchi_diffuser = DDPM(
         num_timesteps=targs.diffusion_nb_steps,
