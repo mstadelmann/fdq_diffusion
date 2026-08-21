@@ -136,7 +136,7 @@ store:
   checkpoint_frequency: 4
   use_tensorboard: false
   use_wandb: true
-  wandb_project: fm_m_celeb_x128
+  wandb_project: celeb_fm_m_x128
   wandb_entity: zhaw_stmd
   img_exp_transform: norm_to_rgb
   wandb_img_as_grid: true

@@ -34,4 +34,4 @@ data:
       val_batch_size: 4
 
 store:
-  wandb_project: fm_m_celeb_x256
+  wandb_project: celeb_fm_m_x256
