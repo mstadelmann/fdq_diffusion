@@ -42,6 +42,12 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml        # lin/cos/si
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 
 
+# VIT (DiT)
+# ---------
+# dg_vit_celeb_ = DiffusionGenerative_VisionTransformer_Celebrities
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml
+
+
 #--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 #--------------------------------------------------------------------------------------------------
