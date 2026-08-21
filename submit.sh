@@ -45,7 +45,10 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 # VIT (DiT)
 # ---------
 # dg_vit_celeb_ = DiffusionGenerative_VisionTransformer_Celebrities
-fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml         # 1 GPU
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_dist2.yaml   # 2 GPUs
+
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml
 
 
 #--------------------------------------------------------------------------------------------------
@@ -53,6 +56,10 @@ fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml
 fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml
+
+# VIT (DiT) backbone, same pretrained VAEs
+fdq_submit configs/celeb_latent_diff_vit/lat_diff_vit_celeb_x128_00_base.yaml
+fdq_submit configs/celeb_latent_diff_vit/lat_diff_vit_celeb_x256_00.yaml
 
 
 #--------------------------------------------------------------------------------------------------

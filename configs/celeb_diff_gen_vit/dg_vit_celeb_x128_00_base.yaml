@@ -62,7 +62,6 @@ data:
       - '*': resize_norm
       hdf_ds_key_request_test:
       - '*': resize_norm
-      ddp_num_workers: 2 # num_workers in DDP is set to 0, as depending on the dataloader, it might be problematic. Use ddp_num_workers to overwrite this.
 
     caching:
       enabled: true
@@ -84,15 +83,16 @@ models:
       sample_size: 128
       in_channels: 3
       out_channels: 3
-      patch_size: 8
+      patch_size: 4
       num_layers: 12
       num_attention_heads: 12
       attention_head_dim: 64
       dropout: 0.0
     optimizer:
-      class_name: torch.optim.Adam
+      class_name: torch.optim.AdamW
       args:
         lr: 5.0e-05
+        weight_decay: 0.01
     lr_scheduler:
       class_name: torch.optim.lr_scheduler.StepLR
       args:
@@ -106,7 +106,11 @@ train:
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
-    early_stop_val_loss: 70
+    # A ViT/DiT backbone lacks the convolutional locality bias a U-Net has: its
+    # denoising loss plateaus long before samples become visually coherent, so
+    # a U-Net-tuned val-loss patience stops it far too early. Disabled here;
+    # early_stop_train_loss/early_stop_nan still guard against a stuck/diverged run.
+    early_stop_val_loss: null
     early_stop_train_loss: 70
     early_stop_nan: 5
     diffusion_scheduler: linear
@@ -154,12 +158,9 @@ slurm_cluster:
   job_time: 1400
   stop_grace_time: 15
   ntasks: 1
-  world_size: 2
-  cpus_per_task: 16
-  gres: gpu:a100sxm:2
-  gres_test: gpu:a100sxm:1
+  cpus_per_task: 8
+  gres: gpu:a100sxm:1
   mem: 120G
-  mem_test: 120G
   partition: gpu_top
   account: cai_ivs
   auto_resubmit: true

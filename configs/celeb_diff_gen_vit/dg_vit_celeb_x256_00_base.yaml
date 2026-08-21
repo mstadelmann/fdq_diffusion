@@ -1,0 +1,45 @@
+defaults:
+  - dg_vit_celeb_x128_00_base_dist2
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+transforms:
+  resize_norm:
+  - Float32
+  - Resize_HW:
+      h: 256
+      w: 256
+  - ReRange:
+      in_min: 0
+      in_max: 255
+      out_min: -1
+      out_max: 1
+
+models:
+  ViT:
+    args:
+      # Doubling the input resolution while keeping patch_size fixed would
+      # quadruple the token count (1024 -> 4096) and, with it, the quadratic
+      # attention cost (~16x). Scaling patch_size up in step with sample_size
+      # keeps the same 1024-token budget as the x128 config.
+      sample_size: 256
+      patch_size: 8
+
+store:
+  wandb_project: celeb_diff_gen_vit_x256
+
+slurm_cluster:
+  gres: gpu:h200sxm:2
+  gres_test: gpu:h200sxm:1
