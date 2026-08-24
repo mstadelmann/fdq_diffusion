@@ -46,6 +46,7 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml
 # ---------
 # dg_vit_celeb_ = DiffusionGenerative_VisionTransformer_Celebrities
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml         # 1 GPU
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_resume.yaml
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_dist2.yaml   # 2 GPUs
 
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml
