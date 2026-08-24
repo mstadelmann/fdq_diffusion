@@ -130,7 +130,7 @@ def fdq_train(experiment) -> None:
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
                 noise_pred = unet_model(noisy_imgs, t)
                 train_loss_tensor = (
-                    experiment.losses["MAE"](noise, noise_pred)
+                    experiment.losses["MSE"](noise, noise_pred)
                     / experiment.gradacc_iter
                 )
 
@@ -164,7 +164,7 @@ def fdq_train(experiment) -> None:
                 ):
                     noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
                     noise_pred = unet_model(noisy_imgs, t)
-                    val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
+                    val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
         experiment.valLoss = val_loss_sum / n_val_processed
 
         # generate samples for preview
@@ -176,7 +176,7 @@ def fdq_train(experiment) -> None:
         ).tolist()
 
         diff_history_latent = get_sample_from_noise(
-            model=unet_model,
+            model=experiment.get_eval_model(targs.model_name),
             diffuser=chuchi_diffuser,
             gen_shape=img_shape,
             idx_to_store=idx_to_store,
@@ -277,7 +277,7 @@ def fdq_test(experiment):
         pbar.update(inf_nb)
 
         diff_history_latent = get_sample_from_noise(
-            model=unet_model,
+            model=experiment.get_eval_model(targs.model_name),
             diffuser=chuchi_diffuser,
             gen_shape=img_shape,
             idx_to_store=idx_to_store,

@@ -17,6 +17,9 @@ mode:
   resume_chpt_path: null
 
 transforms:
+  random_h_flip:
+  - RandomHorizontalFlip:
+      p: 0.5
   resize_norm:
   - Float32
   - Resize_HW:
@@ -70,6 +73,8 @@ data:
       shuffle_test: false
       pin_memory: false
       compress_cache: false
+      nondeterministic_transforms:
+        processor: ~/dev/fdq_diffusion/celeb_augmentation.py
 
 models:
   monaivae:
@@ -111,6 +116,10 @@ models:
       num_attention_heads: 12
       attention_head_dim: 64
       dropout: 0.0
+    # EMA of the weights, updated every optimizer step and used for sampling/
+    # export - averages out per-step SGD noise, standard practice for diffusion
+    # models and a large lever on generated sample sharpness.
+    ema_decay: 0.999
     optimizer:
       class_name: torch.optim.AdamW
       args:
@@ -148,6 +157,8 @@ train:
 losses:
   MAE:
     class_name: torch.nn.L1Loss
+  MSE:
+    class_name: torch.nn.MSELoss
 
 store:
   results_path: ~/data_ML/results

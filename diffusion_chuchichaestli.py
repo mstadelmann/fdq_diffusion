@@ -8,7 +8,7 @@ from image_functions import createSubplots
 @torch.no_grad()
 def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
     targs = experiment.cfg.train.args
-    model = experiment.models[targs.model_name]
+    model = experiment.get_eval_model(targs.model_name)
     model.eval()
 
     imgs = []
@@ -106,7 +106,7 @@ def fdq_train(experiment) -> None:
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
                 noise_pred = model(noisy_imgs, t)
                 train_loss_tensor = (
-                    experiment.losses["MAE"](noise, noise_pred)
+                    experiment.losses["MSE"](noise, noise_pred)
                     / experiment.gradacc_iter
                 )
                 if experiment.useAMP:
@@ -145,7 +145,7 @@ def fdq_train(experiment) -> None:
                 n_val_processed += images_gt.shape[0]
                 noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
                 noise_pred = model(noisy_imgs, t)
-                val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
+                val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
 
             experiment.valLoss = val_loss_sum / n_val_processed
 

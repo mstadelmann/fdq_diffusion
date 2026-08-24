@@ -17,6 +17,9 @@ mode:
   resume_chpt_path: null
 
 transforms:
+  random_h_flip:
+  - RandomHorizontalFlip:
+      p: 0.5
   resize_norm:
   - Float32
   - Resize_HW:
@@ -71,15 +74,20 @@ data:
       shuffle_test: false
       pin_memory: true
       compress_cache: false
+      nondeterministic_transforms:
+        processor: ~/dev/fdq_diffusion/celeb_augmentation.py
 
 models:
   ViT:
     path: ~/dev/fdq_diffusion/vit_diffusion_model.py
     class_name: DiTNoisePredictor
     args:
-      # DiT-B/8 (Peebles & Xie, "Scalable Diffusion Models with Transformers"), applied directly
-      # in pixel space at 128x128 -> patch_size 8 gives a 16x16 = 256 token sequence, comparable
-      # to the 256-token latent grids DiT is normally run on.
+      # DiT-B/4 (Peebles & Xie, "Scalable Diffusion Models with Transformers"), applied directly
+      # in pixel space at 128x128 -> patch_size 4 gives a 32x32 = 1024 token sequence, 4x finer
+      # than the 256-token latent grids DiT is normally run on. Finer patches (more tokens) cost
+      # ~16x the attention FLOPs of patch_size 8 but reliably improve FID at fixed depth/width
+      # (Peebles & Xie, Table 3) - kept here despite the compute cost since raw pixels carry far
+      # less information per patch than a compressed VAE latent does.
       sample_size: 128
       in_channels: 3
       out_channels: 3
@@ -88,6 +96,10 @@ models:
       num_attention_heads: 12
       attention_head_dim: 64
       dropout: 0.0
+    # EMA of the weights, updated every optimizer step and used for sampling/
+    # export - averages out per-step SGD noise, standard practice for diffusion
+    # models and a large lever on generated sample sharpness.
+    ema_decay: 0.999
     optimizer:
       class_name: torch.optim.AdamW
       args:
