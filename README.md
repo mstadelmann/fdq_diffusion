@@ -42,7 +42,10 @@ wget https://raw.githubusercontent.com/mstadelmann/fonduecaquelon/refs/heads/mai
 python submit.py configs/celeb_vae/vae_celeb_x128_00_base.yaml
 ```
 
-`submit_celeb.sh` and `submit_ct.sh` list every configured experiment.
+`submit_celeb.sh` and `submit_ct.sh` list every configured experiment - run
+them line by line, not as a script. Executing either file as-is submits every
+experiment in it back to back, which is a lot of Slurm jobs and GPU-hours at
+once.
 
 ## Experiments
 
