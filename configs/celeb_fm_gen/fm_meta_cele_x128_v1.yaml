@@ -16,7 +16,7 @@ mode:
   resume_chpt_path: null
 
 data:
-  celeb_HDF:
+  celeb_HF:
     args:
       train_batch_size: 16
       val_batch_size: 8

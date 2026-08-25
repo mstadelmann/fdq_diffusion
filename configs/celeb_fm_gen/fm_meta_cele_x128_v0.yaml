@@ -39,12 +39,23 @@ transforms:
   - Uint8
 
 data:
-  celeb_HDF:
-    processor: ~/dev/fdq_diffusion/hdf_preparator_celeb.py
+  celeb_HF:
+    processor: ~/dev/fdq_diffusion/hf_preparator_celeb.py
     args:
-      base_path: ~/data_ML/celeba_hq_256/celeb_train_and_test/
-      file_extension: hdf
+      # datasets library cache_dir for the public bitmind/celeb-a-hq dataset
+      # (downloaded once, reused after). Named hf_cache_dir rather than
+      # base_path since fdq's copy_data_to_scratch() rsyncs any 'base_path'
+      # arg into ephemeral scratch and trains against that copy instead -
+      # which would re-download this every job. base_path: null below is an
+      # inert placeholder so that same function's unconditional attribute
+      # read doesn't raise (see hf_preparator_celeb.py for details).
+      hf_cache_dir: ~/data_ML/celeba_HQ_HF/
+      base_path: null
+      # single 'train' split only; val/test are carved off by fixed row index
+      # (not random), so with subset_*=1.0 below the same images land in
+      # train/val/test on every run.
       val_from_train_ratio: 0.05
+      test_from_train_ratio: 0.05
       subset_train: 1.0
       subset_val: 1.0
       subset_test: 1.0
@@ -58,10 +69,8 @@ data:
       shuffle_val: false
       shuffle_test: false
       drop_last: true
-      hdf_ds_key_request:
-      - '*': resize_norm
-      hdf_ds_key_request_test:
-      - '*': resize_norm
+      transform: resize_norm
+      transform_test: resize_norm
       ddp_num_workers: 2 # num_workers in DDP is set to 0, as depending on the dataloader, it might be problematic. Use ddp_num_workers to overwrite this.
 
     caching:
@@ -120,7 +129,7 @@ train:
     early_stop_val_loss: 50
     early_stop_train_loss: 50
     early_stop_nan: 5
-    dataloader_name: celeb_HDF
+    dataloader_name: celeb_HF
     model_name: metaUNET
 
 losses:
@@ -170,6 +179,6 @@ slurm_cluster:
   account: cai_ivs
   auto_resubmit: true
   additional_pip_packages:
-  - h5py
+  - datasets
   - flow_matching==1.0.10
   - torchmetrics[image]==1.7.1

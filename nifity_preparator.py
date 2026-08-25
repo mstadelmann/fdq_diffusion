@@ -142,7 +142,7 @@ def create_datasets(experiment, args=None):
       `val_dir` is configured.
     - pin_memory, num_workers, prefetch_factor, persistent_workers,
       multiprocessing_context, train_batch_size, val_batch_size, test_batch_size,
-      shuffle_train, shuffle_val, shuffle_test, drop_last: same as hdf_preparator_celeb.py.
+      shuffle_train, shuffle_val, shuffle_test, drop_last.
     """
 
     file_extension = args.get("file_extension", ".nii.gz")

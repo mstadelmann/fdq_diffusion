@@ -28,7 +28,7 @@ transforms:
       out_max: 1
 
 data:
-  celeb_HDF:
+  celeb_HF:
     args:
       train_batch_size: 4
       val_batch_size: 4
