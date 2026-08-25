@@ -1,9 +1,9 @@
 import os
 
 import torch
+from datasets import load_dataset
 from torch.utils import data
 from torchvision.transforms.functional import pil_to_tensor
-from datasets import load_dataset
 
 from fdq.ui_functions import iprint, wprint
 
@@ -51,10 +51,22 @@ def create_datasets(experiment, args=None):
 
     https://huggingface.co/datasets/bitmind/celeb-a-hq
 
-    `base_path` is used as the `datasets` library cache_dir: the first run
+    `hf_cache_dir` is used as the `datasets` library cache_dir: the first run
     downloads and converts the parquet shards there; every subsequent run
     (any experiment, sharing that same path) reuses the on-disk cache with
     no re-download.
+
+    Deliberately NOT named 'base_path': fdq's generic
+    fdqExperiment.copy_data_to_scratch() rsyncs any data arg literally named
+    base_path into the job's ephemeral scratch dir and rewrites the arg to
+    point there instead - which would silently re-download this dataset into
+    scratch on every single job and lose it again when the job ends. This
+    function never reads args.base_path; the corresponding config still
+    declares `base_path: null` as a no-op placeholder, since that same
+    copy_data_to_scratch() reads it via `.` (not `.get()`) unconditionally on
+    every data source and raises ConfigAttributeError if the key is missing
+    entirely - `null` satisfies that check (None -> copy skipped) without
+    this preparator ever using the value.
 
     This dataset ships a single 30k-image 'train' split with no built-in
     val/test - `val_from_train_ratio` and `test_from_train_ratio` carve fixed,
@@ -62,7 +74,7 @@ def create_datasets(experiment, args=None):
     not randomly), so the same held-out images are used whether this function
     is called from the training job or from a later, separate test job.
     """
-    cache_dir = os.path.expanduser(args.base_path)
+    cache_dir = os.path.expanduser(args.hf_cache_dir)
     os.makedirs(cache_dir, exist_ok=True)
 
     num_workers = args.num_workers
@@ -100,7 +112,7 @@ def create_datasets(experiment, args=None):
     if is_train:
         transform = experiment.transformers[args.transform]
 
-        train_hf = full.select(range(0, n_train))
+        train_hf = full.select(range(n_train))
         val_hf = full.select(range(n_train, n_train + n_val))
 
         train = HFCelebDataset(train_hf, transform=transform)

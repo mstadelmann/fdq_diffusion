@@ -53,7 +53,19 @@ data:
     args:
       # datasets library cache_dir - the bitmind/celeb-a-hq parquet shards are
       # downloaded here on first run and reused (no re-download) afterwards.
-      base_path: ~/data_ML/celeba_HQ_HF/
+      # Deliberately NOT the arg fdq's data loading reads: 'base_path' triggers
+      # fdqExperiment.copy_data_to_scratch(), which rsyncs it into the job's
+      # ephemeral scratch dir and trains against THAT copy instead - silently
+      # re-downloading every job and losing it again at job end. See
+      # hf_preparator_celeb.py for the full explanation.
+      hf_cache_dir: ~/data_ML/celeba_HQ_HF/
+      # copy_data_to_scratch() unconditionally reads args.base_path (via `.`,
+      # not `.get()`) on every declared data source, regardless of whether
+      # that source's own preparator uses it - a genuinely absent key raises
+      # ConfigAttributeError rather than being treated as None. This null
+      # placeholder exists only to satisfy that check (None -> copy skipped);
+      # hf_preparator_celeb.py itself never reads base_path.
+      base_path: null
       # this dataset has one 'train' split only; these carve off fixed,
       # non-overlapping val/test slices by row index (not random), so the
       # held-out images are identical whether called from the training job
