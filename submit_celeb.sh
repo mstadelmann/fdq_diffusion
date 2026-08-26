@@ -13,6 +13,8 @@ fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml          # A100: 19s/e
 
 fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30s/ep
 
+fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # H100, same batch_size as x256 - untested, may need reducing
+
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
 # dg_m_cele_ = DiffusionGenerative_MONAI_Celebrities
