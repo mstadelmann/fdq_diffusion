@@ -9,7 +9,7 @@ globals:
 data:
   ctrate:
     args:
-      root_path: /cluster/projects/ac3t/data/ac3t_ct_rate/processed_128
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_128
 
 store:
   wandb_project: cbct_vae_x128

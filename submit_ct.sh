@@ -8,11 +8,12 @@
 # CBCT VAE
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml
-fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml       # 2 GPUs
+fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
 
-fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml            # 128px
+fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
 
-# add x256
+fdq_submit configs/cbct_vae/vae_cbct_x256_v0.yaml
+fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml
 
 #--------------------------------------------------------------------------------------------------
 # CBCT VAE MAESI TEST

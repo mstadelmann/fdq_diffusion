@@ -1,0 +1,33 @@
+defaults:
+  - vae_cbct_x64_v0_dist2
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_256
+      # Each resolution tier is 2x the previous in every axis (256x256x128 here vs
+      # 128x128x64 for x128), i.e. 8x the voxel count per volume. train_batch_size
+      # is cut accordingly (10 -> 2, matching val_batch_size 2 -> 1) as a starting
+      # point to avoid an immediate OOM - this hasn't been run yet, so treat it as
+      # a first guess and adjust once you see actual memory usage.
+      train_batch_size: 2
+      val_batch_size: 1
+
+store:
+  wandb_project: cbct_vae_x256
+
+slurm_cluster:
+  world_size: 2
+  cpus_per_task: 16
+  cpus_per_task_test: 8
+  gres: gpu:h200sxm:2
+  gres_test: gpu:h200sxm:1
+  # Bumped from x128's 280G/180G given the 8x per-volume memory footprint -
+  # also an untested first guess, same caveat as train_batch_size above.
+  mem: 480G
+  mem_test: 300G
