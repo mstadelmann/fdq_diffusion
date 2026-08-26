@@ -108,7 +108,7 @@ def create_datasets(experiment, args=None):
     """NIfTI (.nii.gz) data preparator, e.g. for CT-RATE-style datasets laid out as
     <root_path>/<train_dir>/<patient>/<scan>/<scan>_<n>.nii.gz.
 
-    Instead of listing individual files (as hdf_preparator_v2.py requires), point
+    Instead of listing individual files, point
     `root_path` at the dataset root and every matching file underneath the
     configured split directory is discovered and used directly.
 
