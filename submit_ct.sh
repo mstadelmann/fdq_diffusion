@@ -5,7 +5,7 @@
 # 2) pip install fdq[submit]
 
 #--------------------------------------------------------------------------------------------------
-# CBCT VAE
+# CT-Rate VAE
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
@@ -16,7 +16,7 @@ fdq_submit configs/cbct_vae/vae_cbct_x256_v0.yaml
 fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml
 
 #--------------------------------------------------------------------------------------------------
-# CBCT VAE MAESI TEST
+# CT-Rate  VAE MAESI TEST
 #--------------------------------------------------------------------------------------------------
 
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
@@ -27,7 +27,7 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 
 
 #--------------------------------------------------------------------------------------------------
-# CBCT DIFF GEN
+# CT-Rate  DIFF GEN
 #--------------------------------------------------------------------------------------------------
 
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml         # MONAI UNet
@@ -39,23 +39,16 @@ fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0_dist2.yaml
 fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchichaestli UNet
 
 #--------------------------------------------------------------------------------------------------
-# CBCT DIFF Cnd
+# CT-Rate  DIFF Cnd
 #--------------------------------------------------------------------------------------------------
 # blur
-# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v0.yaml
+fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v0.yaml
 
-# cbct artifact
-# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v1.yaml
-# test: 38420
-# resume: 38421
-
-# fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x256_v0.yaml
-# 38319
 
 
 
 #--------------------------------------------------------------------------------------------------
-# CBCT LAT DIFF GEN
+# CT-Rate  LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
 # fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256.yaml
 # fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.yaml

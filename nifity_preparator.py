@@ -72,16 +72,36 @@ class NiftiDataset(data.Dataset):
         volume = np.transpose(volume, (2, 1, 0))
         sample = torch.from_numpy(np.ascontiguousarray(volume)).unsqueeze(0)
 
-        if self.transform is not None:
-            sample = self.transform(sample)
-
-        return sample
+        if self.transform is None:
+            return sample
+        if isinstance(self.transform, (list, tuple)):
+            # Multiple transforms of the *same* loaded volume, e.g. a clean view
+            # and a degraded (blurred/etc.) view for conditional training - not
+            # multiple different volumes.
+            return tuple(t(sample) for t in self.transform)
+        return self.transform(sample)
 
 
 def _discover_files(split_dir, file_extension):
     if not os.path.isdir(split_dir):
         return []
     return sorted(Path(split_dir).glob(f"**/*{file_extension}"))
+
+
+def _resolve_transform(experiment, transform_name):
+    """Look up a transform_train/transform_test arg by name.
+
+    A plain string resolves to a single transform (one tensor per sample, the
+    existing behaviour). A list/tuple of names resolves to that many transforms
+    applied to the *same* loaded volume, returned as a tuple - e.g. a clean and
+    a degraded view of one volume for conditional training. Omit/null for no
+    transform at all.
+    """
+    if not transform_name:
+        return None
+    if isinstance(transform_name, str):
+        return experiment.transformers[transform_name]
+    return [experiment.transformers[name] for name in transform_name]
 
 
 def _select_subset(file_paths, max_samples, selection, seed):
@@ -127,9 +147,13 @@ def create_datasets(experiment, args=None):
       or "random" (seeded random subset). Default "sequential".
     - sample_seed (int, optional): seed for `sample_selection: random`. Default 42.
       Set to null for a different random subset on every run.
-    - transform_train / transform_test (str, optional): name of the transform (from the
-      experiment's `transforms:` block) applied to every loaded volume during training/val
-      and testing respectively. Omit to return raw (untransformed) volumes.
+    - transform_train / transform_test (str or list[str], optional): name(s) of the
+      transform(s) (from the experiment's `transforms:` block) applied to every loaded
+      volume during training/val and testing respectively. A single name returns one
+      transformed tensor per sample; a list of names applies each transform to the *same*
+      loaded volume and returns a tuple of tensors (e.g. a clean + a degraded view of one
+      volume, for conditional training - not multiple different volumes). Omit for raw
+      (untransformed) volumes.
     - metadata_dir (str, optional but strongly recommended): directory containing the
       CT-RATE `<train_dir>_metadata.csv` / `<test_dir>_metadata.csv` files. Used to look
       up each file's real RescaleSlope/RescaleIntercept and convert raw stored values to
@@ -213,8 +237,7 @@ def create_datasets(experiment, args=None):
     if is_train:
         iprint("Preparing training dataset")
 
-        transform_name = args.get("transform_train")
-        transform = experiment.transformers[transform_name] if transform_name else None
+        transform = _resolve_transform(experiment, args.get("transform_train"))
 
         train = NiftiDataset(
             file_paths=data_files["train"], experiment=experiment, transform=transform, hu_metadata=hu_metadata
@@ -232,8 +255,7 @@ def create_datasets(experiment, args=None):
         train = []
         val = []
 
-        transform_name = args.get("transform_test")
-        transform = experiment.transformers[transform_name] if transform_name else None
+        transform = _resolve_transform(experiment, args.get("transform_test"))
 
     is_test = experiment.mode.op_mode.test
     if is_test and len(data_files["test"]) > 0:
