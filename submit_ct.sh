@@ -21,9 +21,9 @@ fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml
 
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
 
-# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml
-# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v1.yaml
-# fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml # 42101 -> best
+fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml
+fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v1.yaml
+fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 
 
 #--------------------------------------------------------------------------------------------------

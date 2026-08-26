@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 globals:
-  project: CBCT_LatentDiff
+  project: CBCT_VAE
   author: Marc
 
 transforms:
