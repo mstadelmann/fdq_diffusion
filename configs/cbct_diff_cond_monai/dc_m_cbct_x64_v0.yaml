@@ -68,8 +68,10 @@ data:
       file_extension: _1.nii.gz
       # processed_64 volumes are already HU-calibrated and clipped to [-1000, 1000] -
       # no metadata_dir/RescaleSlope lookup needed here.
-      max_train_samples: 10000
-      max_test_samples: 500
+      # Just testing that the setup works end to end - not real training scale.
+      # See dc_m_cbct_x128_v0.yaml for the full-scale values.
+      max_train_samples: 50
+      max_test_samples: 10
       sample_selection: sequential
       sample_seed: 42
       # Two transforms of the *same* volume, not two different volumes: nifity_preparator
@@ -101,6 +103,8 @@ data:
       compress_cache: false
 
 models:
+  # Just testing that the setup works end to end - a much smaller UNet (3 levels
+  # instead of 4, far fewer channels) than the real dc_m_cbct_x128_v0.yaml one.
   monaiUNET:
     class_name: monai.networks.nets.DiffusionModelUNet
     args:
@@ -109,17 +113,14 @@ models:
       out_channels: 1
       resblock_updown: true
       num_res_blocks:
-      - 2
-      - 2
-      - 2
-      - 2
+      - 1
+      - 1
+      - 1
       channels:
+      - 16
+      - 32
       - 64
-      - 128
-      - 256
-      - 512
       attention_levels:
-      - false
       - false
       - false
       - false
@@ -136,7 +137,8 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_monai.py
   args:
-    epochs: 150
+    # Just testing that the setup works end to end - 30 epochs, not a real run.
+    epochs: 30
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
@@ -190,11 +192,13 @@ slurm_cluster:
   stop_grace_time: 15
   cpus_per_task: 16
   cpus_per_task_test: 16
-  gres: gpu:h200sxm:1
-  gres_test: gpu:h200sxm:1
+  # Just testing that the setup works end to end - cheaper GPU/partition, not the
+  # real dc_m_cbct_x128_v0.yaml allocation.
+  gres: gpu:v100sxm:1
+  gres_test: gpu:v100sxm:1
   mem: 120G
   mem_test: 120G
-  partition: gpu_top
+  partition: gpu
   account: cai_ivs
   auto_resubmit: true
   additional_pip_packages:

@@ -29,6 +29,39 @@ data:
   ctrate:
     args:
       root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_128
+      # dc_m_cbct_x64_v0 is a cheap smoke-test config (tiny model/sample count/epochs,
+      # V100 on the "gpu" partition) - this is the real experiment, so every field it
+      # would otherwise inherit reduced is restated at full scale below.
+      max_train_samples: 10000
+      max_test_samples: 500
+
+models:
+  monaiUNET:
+    args:
+      num_res_blocks:
+      - 2
+      - 2
+      - 2
+      - 2
+      channels:
+      - 64
+      - 128
+      - 256
+      - 512
+      attention_levels:
+      - false
+      - false
+      - false
+      - false
+
+train:
+  args:
+    epochs: 150
 
 store:
   wandb_project: diff_cond_cbct_x128
+
+slurm_cluster:
+  gres: gpu:h200sxm:1
+  gres_test: gpu:h200sxm:1
+  partition: gpu_top
