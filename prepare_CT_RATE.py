@@ -311,7 +311,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="/cluster/projects/2025_stmd_bebo/ct-rate",
+        default="/cluster/projects/2026_stmd_orthosense/public_data/ct-rate",
         help="Base directory for processed output. Files for a given --resolution R are "
         "written under <output-dir>/preproc_R/.",
     )
