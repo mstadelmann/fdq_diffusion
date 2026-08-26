@@ -56,6 +56,14 @@ fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 2
 
 
 #--------------------------------------------------------------------------------------------------
+# CELEB DIFF COND
+# blurred GT as condition, same task as CT's cbct_diff_cond_monai/cbct_diff_cond_cc
+#--------------------------------------------------------------------------------------------------
+fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_deblur.yaml   # MONAI UNet
+fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchichaestli UNet
+
+
+#--------------------------------------------------------------------------------------------------
 # CELEB Latent Diffusion
 # diffusion runs on VAE latents instead of raw pixels - smaller, faster to train
 #--------------------------------------------------------------------------------------------------

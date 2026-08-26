@@ -25,12 +25,22 @@ class HFCelebDataset(data.Dataset):
 
     def __getitem__(self, index):
         sample = pil_to_tensor(self.hf_dataset[index]["image"].convert("RGB"))
-        if self.transform is not None:
-            sample = self.transform(sample)
-        return sample
+        if self.transform is None:
+            return sample
+        if isinstance(self.transform, (list, tuple)):
+            return tuple(t(sample) for t in self.transform)
+        return self.transform(sample)
 
     def __len__(self):
         return len(self.hf_dataset)
+
+
+def _resolve_transform(experiment, transform_name):
+    if not transform_name:
+        return None
+    if isinstance(transform_name, str):
+        return experiment.transformers[transform_name]
+    return [experiment.transformers[name] for name in transform_name]
 
 
 def _make_subset(dataset, subratio, shuffle):
@@ -110,7 +120,7 @@ def create_datasets(experiment, args=None):
     test_sub = []
 
     if is_train:
-        transform = experiment.transformers[args.transform]
+        transform = _resolve_transform(experiment, args.transform)
 
         train_hf = full.select(range(n_train))
         val_hf = full.select(range(n_train, n_train + n_val))
@@ -124,7 +134,7 @@ def create_datasets(experiment, args=None):
         iprint("This is a test run - no training and validation sets are being generated.")
 
     if is_test:
-        test_transform = experiment.transformers[args.transform_test]
+        test_transform = _resolve_transform(experiment, args.transform_test)
         test_hf = full.select(range(n_train + n_val, n))
         test = HFCelebDataset(test_hf, transform=test_transform)
         test_sub = _make_subset(test, args.subset_test, args.shuffle_test)
