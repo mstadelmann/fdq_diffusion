@@ -31,11 +31,12 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 #--------------------------------------------------------------------------------------------------
 
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml         # MONAI UNet
-fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml   # 2 GPUs
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml
+fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml                # chuchichaestli UNet
 
-fdq_submit configs/cbct_diff_gen/diff_cbct_x128.yaml                  # chuchichaestli UNet
-
-# add 256x !
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0.yaml         # MONAI UNet
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0_dist2.yaml
+fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchichaestli UNet
 
 #--------------------------------------------------------------------------------------------------
 # CBCT DIFF Cnd

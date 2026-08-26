@@ -1,0 +1,26 @@
+defaults:
+  - diff_cbct_x128
+  - _self_
+
+globals:
+  project: CBCT_Diff_Gen
+  author: Marc
+
+# diff_cbct_x128 currently has run_train: false (left in a test-only state from
+# after that experiment finished training) - this is a fresh, untrained config,
+# so training needs to be turned back on explicitly.
+mode:
+  run_train: true
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_256
+      # preproc_256 volumes are 8x the voxel count of preproc_128 (256x256x128 vs
+      # 128x128x64) - batch size cut accordingly (4 -> 1, val 2 -> 1) as a first
+      # guess to avoid an immediate OOM; this hasn't actually been run yet.
+      train_batch_size: 1
+      val_batch_size: 1
+
+store:
+  wandb_project: cbct_diff_gen_x256
