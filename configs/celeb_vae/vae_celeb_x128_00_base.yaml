@@ -10,7 +10,7 @@ globals:
 mode:
   run_train: true
   run_test_interactive: false
-  run_test_auto: true
+  run_test_auto: false
   dump_model: false
   run_inference: false
   print_model_summary: false
@@ -114,7 +114,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/vae.py
   args:
-    epochs: 400
+    epochs: 10
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1

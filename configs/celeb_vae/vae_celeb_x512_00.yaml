@@ -38,6 +38,10 @@ data:
       pin_memory: true
       compress_cache: false
 
+train:
+  args:
+    epochs: 400
+
 store:
   wandb_project: celeb_vae_x512
 

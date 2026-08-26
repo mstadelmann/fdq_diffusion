@@ -15,6 +15,12 @@ mode:
   print_model_summary: false
   resume_chpt_path: null
 
+# vae_celeb_x128_00_base.yaml is now a baseline/memory-check-only config (2 epochs) -
+# this is the real 2-GPU training run, so epochs is restored explicitly.
+train:
+  args:
+    epochs: 400
+
 data:
   celeb_HF:
     args:

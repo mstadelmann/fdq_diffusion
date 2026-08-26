@@ -8,8 +8,8 @@
 #--------------------------------------------------------------------------------------------------
 # CELEB VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # A100: 33s/ep
-fdq_submit configs/celeb_vae/vae_celeb_x128_03_dist2.yaml          # A100: 19s/ep
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # A100: 33s/ep, baseline/memory check only
+fdq_submit configs/celeb_vae/vae_celeb_x128_00_dist2.yaml          # A100: 19s/ep
 
 fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 1m 30s/ep
 
@@ -24,7 +24,7 @@ fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # H100, same 
 # MONAI
 # -----
 # UNet from Project MONAI (medical imaging DL toolkit)
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml         # baseline, 2m40/ep
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml         # 2m40/ep, baseline/memory check only
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # 1m40/ep
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml              # res-block off
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml              # 3 att levels
@@ -50,8 +50,8 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px
 # ---------
 # dg_vit_celeb_ = DiffusionGenerative_VisionTransformer_Celebrities
 # transformer backbone instead of a UNet (Diffusion Transformer / Peebles & Xie)
-fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml         # 1 GPU
-fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_resume.yaml
+fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml         # 1 GPU, baseline/memory check only
+# fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_resume.yaml
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_dist2.yaml   # 2 GPUs
 
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 256px, 2 GPUs
