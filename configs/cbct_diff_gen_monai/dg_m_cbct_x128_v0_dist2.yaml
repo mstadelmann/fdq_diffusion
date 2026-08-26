@@ -6,6 +6,13 @@ globals:
   project: CBCT_Diff_Gen
   author: Marc
 
+mode:
+  run_test_auto: true
+
+train:
+  args:
+    epochs: 500
+
 slurm_cluster:
   world_size: 2
   cpus_per_task: 16
