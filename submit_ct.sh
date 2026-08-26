@@ -42,6 +42,7 @@ fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchich
 # CT-Rate  DIFF Cnd
 #--------------------------------------------------------------------------------------------------
 # blur
+fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x64_v0.yaml
 fdq_submit configs/cbct_diff_cond_monai/dc_m_cbct_x128_v0.yaml
 
 
