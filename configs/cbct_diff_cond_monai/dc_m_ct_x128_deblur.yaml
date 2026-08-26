@@ -1,5 +1,5 @@
 defaults:
-  - dc_m_cbct_x64_v0
+  - dc_m_ct_x64_deblur
   - _self_
 
 globals:
@@ -20,7 +20,7 @@ transforms:
       out_min: -1
       out_max: 1
   - Gaussian_Blur:
-      # See dc_m_cbct_x64_v0 for why this is resolution-specific: 10px * 3.0mm/px
+      # See dc_m_ct_x64_deblur for why this is resolution-specific: 10px * 3.0mm/px
       # (x128 spacing) = 30mm physical blur radius, matching x64's 5px * 6.0mm/px.
       blur_sigma: 10.0
       blur_kernel_size: 61
@@ -29,7 +29,7 @@ data:
   ctrate:
     args:
       root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_128
-      # dc_m_cbct_x64_v0 is a cheap smoke-test config (tiny model/sample count/epochs,
+      # dc_m_ct_x64_deblur is a cheap smoke-test config (tiny model/sample count/epochs,
       # V100 on the "gpu" partition) - this is the real experiment, so every field it
       # would otherwise inherit reduced is restated at full scale below.
       max_train_samples: 10000

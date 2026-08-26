@@ -36,9 +36,9 @@ transforms:
       # Gaussian_Blur operates in pixel space, but preproc_64/preproc_128/preproc_256
       # all share the same 384mm in-plane FOV (spacing = 384/resolution), so the same
       # pixel sigma would mean a *different physical* blur radius per tier. Scaled to
-      # match dc_m_cbct_x128_v0's physical blur radius: 10px * 3.0mm/px (x128 spacing)
+      # match dc_m_ct_x128_deblur's physical blur radius: 10px * 3.0mm/px (x128 spacing)
       # = 30mm; at x64's 6.0mm/px spacing that's 30 / 6.0 = 5px. kernel_size again
-      # covers +/-3 sigma (see dc_m_cbct_x128_v0 for why that matters).
+      # covers +/-3 sigma (see dc_m_ct_x128_deblur for why that matters).
       blur_sigma: 5.0
       blur_kernel_size: 31
   norm_to_HU:
@@ -69,7 +69,7 @@ data:
       # processed_64 volumes are already HU-calibrated and clipped to [-1000, 1000] -
       # no metadata_dir/RescaleSlope lookup needed here.
       # Just testing that the setup works end to end - not real training scale.
-      # See dc_m_cbct_x128_v0.yaml for the full-scale values.
+      # See dc_m_ct_x128_deblur.yaml for the full-scale values.
       max_train_samples: 50
       max_test_samples: 10
       sample_selection: sequential
@@ -104,7 +104,7 @@ data:
 
 models:
   # Just testing that the setup works end to end - a much smaller UNet (3 levels
-  # instead of 4, far fewer channels) than the real dc_m_cbct_x128_v0.yaml one.
+  # instead of 4, far fewer channels) than the real dc_m_ct_x128_deblur.yaml one.
   monaiUNET:
     class_name: monai.networks.nets.DiffusionModelUNet
     args:
@@ -112,14 +112,16 @@ models:
       in_channels: 2
       out_channels: 1
       resblock_updown: true
+      # channels must each be a multiple of norm_num_groups (defaults to 32 in
+      # MONAI's DiffusionModelUNet) - 16 isn't, which is what actually failed here.
       num_res_blocks:
       - 1
       - 1
       - 1
       channels:
-      - 16
       - 32
       - 64
+      - 128
       attention_levels:
       - false
       - false
@@ -193,11 +195,11 @@ slurm_cluster:
   cpus_per_task: 16
   cpus_per_task_test: 16
   # Just testing that the setup works end to end - cheaper GPU/partition, not the
-  # real dc_m_cbct_x128_v0.yaml allocation.
+  # real dc_m_ct_x128_deblur.yaml allocation.
   gres: gpu:v100sxm:1
   gres_test: gpu:v100sxm:1
-  mem: 120G
-  mem_test: 120G
+  mem: 60G
+  mem_test: 60G
   partition: gpu
   account: cai_ivs
   auto_resubmit: true

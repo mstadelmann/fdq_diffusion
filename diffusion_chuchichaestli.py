@@ -6,7 +6,7 @@ from image_functions import createSubplots
 
 
 @torch.no_grad()
-def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
+def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None, condition=None):
     targs = experiment.cfg.train.args
     model = experiment.get_eval_model(targs.model_name)
     model.eval()
@@ -17,6 +17,7 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
         diffuser.generate(
             model=model,
             shape=tuple(gen_shape),
+            condition=condition,
             n=1,
             yield_intermediate=True,
         )
@@ -71,10 +72,11 @@ def fdq_train(experiment) -> None:
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             if isinstance(batch, (list, tuple)):
-                # Legacy loader compatibility: TODO cleanup!
                 images_gt = batch[0].to(experiment.device)
+                condition = batch[1].to(experiment.device) if len(batch) == 2 else None
             else:
                 images_gt = batch.to(experiment.device)
+                condition = None
 
             n_train_processed += images_gt.shape[0]
 
@@ -102,8 +104,22 @@ def fdq_train(experiment) -> None:
                 )
                 imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
+                if condition is not None:
+                    cond_imgs_path = createSubplots(
+                        image_list=condition,
+                        grayscale=is_grayscale,
+                        experiment=experiment,
+                        histogram=True,
+                        hide_ticks=True,
+                        figure_title="Input Condition",
+                        export_transform=t_img_exp,
+                    )
+                    imgs_to_log.append({"name": "train_cond", "path": cond_imgs_path})
+
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-                noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
+                noisy_imgs, noise, t = chuchi_diffuser.noise_step(
+                    x_t=images_gt, condition=condition
+                )
                 noise_pred = model(noisy_imgs, t)
                 train_loss_tensor = (
                     experiment.losses["MSE"](noise, noise_pred)
@@ -137,13 +153,16 @@ def fdq_train(experiment) -> None:
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
                 if isinstance(batch, (list, tuple)):
-                    # Legacy loader compatibility: TODO cleanup!
                     images_gt = batch[0].to(experiment.device)
+                    condition = batch[1].to(experiment.device) if len(batch) == 2 else None
                 else:
                     images_gt = batch.to(experiment.device)
+                    condition = None
 
                 n_val_processed += images_gt.shape[0]
-                noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
+                noisy_imgs, noise, t = chuchi_diffuser.noise_step(
+                    x_t=images_gt, condition=condition
+                )
                 noise_pred = model(noisy_imgs, t)
                 val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
 
@@ -162,6 +181,7 @@ def fdq_train(experiment) -> None:
                 diffuser=chuchi_diffuser,
                 gen_shape=img_shape,
                 idx_to_store=idx_to_store,
+                condition=condition,
             )
 
             history_path = createSubplots(
@@ -180,6 +200,19 @@ def fdq_train(experiment) -> None:
                     {"name": "gen_hist", "path": history_path},
                 ]
             )
+
+            if condition is not None:
+                cond_diff_path = createSubplots(
+                    image_list=[images_gt, condition, images[-1], images_gt - images[-1]],
+                    grayscale=is_grayscale,
+                    experiment=experiment,
+                    histogram=True,
+                    figure_title="Generative Diffusion Steps",
+                    export_transform=t_img_exp,
+                    labels=["GT", "Condition", "Generated", "GT - Generated"],
+                    apply_global_range=False,
+                )
+                imgs_to_log.append({"name": "gen_cond_diff", "path": cond_diff_path})
 
             experiment.on_epoch_end(log_images_wandb=imgs_to_log)
 
@@ -216,9 +249,11 @@ def fdq_test(experiment):
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     test_sample = next(iter(data.test_data_loader))
-    # legacy compatibility
     if isinstance(test_sample, (list, tuple)):
+        condition = test_sample[1].to(experiment.device) if len(test_sample) == 2 else None
         test_sample = test_sample[0]
+    else:
+        condition = None
 
     img_shape = test_sample.shape[1:]
     is_grayscale = img_shape[0] == 1
@@ -244,6 +279,7 @@ def fdq_test(experiment):
                 diffuser=chuchi_diffuser,
                 gen_shape=img_shape,
                 idx_to_store=idx_to_store,
+                condition=condition,
             )
 
         history_path = createSubplots(

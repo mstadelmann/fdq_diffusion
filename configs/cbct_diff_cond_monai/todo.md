@@ -1,4 +1,4 @@
-# dc_m_cbct_x128_v0 - next steps
+# dc_m_ct_x128_deblur - next steps
 
 Current state is a deliberately simple proof of concept: concatenation-conditioned
 diffusion, Gaussian blur as a stand-in degradation, no EMA, no guidance. The blur
