@@ -248,15 +248,7 @@ def fdq_test(experiment):
     ).tolist()
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
-    test_sample = next(iter(data.test_data_loader))
-    if isinstance(test_sample, (list, tuple)):
-        condition = test_sample[1].to(experiment.device) if len(test_sample) == 2 else None
-        test_sample = test_sample[0]
-    else:
-        condition = None
-
-    img_shape = test_sample.shape[1:]
-    is_grayscale = img_shape[0] == 1
+    test_iter = iter(data.test_data_loader)
 
     chuchi_diffuser = DDPM(
         num_timesteps=targs.diffusion_nb_steps,
@@ -268,10 +260,31 @@ def fdq_test(experiment):
 
     pbar = startProgBar(nb_test_samples, "evaluation...")
 
-    results = []
+    gts, conditions, results = [], [], []
+    img_shape = None
+    is_grayscale = None
 
     for inf_nb in range(nb_test_samples):
         pbar.update(inf_nb)
+
+        # fetch a fresh sample/condition pair each iteration - reusing the
+        # same one for every sample made every "different" test result
+        # condition on an identical source image.
+        test_sample = next(test_iter)
+        if isinstance(test_sample, (list, tuple)):
+            images_gt = test_sample[0].to(experiment.device)
+            condition = (
+                test_sample[1].to(experiment.device)
+                if len(test_sample) == 2
+                else None
+            )
+        else:
+            images_gt = test_sample.to(experiment.device)
+            condition = None
+
+        if img_shape is None:
+            img_shape = images_gt.shape[1:]
+            is_grayscale = img_shape[0] == 1
 
         with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
             images = get_sample_from_noise(
@@ -296,19 +309,44 @@ def fdq_test(experiment):
             experiment, images={"name": "test_gen_history", "path": history_path}
         )
 
+        gts.append(images_gt.cpu())
+        if condition is not None:
+            conditions.append(condition.cpu())
         results.append(images[-1].cpu())
 
     pbar.finish()
 
-    res_path = createSubplots(
-        image_list=results,
-        grayscale=is_grayscale,
-        experiment=experiment,
-        histogram=False,
-        figure_title="Generated test samples",
-        export_transform=t_img_exp,
-        hide_ticks=True,
-        show_colorbar=False,
-    )
+    if conditions:
+        # 4 rows: ground truth / condition / result / ground truth - result
+        gt_batch = torch.cat(gts, dim=0)
+        result_batch = torch.cat(results, dim=0)
+        res_path = createSubplots(
+            image_list=[
+                gt_batch,
+                torch.cat(conditions, dim=0),
+                result_batch,
+                gt_batch - result_batch,
+            ],
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples (rows: ground truth / condition / result / GT - result)",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+            apply_global_range=False,
+            max_cols=nb_test_samples,
+        )
+    else:
+        res_path = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
 
     save_wandb(experiment, images={"name": "test_samples", "path": res_path})

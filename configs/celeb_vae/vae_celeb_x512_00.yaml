@@ -57,10 +57,10 @@ slurm_cluster:
   job_time: 1400
   stop_grace_time: 15
   cpus_per_task: 16
-  gres: gpu:h100pcie:1
-  gres_test: gpu:h100pcie:1
-  mem: 120G
-  mem_test: 120G
+  gres: gpu:h200sxm:1
+  gres_test: gpu:h200sxm:1
+  mem: 160G
+  mem_test: 160G
   partition: gpu_top
   account: cai_ivs
   auto_resubmit: true
