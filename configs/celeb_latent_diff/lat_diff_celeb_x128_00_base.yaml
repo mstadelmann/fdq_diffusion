@@ -166,6 +166,8 @@ train:
 losses:
   MAE:
     class_name: torch.nn.L1Loss
+  MSE:
+    class_name: torch.nn.MSELoss
 
 store:
   results_path: ~/data_ML/results

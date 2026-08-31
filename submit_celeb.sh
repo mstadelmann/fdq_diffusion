@@ -69,8 +69,8 @@ fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchic
 # CELEB Latent Diffusion
 # diffusion runs on VAE latents instead of raw pixels - smaller, faster to train
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml   # UNet backbone - EXPERIMENT FAILED (KeyError 'MSE')
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml        # 256px - EXPERIMENT FAILED (KeyError 'MSE')
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml   # UNet backbone - EXPERIMENT FAILED (KeyError 'MSE') -> 50875
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml        # 256px - EXPERIMENT FAILED (KeyError 'MSE') -> 50876
 
 # VIT (DiT) backbone, same pretrained VAEs
 fdq_submit configs/celeb_latent_diff_vit/lat_diff_vit_celeb_x128_00_base.yaml   # 400 EP, 13h27m, 2m2s/EP
