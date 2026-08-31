@@ -81,8 +81,8 @@ fdq_submit configs/celeb_latent_diff_vit/lat_diff_vit_celeb_x256_00.yaml     # 2
 # CELEB Flow Matching Generative
 # regresses a straight-line velocity field noise->image, no fixed noise schedule
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0.yaml   # baseline - EXPERIMENT FAILED (DDP SIGABRT on startup)
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v1.yaml   # smaller batch, ~408 EP in 23h3m (3m20s/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume)
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v2.yaml   # EMA, attn tweaks, ~130 EP in 22h59m (9m54s/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume)
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v0.yaml   # baseline - EXPERIMENT FAILED (DDP SIGABRT on startup) -> 50884
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v1.yaml   # smaller batch, ~408 EP in 23h3m (3m20s/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume) -> 50885
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x128_v2.yaml   # EMA, attn tweaks, ~130 EP in 22h59m (9m54s/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume) -> 50886
 
-fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml   # 256px, ~16 EP over ~42h (160m/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume)
+fdq_submit configs/celeb_fm_gen/fm_meta_cele_x256_v0.yaml   # 256px, ~16 EP over ~42h (160m/EP) - EXPERIMENT FAILED (DDP SIGABRT on resume) -> 50887

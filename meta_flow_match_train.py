@@ -143,7 +143,7 @@ class EMA(Module):
 @torch.no_grad()
 def fdq_test(experiment):
     targs = experiment.cfg.train.args
-    model = experiment.models[targs.model_name]
+    model = experiment.models_no_ddp[targs.model_name]
 
     exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
@@ -354,7 +354,11 @@ def fdq_train(experiment) -> None:
             list(range(batch_size)), dtype=torch.int32, device=experiment.device
         )
 
-        cfg_weighted_model = CFGScaledModel(model=model)
+        # use the un-wrapped module for sampling: repeatedly running forward-only
+        # inference through the DDP-wrapped model (no matching backward) can
+        # desync DDP's reducer bookkeeping across ranks and eventually hang the
+        # next real training-step all-reduce.
+        cfg_weighted_model = CFGScaledModel(model=model_no_ddp)
 
         x_0 = torch.randn(
             [batch_size, 3, sample_resolution, sample_resolution],
