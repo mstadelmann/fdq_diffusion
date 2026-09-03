@@ -13,7 +13,7 @@ fdq_submit configs/celeb_vae/vae_celeb_x128_00_dist2.yaml          # A100: 365 E
 
 fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # H100: 223 EP, 17h51m, 7m32s/EP
 
-fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # H200, OOM Error, restarted as 50835
+fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # H200, OOM Error, restarted as 51707
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
@@ -69,8 +69,8 @@ fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchic
 # CELEB Latent Diffusion
 # diffusion runs on VAE latents instead of raw pixels - smaller, faster to train
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml   # UNet backbone - EXPERIMENT FAILED (KeyError 'MSE') -> 50875
-fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml        # 256px - EXPERIMENT FAILED (KeyError 'MSE') -> 50876
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x128_00_base.yaml   # UNet backbone, 224 EP, 15h2m, 4m2s/EP
+fdq_submit configs/celeb_latent_diff/lat_diff_celeb_x256_00.yaml        # 256px, 174 EP, 13h5m, 4m31s/EP
 
 # VIT (DiT) backbone, same pretrained VAEs
 fdq_submit configs/celeb_latent_diff_vit/lat_diff_vit_celeb_x128_00_base.yaml   # 400 EP, 13h27m, 2m2s/EP

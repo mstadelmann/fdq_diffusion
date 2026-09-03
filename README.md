@@ -244,16 +244,20 @@ download-once approach used for Celeb is planned.
 ### CELEB Latent Diffusion
 
 #### lat_diff_celeb_x128_00_base.yaml (UNet backbone)
-- slurm train: 49422
-- slurm test: none (training failed)
+- slurm train: 49422 (failed, KeyError: 'MSE') → 50875
+- slurm test: 51079
 - GPU: H200
-- Error: crashed in epoch 1 - KeyError: 'MSE' (loss key missing from config)
+- Train: 224 EP, 15h2m, 4m2s/EP (stopped early: ValLoss_stagnated)
+
+![lat_diff_celeb_x128_00_base generated test samples](assets/lat_diff_celeb_x128_00_base.jpg)
 
 #### lat_diff_celeb_x256_00.yaml (256px)
-- slurm train: 49423
-- slurm test: none (training failed)
+- slurm train: 49423 (failed, KeyError: 'MSE') → 50876
+- slurm test: 51056
 - GPU: H200
-- Error: crashed in epoch 1 - KeyError: 'MSE' (loss key missing from config)
+- Train: 174 EP, 13h5m, 4m31s/EP (stopped early: TrainLoss_stagnated)
+
+![lat_diff_celeb_x256_00 generated test samples](assets/lat_diff_celeb_x256_00.jpg)
 
 #### VIT (DiT) backbone, same pretrained VAEs
 
