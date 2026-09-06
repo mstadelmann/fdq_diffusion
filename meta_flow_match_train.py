@@ -144,6 +144,7 @@ class EMA(Module):
 def fdq_test(experiment):
     targs = experiment.cfg.train.args
     model = experiment.models_no_ddp[targs.model_name]
+    data = experiment.data[targs.dataloader_name]
 
     exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
@@ -153,6 +154,15 @@ def fdq_test(experiment):
     t_img_exp = experiment.transformers[exp_trans_name]
     log_as_grid = experiment.cfg.store.get("wandb_img_as_grid", True)
 
+    # infer the resolution to generate at from the actual (post-transform) test
+    # images - a hardcoded value here silently mismatches configs that train/test
+    # at a resolution other than 128 (e.g. the x256 experiments), producing
+    # incoherent samples since the model never trained at that resolution.
+    test_sample = next(iter(data.test_data_loader))
+    if isinstance(test_sample, (list, tuple)):
+        test_sample = test_sample[0]
+    sample_resolution = test_sample.shape[-1]
+
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
     pbar = startProgBar(nb_test_samples, "evaluation...")
     results = []
@@ -161,7 +171,6 @@ def fdq_test(experiment):
         pbar.update(inf_nb)
 
         batch_size = 16
-        sample_resolution = 128
 
         labels = torch.tensor(
             list(range(batch_size)), dtype=torch.int32, device=experiment.device
@@ -346,9 +355,11 @@ def fdq_train(experiment) -> None:
             ema.backup()
             ema.copy_to_model()
 
-        # generate samples for wandb logging
+        # generate samples for wandb logging - resolution follows the actual
+        # (post-transform) training images, not a hardcoded value, so previews stay
+        # consistent with whatever resolution this config actually trains at
         batch_size = 16
-        sample_resolution = 128
+        sample_resolution = samples.shape[-1]
 
         labels = torch.tensor(
             list(range(batch_size)), dtype=torch.int32, device=experiment.device

@@ -335,8 +335,6 @@ def fdq_train(experiment) -> None:
 
 @torch.no_grad()
 def fdq_test(experiment):
-    # this is just a generative test.
-    # the test for the conditional model is here: diffusion_monai_cond.py
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
@@ -371,23 +369,41 @@ def fdq_test(experiment):
     inferer = DiffusionInferer(scheduler)
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
-    test_sample = next(iter(test_loader))
-    # legacy compatibility
-    if isinstance(test_sample, (list, tuple)):
-        test_sample = test_sample[0]
+    test_iter = iter(test_loader)
 
     pbar = startProgBar(nb_test_samples, "evaluation...")
 
-    results = []
+    gts, conditions, results = [], [], []
+    img_shape = None
+    is_grayscale = None
 
     for inf_nb in range(nb_test_samples):
         pbar.update(inf_nb)
 
-        # Generate sample
-        noise = torch.randn((1, *test_sample.shape[1:]), device=experiment.device)
-        scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
+        # fetch a fresh sample/condition pair each iteration - reusing the
+        # same one for every sample made every "different" test result
+        # condition on an identical source image.
+        test_sample = next(test_iter)
+        if isinstance(test_sample, (list, tuple)):
+            images_gt = test_sample[0].to(experiment.device)
+            condition = (
+                test_sample[1].to(experiment.device)
+                if len(test_sample) == 2
+                else None
+            )
+            monai_mode = "concat" if condition is not None else "crossattn"
+        else:
+            images_gt = test_sample.to(experiment.device)
+            condition = None
+            monai_mode = "crossattn"
 
-        is_grayscale = noise.shape[1] == 1
+        if img_shape is None:
+            img_shape = images_gt.shape[1:]
+            is_grayscale = img_shape[0] == 1
+
+        # Generate sample
+        noise = torch.randn((1, *img_shape), device=experiment.device)
+        scheduler.set_timesteps(num_inference_steps=targs.diffusion_nb_steps)
 
         isteps = int(
             targs.diffusion_nb_steps / targs.get("diffusion_nb_plot_steps", 15)
@@ -399,6 +415,8 @@ def fdq_test(experiment):
             scheduler=scheduler,
             save_intermediates=True,
             intermediate_steps=isteps,
+            conditioning=condition,
+            mode=monai_mode,
         )
 
         _ = createSubplots(
@@ -411,23 +429,50 @@ def fdq_test(experiment):
             show_colorbar=False,
         )
 
+        gts.append(images_gt.cpu())
+        if condition is not None:
+            conditions.append(condition.cpu())
         results.append(image.cpu())
 
-    res_path = createSubplots(
-        image_list=results,
-        grayscale=is_grayscale,
-        experiment=experiment,
-        histogram=False,
-        figure_title="Generated test samples",
-        export_transform=t_img_exp,
-        hide_ticks=True,
-        show_colorbar=False,
-    )
+    pbar.finish()
+
+    if conditions:
+        # 4 rows: ground truth / condition / result / ground truth - result
+        gt_batch = torch.cat(gts, dim=0)
+        result_batch = torch.cat(results, dim=0)
+        res_path = createSubplots(
+            image_list=[
+                gt_batch,
+                torch.cat(conditions, dim=0),
+                result_batch,
+                gt_batch - result_batch,
+            ],
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples (rows: ground truth / condition / result / GT - result)",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+            apply_global_range=False,
+            max_cols=nb_test_samples,
+        )
+    else:
+        res_path = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+
     imgs_to_log = [
         {"name": "test_samples", "path": res_path},
     ]
 
     save_wandb(experiment, images=imgs_to_log)
 
-    pbar.finish()
     print("Test samples generated and saved.")

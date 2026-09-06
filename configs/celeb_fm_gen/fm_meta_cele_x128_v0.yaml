@@ -71,7 +71,13 @@ data:
       drop_last: true
       transform: resize_norm
       transform_test: resize_norm
-      ddp_num_workers: 2 # num_workers in DDP is set to 0, as depending on the dataloader, it might be problematic. Use ddp_num_workers to overwrite this.
+      # ddp_num_workers: 2  # DISABLED - this override caused repeated intermittent NCCL
+      # ALLREDUCE watchdog timeouts (~10min hang, then DDP abort) at the start of DDP
+      # jobs/resumes across this whole family (v0/v1/v2/x256_v0): 49426, 50341, 51499,
+      # 51566, 54415, 54277 all show the identical signature. fdq's default DDP safety
+      # net (num_workers forced to 0) exists specifically to avoid this - see
+      # experiment.py's _prepare_ddp_data_args(). Leaving num_workers forced to 0 here
+      # trades a bit of data-loading throughput for not losing ~23h GPU jobs to this race.
 
     caching:
       enabled: true

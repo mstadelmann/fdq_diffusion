@@ -99,10 +99,12 @@ download-once approach used for Celeb is planned.
 ![vae_celeb_x256_00 results overview](assets/vae_celeb_x256_00.jpg)
 
 #### vae_celeb_x512_00.yaml
-- slurm train: 49399
-- slurm test: none (training failed)
+- slurm train: 51707 → 54203
+- slurm test: 54464
 - GPU: H200
-- Error: out of memory - job killed by Slurm (exit 137)
+- Train: 259 EP, 42h19m combined, 9m28s/EP (stopped early: ValLoss_stagnated)
+
+![vae_celeb_x512_00 results overview](assets/vae_celeb_x512_00.jpg)
 
 ---
 
@@ -232,10 +234,10 @@ download-once approach used for Celeb is planned.
 - Error: crashed in epoch 1 - RuntimeError, tensor size mismatch concatenating the conditioning input during sampling
 
 #### dc_cc_celeb_x128_deblur.yaml (chuchichaestli UNet)
-- slurm train: 49421
-- slurm test: 50004
+- slurm train: 50873
+- slurm test: 50948
 - GPU: 2x A100
-- Train: 128 EP, 2h10m, 55s/EP
+- Train: 154 EP, 2h49m, 1m6s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_deblur generated test samples](assets/dc_cc_celeb_x128_deblur.jpg)
 
@@ -280,28 +282,37 @@ download-once approach used for Celeb is planned.
 ### CELEB Flow Matching Generative
 
 #### fm_meta_cele_x128_v0.yaml (baseline)
-- slurm train: 49426
-- slurm test: none (training failed)
+- slurm train: 49426 (DDP SIGABRT on startup) → 50884 → 51477 → 54102 → 54323
+- slurm test: 54483
 - GPU: 2x H200
-- Error: crashed before completing epoch 1 - DDP worker process aborted (SIGABRT) during startup
+- Train: 650 EP, 84h20m combined, 7m47s/EP
+
+![fm_meta_cele_x128_v0 generated test samples](assets/fm_meta_cele_x128_v0.png)
 
 #### fm_meta_cele_x128_v1.yaml (smaller batch)
-- slurm train: 49427 → 50341
+- slurm train: 49427 → 50341 (resume failed) → 50885 (restarted from scratch) → 51498 → 54114 → 54415 (resume failed)
 - slurm test: none (training failed)
 - GPU: 2x H200
 - Train (49427, before crash): ~408 EP, 23h3m, 3m20s/EP
-- Error: 49427 hit the walltime limit and auto-resubmitted; 50341 crashed immediately on resume - DDP worker process aborted (SIGABRT)
+- Train (50885 → 54114, before crash): 452/650 EP, 69h14m combined, 9m11s/EP
+- Error: 49427 hit the walltime limit and auto-resubmitted; 50341 crashed immediately on resume - DDP worker process aborted (SIGABRT). Manually restarted from scratch as 50885, which auto-resubmitted twice more (51498, 54114) on hitting the walltime limit; 54114's own resubmission (54415) crashed immediately on resume again - DDP worker aborted (SIGABRT) after an NCCL collective timeout.
+- `mode.resume_chpt_path` now points at 54114's last checkpoint (epoch 452) so the run can be resubmitted from there.
 
 #### fm_meta_cele_x128_v2.yaml (EMA, attn tweaks)
-- slurm train: 49428 → 50371
+- slurm train: 49428 → 50371 (resume failed) → 50886 (restarted from scratch) → 51499 (resume failed) → 53956 → 54277 (resume failed)
 - slurm test: none (training failed)
 - GPU: 2x H200
 - Train (49428, before crash): ~130 EP, 22h59m, 9m54s/EP
-- Error: 49428 hit the walltime limit and auto-resubmitted; 50371 crashed immediately on resume - DDP worker process aborted (SIGABRT)
+- Train (50886 → 53956, before crash): 424/650 EP, 46h10m combined, 6m32s/EP
+- Error: 49428 hit the walltime limit and auto-resubmitted; 50371 crashed immediately on resume - DDP worker process aborted (SIGABRT). Manually restarted from scratch as 50886; its own resubmission (51499) crashed the same way, manually restarted as 53956, which ran cleanly to checkpoint 424 before hitting the walltime limit; that resubmission (54277) crashed immediately on resume again.
+- Root cause found: all these resume crashes are an NCCL `ALLREDUCE` collective timeout (~10min watchdog hang, then DDP abort), caused by `data.celeb_HF.args.ddp_num_workers: 2` overriding fdq's default DDP safety net (which normally forces `num_workers=0` under DDP to avoid exactly this race). Disabled in `fm_meta_cele_x128_v0.yaml` (inherited by v1/v2/x256_v0).
+- `mode.resume_chpt_path` now points at 53956's last checkpoint (epoch 424) so the run can be resubmitted from there.
 
 #### fm_meta_cele_x256_v0.yaml (256px)
-- slurm train: 49429 → 50447 → 50684
-- slurm test: none (training failed)
+- slurm train: 49429 → 50447 → 50684 (resume failed) → 50887 (restarted from scratch) → 51566 (resume failed) → 53957 → 54279 → 54486 (running)
+- slurm test: none yet (still training)
 - GPU: 2x H200
 - Train (49429 + 50447, before crash): ~16 EP over ~42h, ~160m/EP
-- Error: 49429 and 50447 each hit the walltime limit and auto-resubmitted; 50684 crashed immediately on resume - DDP worker process aborted (SIGABRT)
+- Train (50887 → 54279, before latest resume): 36/650 EP, ~115h24m combined
+- Error: 49429 and 50447 each hit the walltime limit and auto-resubmitted; 50684 crashed immediately on resume - DDP worker process aborted (SIGABRT). Manually restarted from scratch as 50887; its resubmission (51566) crashed the same way. Root cause found and fixed (see `fm_meta_cele_x128_v2.yaml` above): the `ddp_num_workers` override was disabled in `fm_meta_cele_x128_v0.yaml`, which this config inherits from - since then, both of this experiment's auto-resubmits (53957 → 54279, 54279 → 54486) have resumed cleanly.
+- Separate bug found and fixed: `meta_flow_match_train.py` hardcoded `sample_resolution = 128` for the per-epoch wandb preview *and* the test-time sample generation, regardless of the resolution a config actually trains at. This config trains on 256x256 crops, so every preview/test image was generated by feeding 128x128 noise into a model that only ever learned to denoise 256x256 images - producing incoherent, patchwork-looking output. The actual training loss/backward pass was unaffected (it always used the real 256x256 batches), so the model itself was likely training correctly the whole time; only the visual previews were broken. Now derives the resolution from the real data instead. The fix only takes effect on the next job restart (54486 was already running when it landed).
