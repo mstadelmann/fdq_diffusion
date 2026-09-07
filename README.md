@@ -290,13 +290,16 @@ download-once approach used for Celeb is planned.
 ![fm_meta_cele_x128_v0 generated test samples](assets/fm_meta_cele_x128_v0.png)
 
 #### fm_meta_cele_x128_v1.yaml (smaller batch)
-- slurm train: 49427 → 50341 (resume failed) → 50885 (restarted from scratch) → 51498 → 54114 → 54415 (resume failed)
-- slurm test: none (training failed)
+- slurm train: 49427 → 50341 (resume failed) → 50885 (restarted from scratch) → 51498 → 54114 → 54415 (resume failed) → 54540
+- slurm test: 54656
 - GPU: 2x H200
 - Train (49427, before crash): ~408 EP, 23h3m, 3m20s/EP
 - Train (50885 → 54114, before crash): 452/650 EP, 69h14m combined, 9m11s/EP
-- Error: 49427 hit the walltime limit and auto-resubmitted; 50341 crashed immediately on resume - DDP worker process aborted (SIGABRT). Manually restarted from scratch as 50885, which auto-resubmitted twice more (51498, 54114) on hitting the walltime limit; 54114's own resubmission (54415) crashed immediately on resume again - DDP worker aborted (SIGABRT) after an NCCL collective timeout.
-- `mode.resume_chpt_path` now points at 54114's last checkpoint (epoch 452) so the run can be resubmitted from there.
+- Train (54540, resumed from e452): 650/650 EP complete, 11h12m, 3m24s/EP
+- Error (historical): 49427 hit the walltime limit and auto-resubmitted; 50341 crashed immediately on resume - DDP worker process aborted (SIGABRT). Manually restarted from scratch as 50885, which auto-resubmitted twice more (51498, 54114) on hitting the walltime limit; 54114's own resubmission (54415) crashed immediately on resume again - DDP worker aborted (SIGABRT) after an NCCL collective timeout.
+- Resubmitted from 54114's last checkpoint (epoch 452) as 54540, which ran cleanly to completion (best val loss: epoch 477, best train loss: epoch 610).
+
+![fm_meta_cele_x128_v1 generated test samples](assets/fm_meta_cele_x128_v1.png)
 
 #### fm_meta_cele_x128_v2.yaml (EMA, attn tweaks)
 - slurm train: 49428 → 50371 (resume failed) → 50886 (restarted from scratch) → 51499 (resume failed) → 53956 → 54277 (resume failed)
