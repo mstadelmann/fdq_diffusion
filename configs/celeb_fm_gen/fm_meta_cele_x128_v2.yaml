@@ -7,7 +7,7 @@ globals:
   author: Marc
 
 mode:
-  run_train: true
+  run_train: false
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
