@@ -63,6 +63,8 @@ fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 2
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_deblur.yaml   # MONAI UNet
 fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchichaestli UNet
+fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_hard.yaml       # harder condition: blur + cutout + salt-pepper + gaussian noise
+fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_halfface.yaml   # condition is half the face blacked out - outpaint the other half
 
 
 #--------------------------------------------------------------------------------------------------

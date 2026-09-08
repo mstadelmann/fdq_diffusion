@@ -302,7 +302,11 @@ def fdq_train(experiment) -> None:
         )
 
         if condition is not None:
-            img_list = [images_gt, condition, image, images_gt - image]
+            # images_gt/condition are still the full validation batch; image (and
+            # sample_condition it was generated from) is a single sample - slice down to
+            # match, otherwise createSubplots explodes the batch into one image per
+            # sample and the fixed 4/6-entry labels below no longer match the image count.
+            img_list = [images_gt[:1], sample_condition, image, images_gt[:1] - image]
             img_labels = ["GT", "Condition", "Generated", "GT - Generated"]
             if norm_to_hu is not None:
                 img_list.extend([images_gt_hu, result_hu])

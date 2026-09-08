@@ -176,12 +176,19 @@ def fdq_train(experiment) -> None:
                 dtype=torch.int,
             ).tolist()
 
+            # These preview plots pass explicit per-row/per-step labels sized for a single
+            # sample (e.g. one "GT"/"Condition"/"Generated" row, one image per diffusion
+            # step) - createSubplots silently explodes a multi-sample batch into one image
+            # per sample, which would then no longer match those labels. Generate from a
+            # single validation sample here so the shapes the labels expect are the shapes
+            # actually produced (mirrors the equivalent fix already in diffusion_monai.py).
+            sample_condition = condition[:1] if condition is not None else None
             images = get_sample_from_noise(
                 experiment=experiment,
                 diffuser=chuchi_diffuser,
                 gen_shape=img_shape,
                 idx_to_store=idx_to_store,
-                condition=condition,
+                condition=sample_condition,
             )
 
             history_path = createSubplots(
@@ -203,7 +210,12 @@ def fdq_train(experiment) -> None:
 
             if condition is not None:
                 cond_diff_path = createSubplots(
-                    image_list=[images_gt, condition, images[-1], images_gt - images[-1]],
+                    image_list=[
+                        images_gt[:1],
+                        sample_condition,
+                        images[-1],
+                        images_gt[:1] - images[-1],
+                    ],
                     grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
