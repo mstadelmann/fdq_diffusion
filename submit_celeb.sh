@@ -61,7 +61,7 @@ fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 2
 # CELEB DIFF COND
 # blurred GT as condition, same task as CT's cbct_diff_cond_monai/cbct_diff_cond_cc
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_deblur.yaml   # MONAI UNet - EXPERIMENT FAILED (tensor size mismatch) -> resubmitted as 50864 -> train ok, but test failed in 51120 -> restarted test as 54536
+fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_deblur.yaml   # MONAI UNet - 49420 EXPERIMENT FAILED (tensor size mismatch) -> resubmitted as 50864, 126 EP, 16h9m, 7m41s/EP -> test 51120 FAILED (channel mismatch) -> retested as 54536 -> COMPLETE
 fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchichaestli UNet, 128 EP, 2h10m, 55s/EP -> resubmitted as 50873, 154 EP, 2h49m, 1m6s/EP
 
 
