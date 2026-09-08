@@ -124,7 +124,7 @@ download-once approach used for Celeb is planned.
 - Train: 65 EP, 4h16m, 3m48s/EP
 
 ![dg_m_cele_x128_00_base_dist2 generated test samples](assets/dg_m_cele_x128_00_base_dist2.jpg)
-- Quality: mixed, color-bleed and melted textures on several faces (undertrained)
+- Quality: bad - about 4/10 faces have unnatural green/red skin-tone artifacts, not real-looking
 
 ##### dg_m_cele_x128_01.yaml (res-block off)
 - Keywords: architecture ablation, UNet residual blocks disabled
@@ -132,7 +132,7 @@ download-once approach used for Celeb is planned.
 - Train: 183 EP, 10h36m, 3m22s/EP
 
 ![dg_m_cele_x128_01 generated test samples](assets/dg_m_cele_x128_01.jpg)
-- Quality: good, cleaner and more consistent than the baseline
+- Quality: good - all 10 faces read as real, no color-cast or anatomical distortion
 
 ##### dg_m_cele_x128_02.yaml (3 att levels)
 - Keywords: architecture ablation, attention at 3 resolution levels
@@ -140,7 +140,7 @@ download-once approach used for Celeb is planned.
 - Train: 153 EP, 19h58m, 7m42s/EP
 
 ![dg_m_cele_x128_02 generated test samples](assets/dg_m_cele_x128_02.jpg)
-- Quality: good, comparable to the res-block-off variant, minor color artifacts
+- Quality: good - all 10 faces read as real, only faint background bleed on 1-2
 
 ##### dg_m_cele_x128_03.yaml (4 layers only)
 - Keywords: capacity ablation, UNet depth reduced to 4 levels
@@ -148,7 +148,7 @@ download-once approach used for Celeb is planned.
 - Train: 85 EP, 9h51m, 6m52s/EP
 
 ![dg_m_cele_x128_03 generated test samples](assets/dg_m_cele_x128_03.jpg)
-- Quality: rough, streaky/melted textures, reduced capacity shows
+- Quality: good - coherent, real-looking faces despite heavy punk/goth styling; no anatomical distortion
 
 ##### dg_m_cele_x128_08_zero_snr.yaml (zero-SNR fix, v-pred)
 - Keywords: zero terminal-SNR noise schedule, v-prediction parameterization
@@ -156,7 +156,7 @@ download-once approach used for Celeb is planned.
 - Train: 96 EP, 6h16m, 3m46s/EP
 
 ![dg_m_cele_x128_08_zero_snr generated test samples](assets/dg_m_cele_x128_08_zero_snr.jpg)
-- Quality: good, coherent faces, decent detail
+- Quality: good - real, coherent faces despite heavy makeup styling
 
 ##### dg_m_cele_x256_00.yaml (256px, 2 GPUs)
 - Keywords: same baseline architecture, scaled to 256px
@@ -164,7 +164,7 @@ download-once approach used for Celeb is planned.
 - Train: 149 EP, 40h35m combined, 13m35s/EP (stopped early: TrainLoss_stagnated)
 
 ![dg_m_cele_x256_00 generated test samples](assets/dg_m_cele_x256_00.jpg)
-- Quality: poor, strong color-cast (teal/blue/red tint) across most samples
+- Quality: bad - every one of the 10 faces has an unnatural color-cast (teal/blue/red/maroon skin), none look like real skin tones
 
 ##### dg_m_cele_x256_01_zero_snr.yaml (256px, zero-SNR fix)
 - Keywords: zero-SNR/v-pred fix applied at 256px
@@ -172,7 +172,7 @@ download-once approach used for Celeb is planned.
 - Train: 109 EP, 11h2m, 6m0s/EP
 
 ![dg_m_cele_x256_01_zero_snr generated test samples](assets/dg_m_cele_x256_01_zero_snr.jpg)
-- Quality: inconsistent, fixes the color-cast but 2/10 samples are severely corrupted
+- Quality: bad - only about 4/10 faces look genuinely real; the rest are severely textured, melted, or scribbled beyond recognition
 
 #### Chuchichaestli UNet
 
@@ -182,7 +182,7 @@ download-once approach used for Celeb is planned.
 - Train: 165 EP, 2h41m, 1m0s/EP
 
 ![dg_c_celeb_x128_00_base generated test samples](assets/dg_c_celeb_x128_00_base.jpg)
-- Quality: good, mostly clean faces, minor artifacts on 2 samples
+- Quality: mixed - 1/10 completely unrealistic (green cast merging into hair/background), several others have background texture bleeding into the face
 
 ##### dg_c_celeb_x128_01.yaml (LR param, 4 parallel runs)
 - Keywords: learning-rate sweep, 4 parallel runs at different LR values
@@ -190,10 +190,10 @@ download-once approach used for Celeb is planned.
 
 | Train | Image | Quality |
 |---|---|---|
-| 178 EP, 2h55m, 1m0s/EP | <img src="assets/dg_c_celeb_x128_01_p001.jpg" width="400"> | 1 badly melted face, rest OK |
-| 116 EP, 1h52m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p002.jpg" width="400"> | good, minor smudging |
-| 166 EP, 2h40m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p003.jpg" width="400"> | soft, painterly, undertrained-looking |
-| 146 EP, 2h22m, 59s/EP | <img src="assets/dg_c_celeb_x128_01_p004.jpg" width="400"> | poor, washed out, faces barely resolved |
+| 178 EP, 2h55m, 1m0s/EP | <img src="assets/dg_c_celeb_x128_01_p001.jpg" width="400"> | 1/10 badly melted/deformed (not a real face), rest look real |
+| 116 EP, 1h52m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p002.jpg" width="400"> | 1/10 an indistinct blurry non-face, rest look real |
+| 166 EP, 2h40m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p003.jpg" width="400"> | bad - every face rendered as a thick oil-painting texture, none look like real photos |
+| 146 EP, 2h22m, 59s/EP | <img src="assets/dg_c_celeb_x128_01_p004.jpg" width="400"> | bad - most faces (6/10) are foggy, ghostly, or indistinct, not recognizable as real |
 
 ##### dg_c_celeb_x128_02.yaml (lin/cos/sig param, 3 parallel runs)
 - Keywords: noise-schedule sweep, linear vs cosine vs sigmoid beta schedule, 3 parallel runs
@@ -201,9 +201,9 @@ download-once approach used for Celeb is planned.
 
 | Train | Image | Quality |
 |---|---|---|
-| 200 EP, 3h11m, 56s/EP | <img src="assets/dg_c_celeb_x128_02_p001.jpg" width="400"> | good, minor color tint on 1 sample |
-| 172 EP, 2h44m, 53s/EP | <img src="assets/dg_c_celeb_x128_02_p002.jpg" width="400"> | good, odd hair color on 1-2 samples |
-| 216 EP, 3h31m, 54s/EP | <img src="assets/dg_c_celeb_x128_02_p003.jpg" width="400"> | good, sharp, 1 mouth-region artifact |
+| 200 EP, 3h11m, 56s/EP | <img src="assets/dg_c_celeb_x128_02_p001.jpg" width="400"> | good - all 10 faces look real and coherent |
+| 172 EP, 2h44m, 53s/EP | <img src="assets/dg_c_celeb_x128_02_p002.jpg" width="400"> | 2/10 unnatural (bright orange scalp patch, deep magenta face), rest look real |
+| 216 EP, 3h31m, 54s/EP | <img src="assets/dg_c_celeb_x128_02_p003.jpg" width="400"> | 2/10 clearly unrealistic (indistinct dark face, magenta cast), rest look real |
 
 ##### dg_c_celeb_x256_00_base.yaml (256px)
 - Keywords: same baseline architecture, scaled to 256px
@@ -211,7 +211,7 @@ download-once approach used for Celeb is planned.
 - Train: 130 EP, 2h29m, 1m5s/EP
 
 ![dg_c_celeb_x256_00_base generated test samples](assets/dg_c_celeb_x256_00_base.jpg)
-- Quality: good, coherent and detailed, 1 mouth-region glitch
+- Quality: mixed - 2/10 clearly unrealistic (indistinct dark face, magenta cast), rest look real
 
 #### VIT (DiT)
 
@@ -221,7 +221,7 @@ download-once approach used for Celeb is planned.
 - Train: 350 EP, 56h33m combined, 9m32s/EP
 
 ![dg_vit_celeb_x128_00_base_dist2 generated test samples](assets/dg_vit_celeb_x128_00_base_dist2.jpg)
-- Quality: good, mostly coherent, occasional mouth/feature glitches
+- Quality: mixed - 2/10 have a dark disfiguring blob over the mouth/chin, rest look real
 
 ##### dg_vit_celeb_x256_00_base.yaml (256px, 2 GPUs)
 - Keywords: same ViT/DiT backbone, scaled to 256px
@@ -229,7 +229,7 @@ download-once approach used for Celeb is planned.
 - Train: 302 EP, 35h16m combined, 10m50s/EP (stopped early: TrainLoss_stagnated)
 
 ![dg_vit_celeb_x256_00_base generated test samples](assets/dg_vit_celeb_x256_00_base.jpg)
-- Quality: poor-to-mixed, several smeared/melted faces, undertrained at this resolution
+- Quality: bad - half the faces (5/10) are heavily smeared or textured, not recognizable as real skin
 
 ---
 
@@ -261,7 +261,7 @@ download-once approach used for Celeb is planned.
 - Train: 224 EP, 15h2m, 4m2s/EP (stopped early: ValLoss_stagnated)
 
 ![lat_diff_celeb_x128_00_base generated test samples](assets/lat_diff_celeb_x128_00_base.jpg)
-- Quality: good, clean and coherent, sharper than the pixel-space DDPM baseline
+- Quality: good - 19/20 faces look real, 1 with rough discolored skin
 
 #### lat_diff_celeb_x256_00.yaml (256px)
 - Keywords: same latent UNet approach, scaled to 256px
@@ -269,7 +269,7 @@ download-once approach used for Celeb is planned.
 - Train: 174 EP, 13h5m, 4m31s/EP (stopped early: TrainLoss_stagnated)
 
 ![lat_diff_celeb_x256_00 generated test samples](assets/lat_diff_celeb_x256_00.jpg)
-- Quality: good, coherent, minor softness on a few samples
+- Quality: good - 19/20 faces look real, 1 clearly non-human (rough beast-like texture)
 
 #### VIT (DiT) backbone, same pretrained VAEs
 
@@ -279,7 +279,7 @@ download-once approach used for Celeb is planned.
 - Train: 400 EP, 13h27m, 2m2s/EP
 
 ![lat_diff_vit_celeb_x128_00_base generated test samples](assets/lat_diff_vit_celeb_x128_00_base.jpg)
-- Quality: good, clean faces, 1 warped/melted texture outlier
+- Quality: good - all 20 faces look real, no standout failures
 
 ##### lat_diff_vit_celeb_x256_00.yaml (256px)
 - Keywords: same latent ViT/DiT approach, scaled to 256px
@@ -287,7 +287,7 @@ download-once approach used for Celeb is planned.
 - Train: 400 EP, 52h29m combined, 7m47s/EP
 
 ![lat_diff_vit_celeb_x256_00 generated test samples](assets/lat_diff_vit_celeb_x256_00.jpg)
-- Quality: good, coherent and detailed, minor softness at edges
+- Quality: good - 19/20 faces look real, 1 clearly non-human (same recurring beast-like texture as the UNet 256px run)
 
 ### CELEB Flow Matching Generative
 
