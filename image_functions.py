@@ -2,6 +2,42 @@ import torch
 from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+
+
+def stack_images_vertically(paths, save_path):
+    """Vertically stack multiple already-saved images into one combined image.
+
+    Useful to combine separate createSubplots() outputs (e.g. one 2-row GT+histogram
+    figure and one 2-row Condition+histogram figure) into a single figure, rather than
+    logging them as separate images.
+
+    Args:
+        paths: List of image file paths to stack, top to bottom. None entries (e.g. a
+            createSubplots() call that failed and returned None) are skipped.
+        save_path: Path to write the combined image to.
+
+    Returns:
+        str: save_path, or None if fewer than one valid path was given.
+    """
+    imgs = [Image.open(p) for p in paths if p is not None]
+    if not imgs:
+        return None
+    if len(imgs) == 1:
+        imgs[0].save(save_path)
+        return save_path
+
+    width = max(im.width for im in imgs)
+    total_height = sum(im.height for im in imgs)
+    combined = Image.new(imgs[0].mode, (width, total_height), color="white")
+
+    y = 0
+    for im in imgs:
+        combined.paste(im, (0, y))
+        y += im.height
+
+    combined.save(save_path)
+    return save_path
 
 
 def compute_histo(image, nb_bins=100):

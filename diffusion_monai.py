@@ -3,7 +3,7 @@ from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from monai.inferers import DiffusionInferer
 from monai.networks.schedulers import DDPMScheduler
-from image_functions import createSubplots
+from image_functions import createSubplots, stack_images_vertically
 from zero_snr_scheduler import ZeroSNRDDPMScheduler
 
 
@@ -100,6 +100,12 @@ def fdq_train(experiment) -> None:
     img_shape = None
     is_grayscale = False
 
+    # Optional auxiliary perceptual loss on top of the standard noise/velocity-prediction
+    # MSE. Off by default (lpips_weight=0.0) - existing experiments that don't define
+    # 'lpips_weight' or a 'LPIPS' loss are completely unaffected.
+    lpips_weight = targs.get("lpips_weight", 0.0)
+    lpips_loss_fn = experiment.losses["LPIPS"].to(experiment.device).eval() if lpips_weight > 0 else None
+
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
         experiment.on_epoch_start(epoch=epoch)
         imgs_to_log = []
@@ -139,7 +145,10 @@ def fdq_train(experiment) -> None:
                 if img_shape[0] == 1:
                     is_grayscale = True
 
-                # first test batch: store inputs
+                # first test batch: store inputs. GT and (if present) Condition are
+                # built as separate 2-row (images + histogram) figures, then stacked
+                # into one 4-row image so they're easier to compare side by side
+                # instead of as two separate wandb panels.
                 gt_imgs_path = createSubplots(
                     image_list=images_gt,
                     grayscale=is_grayscale,
@@ -149,7 +158,6 @@ def fdq_train(experiment) -> None:
                     figure_title="Input GT",
                     export_transform=t_img_exp,
                 )
-                imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
                 if condition is not None:
                     cond_imgs_path = createSubplots(
@@ -161,7 +169,13 @@ def fdq_train(experiment) -> None:
                         figure_title="Input Condition",
                         export_transform=t_img_exp,
                     )
-                    imgs_to_log.append({"name": "train_cond", "path": cond_imgs_path})
+                    combined_path = stack_images_vertically(
+                        [gt_imgs_path, cond_imgs_path],
+                        save_path=experiment.get_next_export_fn(name="train_gt_cond"),
+                    )
+                    imgs_to_log.append({"name": "train_imgs", "path": combined_path})
+                else:
+                    imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
                 noise = torch.randn_like(images_gt).to(experiment.device)
@@ -186,10 +200,32 @@ def fdq_train(experiment) -> None:
                     if prediction_type == "epsilon"
                     else scheduler.get_velocity(images_gt, noise, timesteps)
                 )
-                train_loss_tensor = (
-                    experiment.losses["MSE"](target, noise_pred)
-                    / experiment.gradacc_iter
-                )
+                loss_tensor = experiment.losses["MSE"](target, noise_pred)
+
+                if lpips_loss_fn is not None:
+                    # Reconstruct the estimated clean image x0_hat from the model output
+                    # (the same closed-form the scheduler's own step() uses), then
+                    # compare it to GT with LPIPS - the noise/velocity-space MSE above
+                    # under-penalizes localized texture/detail loss.
+                    noisy_images = scheduler.add_noise(
+                        original_samples=images_gt, noise=noise, timesteps=timesteps
+                    )
+                    t_shape = [-1] + [1] * (images_gt.dim() - 1)
+                    alpha_prod_t = scheduler.alphas_cumprod.to(device=images_gt.device)[
+                        timesteps
+                    ].reshape(t_shape)
+                    beta_prod_t = 1 - alpha_prod_t
+                    if prediction_type == "epsilon":
+                        x0_hat = (noisy_images - beta_prod_t.sqrt() * noise_pred) / alpha_prod_t.sqrt()
+                    else:  # v_prediction
+                        x0_hat = alpha_prod_t.sqrt() * noisy_images - beta_prod_t.sqrt() * noise_pred
+                    # x0_hat is a poor/noisy estimate at high t (early in the forward
+                    # process) - clamp to the data range rather than trying to weight it
+                    # away, keeping this simple.
+                    x0_hat = x0_hat.clamp(-1, 1)
+                    loss_tensor = loss_tensor + lpips_weight * lpips_loss_fn(x0_hat, images_gt).mean()
+
+                train_loss_tensor = loss_tensor / experiment.gradacc_iter
                 if experiment.useAMP:
                     experiment.scaler.scale(train_loss_tensor).backward()
 

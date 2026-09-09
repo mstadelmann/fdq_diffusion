@@ -51,7 +51,6 @@ fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px
 # dg_vit_celeb_ = DiffusionGenerative_VisionTransformer_Celebrities
 # transformer backbone instead of a UNet (Diffusion Transformer / Peebles & Xie)
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base.yaml         # quick single-GPU smoke test
-# fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_resume.yaml
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x128_00_base_dist2.yaml   # baseline, 2 GPUs
 
 fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 256px, 2 GPUs
@@ -62,6 +61,9 @@ fdq_submit configs/celeb_diff_gen_vit/dg_vit_celeb_x256_00_base.yaml         # 2
 # blurred/corrupted GT as condition, same task as CT's cbct_diff_cond_monai/cbct_diff_cond_cc
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_deblur.yaml   # MONAI UNet
+fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_hard.yaml     # harder condition: blur + cutout + salt-pepper + gaussian noise
+fdq_submit configs/celeb_diff_cond_monai/dc_m_celeb_x128_halfface.yaml # condition is half the face blacked out - outpaint the other half
+
 fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_deblur.yaml     # chuchichaestli UNet
 fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_hard.yaml       # harder condition: blur + cutout + salt-pepper + gaussian noise
 fdq_submit configs/celeb_diff_cond_cc/dc_cc_celeb_x128_halfface.yaml   # condition is half the face blacked out - outpaint the other half

@@ -6,7 +6,7 @@ globals:
   project: Celeb_Diff_Cond_CC
   author: Marc
   uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
-  comment: "Conditional diffusion / outpainting: the condition is the GT image with exactly one half (left/right, chosen at random each epoch) blacked out. The model has to reconstruct the missing half from the visible half, not just sharpen or denoise it. Same backbone/task family as dc_cc_celeb_x128_deblur.yaml."
+  comment: "Conditional diffusion / outpainting: the condition is the GT image with exactly one half (left/right, chosen at random each epoch) blacked out. The model has to reconstruct the missing half from the visible half, not just sharpen or denoise it. Same backbone/task family as dc_cc_celeb_x128_deblur.yaml. v2: wider UNet, more early-stop patience, and an auxiliary LPIPS loss, aimed at fixing the residual smearing seen on hard (e.g. side-profile) samples in the first pass. The masked half stays a flat fill (not noise): unlike a small cutout patch, the whole half is unrecoverable regardless of fill value, so there's no context-shortcut to close - a flat fill just gives the model a cheap, unambiguous known/unknown boundary."
 
 mode:
   run_train: true
@@ -123,7 +123,7 @@ models:
       dimensions: 2
       in_channels: 6  # 3 (noisy target) + 3 (condition), concatenated
       out_channels: 3
-      n_channels: 64
+      n_channels: 96  # bumped from 64: outpainting half a face needs more capacity than plain deblurring
       num_blocks_per_level: 1
       down_block_types:
       - DownBlock
@@ -162,7 +162,7 @@ train:
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
-    early_stop_val_loss: 70
+    early_stop_val_loss: 100  # bumped from 70: harder task, wanted more patience before quitting
     early_stop_train_loss: 70
     early_stop_nan: 5
     diffusion_scheduler: linear
@@ -172,12 +172,21 @@ train:
     diffusion_nb_plot_steps: 10
     dataloader_name: celeb_HF
     model_name: ccUNET
+    # Auxiliary perceptual loss weight added to the MSE noise-prediction loss (0 disables
+    # it). See diffusion_chuchichaestli.py: reconstructs x0_hat from the predicted noise
+    # and compares it to GT via LPIPS, to penalize localized texture/detail loss that a
+    # pure noise-space MSE under-penalizes.
+    lpips_weight: 0.01
 
 losses:
   MAE:
     class_name: torch.nn.L1Loss
   MSE:
     class_name: torch.nn.MSELoss
+  LPIPS:
+    class_name: lpips.LPIPS
+    args:
+      net: alex
 
 store:
   results_path: ~/data_ML/results
@@ -200,7 +209,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.20
+  fdq_version: 0.1.21
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
@@ -222,3 +231,4 @@ slurm_cluster:
   additional_pip_packages:
   - datasets
   - chuchichaestli==0.2.17
+  - lpips

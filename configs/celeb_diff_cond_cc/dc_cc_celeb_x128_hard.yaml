@@ -6,7 +6,7 @@ globals:
   project: Celeb_Diff_Cond_CC
   author: Marc
   uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
-  comment: "Conditional diffusion using a harder condition than plain blur: blur + random cutout patches + salt-and-pepper noise + Gaussian noise, stacked. Same backbone/task family as dc_cc_celeb_x128_deblur.yaml, but the condition no longer just has high-frequency detail removed - chunks of it are missing or corrupted outright, so the model has to inpaint/denoise, not just sharpen."
+  comment: "Conditional diffusion using a harder condition than plain blur: blur + random cutout patches + salt-and-pepper noise + Gaussian noise, stacked. Same backbone/task family as dc_cc_celeb_x128_deblur.yaml, but the condition no longer just has high-frequency detail removed - chunks of it are missing or corrupted outright, so the model has to inpaint/denoise, not just sharpen. v2: wider UNet, more early-stop patience, an auxiliary LPIPS loss, and noise-filled (instead of flat-filled) cutout patches, aimed at fixing the residual localized artifacts seen in the first pass."
 
 mode:
   run_train: true
@@ -51,7 +51,10 @@ transforms:
       num_patches: 2
       min_frac: 0.15
       max_frac: 0.35
-      fill_value: 0.0
+      # Noise fill (not a flat constant) so the model can't shortcut by just detecting
+      # "is this patch exactly fill_value?" - it has to actually use surrounding context.
+      fill_mode: noise
+      noise_std: 1.0
       p: 0.7
   - RandomSaltPepperNoise:
       amount: 0.03
@@ -134,7 +137,7 @@ models:
       dimensions: 2
       in_channels: 6  # 3 (noisy target) + 3 (condition), concatenated
       out_channels: 3
-      n_channels: 64
+      n_channels: 96  # bumped from 64: harder condition (blur+cutout+noise) needs more capacity than plain deblurring
       num_blocks_per_level: 1
       down_block_types:
       - DownBlock
@@ -173,7 +176,7 @@ train:
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
-    early_stop_val_loss: 70
+    early_stop_val_loss: 100  # bumped from 70: harder task, wanted more patience before quitting
     early_stop_train_loss: 70
     early_stop_nan: 5
     diffusion_scheduler: linear
@@ -183,12 +186,21 @@ train:
     diffusion_nb_plot_steps: 10
     dataloader_name: celeb_HF
     model_name: ccUNET
+    # Auxiliary perceptual loss weight added to the MSE noise-prediction loss (0 disables
+    # it). See diffusion_chuchichaestli.py: reconstructs x0_hat from the predicted noise
+    # and compares it to GT via LPIPS, to penalize localized texture/detail loss that a
+    # pure noise-space MSE under-penalizes.
+    lpips_weight: 0.01
 
 losses:
   MAE:
     class_name: torch.nn.L1Loss
   MSE:
     class_name: torch.nn.MSELoss
+  LPIPS:
+    class_name: lpips.LPIPS
+    args:
+      net: alex
 
 store:
   results_path: ~/data_ML/results
@@ -211,7 +223,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.20
+  fdq_version: 0.1.21
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
@@ -233,3 +245,4 @@ slurm_cluster:
   additional_pip_packages:
   - datasets
   - chuchichaestli==0.2.17
+  - lpips
