@@ -251,6 +251,22 @@ download-once approach used for Celeb is planned.
 ![dc_cc_celeb_x128_deblur generated test samples](assets/dc_cc_celeb_x128_deblur.jpg)
 - Quality: excellent, on par with the MONAI version
 
+#### dc_cc_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
+- Keywords: conditional DDPM, chuchichaestli UNet, condition stacks blur with random cutout patches, salt-and-pepper noise, and Gaussian noise (resampled every epoch), inpainting/denoising rather than plain deblurring
+- GPU: 2x A100
+- Train: 102 EP, 2h12m, 1m9s/EP (stopped early: ValLoss_stagnated)
+
+![dc_cc_celeb_x128_hard generated test samples](assets/dc_cc_celeb_x128_hard.jpg)
+- Quality: good - 9/10 results closely match GT despite the heavy corruption, 1/10 has a residual dark artifact around the eyes
+
+#### dc_cc_celeb_x128_halfface.yaml (condition is half the face blacked out)
+- Keywords: conditional DDPM, chuchichaestli UNet, outpainting, condition is the GT with a random half (left/right, resampled every epoch via RandomEdgeMask) blacked out, model reconstructs the missing half
+- GPU: 2x A100
+- Train: 159 EP, 2h44m, 56s/EP (stopped early: ValLoss_stagnated)
+
+![dc_cc_celeb_x128_halfface generated test samples](assets/dc_cc_celeb_x128_halfface.jpg)
+- Quality: good - 9/10 outpainted halves are plausible and coherent with the visible half, 1/10 (a hard side-profile sample that also struggled in dc_cc_celeb_x128_hard) is smeared/artifacted
+
 ---
 
 ### CELEB Latent Diffusion
