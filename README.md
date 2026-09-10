@@ -326,11 +326,15 @@ download-once approach used for Celeb is planned.
 #### fm_meta_cele_x128_v2.yaml (EMA, attn tweaks)
 - Keywords: adds EMA weight averaging and attention-head tweaks to the baseline
 - GPU: 2x H200
-- Train: 424/650 EP so far, 46h10m combined, 6m32s/EP - stuck, every resume attempt crashes on a DDP/NCCL ALLREDUCE timeout; retry queued
-- Quality: not yet available (no completed test run)
+- Train: 426/650 EP, 45h41m combined, 6m26s/EP
+
+![fm_meta_cele_x128_v2 generated test samples](assets/fm_meta_cele_x128_v2.png)
+- Quality: all 16 faces look sharp, no color-cast or major anatomical distortion
 
 #### fm_meta_cele_x256_v0.yaml (256px)
 - Keywords: same baseline flow matching setup, scaled to 256px
 - GPU: 2x H200
-- Train: in progress, target 650 EP
-- Quality: not yet available (still training)
+- Train: 71/650 EP, 122h41m combined, 1h43m/EP
+
+![fm_meta_cele_x256_v0 generated test samples](assets/fm_meta_cele_x256_v0.png)
+- Quality: surprisingly good for only 71/650 EP - most of the 16 faces are coherent and mostly photorealistic, a few show soft/noisy texture typical of an undertrained model
