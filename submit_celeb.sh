@@ -10,9 +10,7 @@
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # quick single-GPU smoke test
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_dist2.yaml          # 128px, 2 GPUs
-
 fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # 256px
-
 fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # 512px
 
 #--------------------------------------------------------------------------------------------------

@@ -42,18 +42,8 @@ data:
   celeb_HF:
     processor: ~/dev/fdq_diffusion/hf_preparator_celeb.py
     args:
-      # datasets library cache_dir for the public bitmind/celeb-a-hq dataset
-      # (downloaded once, reused after). Named hf_cache_dir rather than
-      # base_path since fdq's copy_data_to_scratch() rsyncs any 'base_path'
-      # arg into ephemeral scratch and trains against that copy instead -
-      # which would re-download this every job. base_path: null below is an
-      # inert placeholder so that same function's unconditional attribute
-      # read doesn't raise (see hf_preparator_celeb.py for details).
       hf_cache_dir: ~/data_ML/celeba_HQ_HF/
       base_path: null
-      # single 'train' split only; val/test are carved off by fixed row index
-      # (not random), so with subset_*=1.0 below the same images land in
-      # train/val/test on every run.
       val_from_train_ratio: 0.1
       test_from_train_ratio: 0.05
       subset_train: 1.0
@@ -146,7 +136,7 @@ test:
   processor: ~/dev/fdq_diffusion/vae.py
   test_model: best
   args:
-    nb_test_samples: 20
+    nb_test_samples: 10
     nb_export_samples: 10
 
 slurm_cluster:
