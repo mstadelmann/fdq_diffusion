@@ -126,7 +126,7 @@ download-once approach used for Celeb is planned.
 ![dg_m_cele_x128_00_base_dist2 generated test samples](assets/dg_m_cele_x128_00_base_dist2.jpg)
 - Quality: bad - about 4/10 faces have unnatural green/red skin-tone artifacts, not real-looking
 
-##### dg_m_cele_x128_01.yaml (res-block off)
+##### dg_m_cele_x128_01.yaml (resblock_updown: false)
 - Keywords: architecture ablation, UNet residual blocks disabled
 - GPU: 2x A100
 - Train: 183 EP, 10h36m, 3m22s/EP
@@ -195,6 +195,19 @@ download-once approach used for Celeb is planned.
 | 166 EP, 2h40m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p003.jpg" width="400"> | bad - every face rendered as a thick oil-painting texture, none look like real photos |
 | 146 EP, 2h22m, 59s/EP | <img src="assets/dg_c_celeb_x128_01_p004.jpg" width="400"> | bad - most faces (6/10) are foggy, ghostly, or indistinct, not recognizable as real |
 
+> **Parameter study**: `lr@p: [0.00001:0.005:4]` is a *linear* sweep (fdq's `@p` range
+> syntax interpolates linearly, not log-spaced), giving LR ≈ 1e-5, 1.67e-3, 3.33e-3,
+> 5e-3 - vs. the baseline's 5e-5.
+> **Outcome**: training holds up to ~1.67e-3 (33x the baseline LR), then breaks down
+> somewhere between 1.67e-3 and 3.33e-3 - p003 collapses into a uniform oil-painting
+> texture and p004 (max LR) never resolves fine detail, staying foggy/washed out.
+> There's no data point between 5e-5 and 1.67e-3, so whether anything above baseline
+> is an actual improvement (vs. simply not-yet-broken) is unknown.
+> **Before rerunning**: use a log-spaced sweep bracketing the instability cliff (e.g.
+> `[0.00005:0.002:5]`) instead of a linear one, and run the surviving LRs with 2-3
+> seeds each - a single 10-sample grid can't separate "this LR is better" from
+> ordinary run-to-run variance (see the baseline note above).
+
 ##### dg_c_celeb_x128_02.yaml (lin/cos/sig param, 3 parallel runs)
 - Keywords: noise-schedule sweep, linear vs cosine vs sigmoid beta schedule, 3 parallel runs
 - GPU: 2x A100
@@ -204,6 +217,19 @@ download-once approach used for Celeb is planned.
 | 200 EP, 3h11m, 56s/EP | <img src="assets/dg_c_celeb_x128_02_p001.jpg" width="400"> | good - all 10 faces look real and coherent |
 | 172 EP, 2h44m, 53s/EP | <img src="assets/dg_c_celeb_x128_02_p002.jpg" width="400"> | 2/10 unnatural (bright orange scalp patch, deep magenta face), rest look real |
 | 216 EP, 3h31m, 54s/EP | <img src="assets/dg_c_celeb_x128_02_p003.jpg" width="400"> | 2/10 clearly unrealistic (indistinct dark face, magenta cast), rest look real |
+
+> **Parameter study**: categorical sweep over `diffusion_scheduler`
+> (linear/cosine/sigmoid), same `beta_start`/`beta_end` for all three - otherwise
+> identical to the baseline config (same LR, same architecture).
+> **Outcome**: linear scored best (10/10 real), cosine and sigmoid each had 2/10
+> unnatural samples. But the linear run here (p001) is the *same config* as
+> `dg_c_celeb_x128_00_base.yaml` above, just trained ~35 epochs longer, and it scored
+> noticeably better than that baseline run did (10/10 vs. mixed with background
+> bleed). That gap - from epoch count and seed alone - is at least as large as the
+> gap between schedules, so this ranking is likely confounded rather than a real
+> "linear beats cosine/sigmoid" result.
+> **Before rerunning**: pin all three to the same epoch count (or the same
+> early-stop criterion) and run 2-3 seeds per schedule before trusting any ranking.
 
 ##### dg_c_celeb_x256_00_base.yaml (256px)
 - Keywords: same baseline architecture, scaled to 256px
@@ -230,6 +256,13 @@ download-once approach used for Celeb is planned.
 
 ![dg_vit_celeb_x256_00_base generated test samples](assets/dg_vit_celeb_x256_00_base.jpg)
 - Quality: bad - half the faces (5/10) are heavily smeared or textured, not recognizable as real skin
+
+> **Note**: `patch_size` was doubled to 8 here (from 4 at 128px) to keep the token
+> count/attention compute constant at the larger resolution. This is pixel-space
+> diffusion, so the coarser patch likely trades
+> away exactly the per-patch fidelity that mattered - `patch_size` would probably need
+> to come back down to 4 to fix the smearing, at the cost of ~4x more tokens and
+> correspondingly more compute/VRAM.
 
 ---
 

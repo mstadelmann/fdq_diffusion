@@ -12,6 +12,7 @@ fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml           # quick singl
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_dist2.yaml          # 128px, 2 GPUs
 fdq_submit configs/celeb_vae/vae_celeb_x256_00.yaml                # 256px
 fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # 512px
+# TODO: test plot was updated; check if correct and update figs: 57540-57542
 
 #--------------------------------------------------------------------------------------------------
 # CELEB DIFF GEN
@@ -23,8 +24,8 @@ fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # 512px
 # -----
 # UNet from Project MONAI (medical imaging DL toolkit)
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml         # quick single-GPU smoke test
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # baseline, 2 GPUs
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml              # res-block off
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # baseline, 2 GPUs # TODO: restarted because exp below was better, why? -> 57565
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml              # resblock_updown: false
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml              # 3 att levels
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml              # 4 layers only
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_08_zero_snr.yaml     # zero-SNR fix, v-pred
@@ -37,11 +38,11 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_01_zero_snr.yaml     # 25
 # CHUCHICHAESTLI
 # --------------
 # UNet from chuchichaestli, ZHAW's own diffusion library
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml   # baseline
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml   # baseline # TODO, rerun with early stop at 150 -> 57588
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml        # LR sweep, 4 parallel runs
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml        # lin/cos/sig noise-schedule sweep, 3 parallel runs
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px -> TODO rerun with early stop at 150: 57592
 
 
 # VIT (DiT)
