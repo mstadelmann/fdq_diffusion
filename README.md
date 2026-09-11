@@ -268,37 +268,51 @@ download-once approach used for Celeb is planned.
 
 ### CELEB DIFF COND
 
-#### dc_m_celeb_x128_deblur.yaml (MONAI UNet)
+#### MONAI UNet
+
+##### dc_m_celeb_x128_deblur.yaml
 - Keywords: conditional DDPM, deblurring, blurred image as condition, MONAI UNet
 - GPU: A100
-- Train: 126 EP, 16h9m, 7m41s/EP (stopped early: ValLoss_stagnated)
+- Train: 151 EP, 20h1m, 7m57s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_m_celeb_x128_deblur generated test samples](assets/dc_m_celeb_x128_deblur.jpg)
 - Quality: excellent, deblurred result nearly indistinguishable from ground truth
 
-#### dc_cc_celeb_x128_deblur.yaml (chuchichaestli UNet)
+##### dc_m_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
+- Keywords: conditional DDPM, MONAI UNet, condition stacks blur with random cutout patches, salt-and-pepper noise, and Gaussian noise (resampled every epoch), inpainting/denoising rather than plain deblurring
+- GPU: A100
+- Status: still training - `job_time` (23.3h) is shorter than this run needs, so it checkpoints and auto-resubmits itself rather than finishing in one job. 2 segments completed so far (~46h combined), last checkpoint at epoch 204/350, a 3rd segment is queued (pending on cluster priority as of this check). No test results yet.
+
+##### dc_m_celeb_x128_halfface.yaml (condition is half the face blacked out)
+- Keywords: conditional DDPM, MONAI UNet, outpainting, condition is the GT with a random half (left/right, resampled every epoch via RandomEdgeMask) blacked out, model reconstructs the missing half
+- GPU: A100
+- Status: still training - same checkpoint/auto-resubmit pattern as the `hard` run above. 1st segment reached epoch 104/350 (~23h) before hitting the job time limit; the 2nd segment is running now. No test results yet.
+
+#### Chuchichaestli UNet
+
+##### dc_cc_celeb_x128_deblur.yaml
 - Keywords: same conditional deblurring task, chuchichaestli UNet backbone
 - GPU: 2x A100
-- Train: 154 EP, 2h49m, 1m6s/EP (stopped early: ValLoss_stagnated)
+- Train: 219 EP, 3h29m, 57s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_deblur generated test samples](assets/dc_cc_celeb_x128_deblur.jpg)
 - Quality: excellent, on par with the MONAI version
 
-#### dc_cc_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
+##### dc_cc_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
 - Keywords: conditional DDPM, chuchichaestli UNet, condition stacks blur with random cutout patches, salt-and-pepper noise, and Gaussian noise (resampled every epoch), inpainting/denoising rather than plain deblurring
 - GPU: 2x A100
-- Train: 102 EP, 2h12m, 1m9s/EP (stopped early: ValLoss_stagnated)
+- Train: 213 EP, 6h20m, 1m47s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_hard generated test samples](assets/dc_cc_celeb_x128_hard.jpg)
-- Quality: good - 9/10 results closely match GT despite the heavy corruption, 1/10 has a residual dark artifact around the eyes
+- Quality: good - all 10 results plausibly reconstruct the GT despite the heavy corruption, no clear residual artifacts this time (an improvement on the previous run's 1/10 dark-eye artifact)
 
-#### dc_cc_celeb_x128_halfface.yaml (condition is half the face blacked out)
+##### dc_cc_celeb_x128_halfface.yaml (condition is half the face blacked out)
 - Keywords: conditional DDPM, chuchichaestli UNet, outpainting, condition is the GT with a random half (left/right, resampled every epoch via RandomEdgeMask) blacked out, model reconstructs the missing half
 - GPU: 2x A100
-- Train: 159 EP, 2h44m, 56s/EP (stopped early: ValLoss_stagnated)
+- Train: 170 EP, 4h28m, 1m35s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_halfface generated test samples](assets/dc_cc_celeb_x128_halfface.jpg)
-- Quality: good - 9/10 outpainted halves are plausible and coherent with the visible half, 1/10 (a hard side-profile sample that also struggled in dc_cc_celeb_x128_hard) is smeared/artifacted
+- Quality: good - most outpainted halves (9/10) are plausible and coherent with the visible half, 1/10 (the striped-shirt sample) shows the shirt's pattern bleeding into the outpainted face region
 
 ---
 
