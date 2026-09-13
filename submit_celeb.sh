@@ -23,7 +23,7 @@ fdq_submit configs/celeb_vae/vae_celeb_x512_00.yaml                # 512px
 # -----
 # UNet from Project MONAI (medical imaging DL toolkit)
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base.yaml         # quick single-GPU smoke test
-fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # baseline, 2 GPUs # TODO: restarted because exp below was better, why? -> 57565
+fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_00_base_dist2.yaml   # baseline, 2 GPUs
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_01.yaml              # resblock_updown: false
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_02.yaml              # 3 att levels
 fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x128_03.yaml              # 4 layers only

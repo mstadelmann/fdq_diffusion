@@ -121,10 +121,10 @@ download-once approach used for Celeb is planned.
 ##### dg_m_cele_x128_00_base_dist2.yaml
 - Keywords: pixel-space DDPM, MONAI UNet, baseline architecture, 128px
 - GPU: 2x A100
-- Train: 65 EP, 4h16m, 3m48s/EP
+- Train: 129 EP, 8h33m, 3m59s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_m_cele_x128_00_base_dist2 generated test samples](assets/dg_m_cele_x128_00_base_dist2.jpg)
-- Quality: bad - about 4/10 faces have unnatural green/red skin-tone artifacts, not real-looking
+- Quality: About 2-3/10 faces show a mild olive/yellow color-cast, rest look real
 
 ##### dg_m_cele_x128_01.yaml (resblock_updown: false)
 - Keywords: architecture ablation, UNet residual blocks disabled
