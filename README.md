@@ -179,10 +179,10 @@ download-once approach used for Celeb is planned.
 ##### dg_c_celeb_x128_00_base.yaml (baseline)
 - Keywords: pixel-space DDPM, chuchichaestli UNet, baseline architecture, 128px
 - GPU: 2x A100
-- Train: 165 EP, 2h41m, 1m0s/EP
+- Train: 266 EP, 4h6m, 56s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_c_celeb_x128_00_base generated test samples](assets/dg_c_celeb_x128_00_base.jpg)
-- Quality: mixed - 1/10 completely unrealistic (green cast merging into hair/background), several others have background texture bleeding into the face
+- Quality: good - all 10 faces read as real and coherent, no color-cast or texture-bleed artifacts
 
 ##### dg_c_celeb_x128_01.yaml (LR param, 4 parallel runs)
 - Keywords: learning-rate sweep, 4 parallel runs at different LR values
@@ -234,10 +234,10 @@ download-once approach used for Celeb is planned.
 ##### dg_c_celeb_x256_00_base.yaml (256px)
 - Keywords: same baseline architecture, scaled to 256px
 - GPU: 2x H200
-- Train: 130 EP, 2h29m, 1m5s/EP
+- Train: 263 EP, 4h58m, 1m8s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_c_celeb_x256_00_base generated test samples](assets/dg_c_celeb_x256_00_base.jpg)
-- Quality: mixed - 2/10 clearly unrealistic (indistinct dark face, magenta cast), rest look real
+- Quality: bad - only about 2/10 faces look real, rest show strong blue/purple/green color-cast or heavy distortion
 
 #### VIT (DiT)
 

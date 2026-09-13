@@ -37,11 +37,11 @@ fdq_submit configs/celeb_diff_gen_monai/dg_m_cele_x256_01_zero_snr.yaml     # 25
 # CHUCHICHAESTLI
 # --------------
 # UNet from chuchichaestli, ZHAW's own diffusion library
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml   # baseline # TODO, rerun with early stop at 150 -> 57588
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_00_base.yaml   # baseline
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_01.yaml        # LR sweep, 4 parallel runs
 fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x128_02.yaml        # lin/cos/sig noise-schedule sweep, 3 parallel runs
 
-fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px -> TODO rerun with early stop at 150: 57592
+fdq_submit configs/celeb_diff_gen_cc/dg_c_celeb_x256_00_base.yaml   # 256px
 
 
 # VIT (DiT)
