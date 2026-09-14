@@ -385,3 +385,57 @@ download-once approach used for Celeb is planned.
 
 ![fm_meta_cele_x256_v0 generated test samples](assets/fm_meta_cele_x256_v0.png)
 - Quality: surprisingly good for only 71/650 EP - most of the 16 faces are coherent and mostly photorealistic, a few show soft/noisy texture typical of an undertrained model
+
+---
+
+### CBCT VAE
+
+#### vae_cbct_x64_v0_dist2.yaml
+- Keywords: VAE, KL-regularized autoencoder, CT-RATE chest CT volumes, 64px
+- GPU: 2x H200
+- Train: 89 EP, 3h50m, 2m35s/EP (stopped early: ValLoss_stagnated)
+
+![vae_cbct_x64_v0_dist2 results overview](assets/vae_cbct_x64_v0_dist2.jpg)
+- Quality: coarse - overall body outline and lung shape are captured, but fine vascular/bronchial detail is lost; reconstructions look overly smooth compared to gt
+
+#### vae_cbct_x128_v0.yaml
+- Keywords: VAE, 128px, higher-resolution CT latents
+- GPU: 2x H200
+- Train: 113 EP, 18h2m, 9m34s/EP (stopped early: ValLoss_stagnated)
+
+![vae_cbct_x128_v0 results overview](assets/vae_cbct_x128_v0.jpg)
+- Quality: coarse - same pattern as the 64px VAE: correct overall anatomy, fine structures (vessels, bronchi) smoothed away
+
+#### MAISI (pretrained, zero-shot test - no training)
+
+##### vae_cbct_maisi_x128.yaml
+- Keywords: pretrained NVIDIA MAISI VAE, no training, 128px
+- GPU: H200
+- Test: 200 samples, 39s total, PSNR 25.8 (23.8 HU)
+
+![vae_cbct_maisi_x128 test sample](assets/vae_cbct_maisi_x128.jpg)
+- Quality: sharp, faithful reconstruction - fine vascular/bronchial detail preserved, unlike the trained-from-scratch VAEs above
+
+##### vae_cbct_maisi_x256.yaml
+- Keywords: same pretrained MAISI VAE, 256px
+- GPU: H200
+- Test: 200 samples, 1m17s total, PSNR 27.9 (26.0 HU)
+
+![vae_cbct_maisi_x256 test sample](assets/vae_cbct_maisi_x256.jpg)
+- Quality: sharp, faithful reconstruction, on par with (slightly better than) the 128px MAISI VAE
+
+##### vae_cbct_maisi_x256_v1.yaml (HU window narrowed to [-1000,1000])
+- Keywords: same as x256, HU_to_norm window narrowed from [-1500,1000] to [-1000,1000], still normalized to [-1,1]
+- GPU: H200
+- Test: 200 samples, 1m11s total, PSNR 24.3 (24.3 HU)
+
+![vae_cbct_maisi_x256_v1 test sample](assets/vae_cbct_maisi_x256_v1.jpg)
+- Quality: still a sharp reconstruction, but a visibly noisier diff map and lower PSNR than the base x256 run - narrowing the HU window this way doesn't help
+
+##### vae_cbct_maisi_x256_v2.yaml (HU window [-1000,1000], normalized to [0,1])
+- Keywords: same [-1000,1000] HU window as v1, but normalized to [0,1] instead of [-1,1]
+- GPU: H200
+- Test: 200 samples, 1m10s total, PSNR 33.7 (27.7 HU)
+
+![vae_cbct_maisi_x256_v2 test sample](assets/vae_cbct_maisi_x256_v2.jpg)
+- Quality: best of the four MAISI runs - clearly the cleanest diff map and highest PSNR by a wide margin; the [0,1] normalization (rather than [-1,1]) appears to matter more than the HU window itself

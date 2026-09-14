@@ -7,18 +7,16 @@
 #--------------------------------------------------------------------------------------------------
 # CT-Rate VAE
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml                   # baseline/memory check only
+fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml            # baseline/memory check only
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
 
 fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
 
-fdq_submit configs/cbct_vae/vae_cbct_x256_v0.yaml
-fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml
+fdq_submit configs/cbct_vae/vae_cbct_x256_v0_dist2.yaml     # increased sys mem: 58121, nncl timeout, restart 58156
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  VAE MAESI TEST
 #--------------------------------------------------------------------------------------------------
-
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x128.yaml
 
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml
