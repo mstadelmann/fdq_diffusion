@@ -5,11 +5,12 @@ defaults:
 globals:
   project: Celeb_VAE
   author: Marc
+  uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
   run_train: true
   run_test_interactive: false
-  run_test_auto: true
+  run_test_auto: false
   dump_model: false
   run_inference: false
   print_model_summary: false
@@ -38,12 +39,13 @@ transforms:
   - Uint8
   
 data:
-  celeb_HDF:
-    processor: ~/dev/fdq_diffusion/hdf_preparator_celeb.py
+  celeb_HF:
+    processor: ~/dev/fdq_diffusion/hf_preparator_celeb.py
     args:
-      base_path: ~/data_ML/celeba_hq_256/celeb_train_and_test/
-      file_extension: hdf
+      hf_cache_dir: ~/data_ML/celeba_HQ_HF/
+      base_path: null
       val_from_train_ratio: 0.1
+      test_from_train_ratio: 0.05
       subset_train: 1.0
       subset_val: 1.0
       subset_test: 1.0
@@ -57,10 +59,8 @@ data:
       shuffle_val: false
       shuffle_test: false
       drop_last: true
-      hdf_ds_key_request:
-      - '*': resize_norm
-      hdf_ds_key_request_test:
-      - '*': resize_norm
+      transform: resize_norm
+      transform_test: resize_norm
     caching:
       enabled: true
       cache_dir: /scratch/fdq_cache/
@@ -104,7 +104,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/vae.py
   args:
-    epochs: 400
+    epochs: 10
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1
@@ -112,7 +112,7 @@ train:
     early_stop_train_loss: 20
     early_stop_nan: 5
     kl_loss_weight: 1.0e-06
-    dataloader_name: celeb_HDF
+    dataloader_name: celeb_HF
     model_name: monaivae
 
 losses:
@@ -129,19 +129,19 @@ store:
   use_tensorboard: false
   use_wandb: true
   wandb_project: celeb_vae_x128
-  wandb_entity: stmd
+  wandb_entity: zhaw_stmd
   img_exp_transform: norm_to_rgb
 
 test:
   processor: ~/dev/fdq_diffusion/vae.py
   test_model: best
   args:
-    nb_test_samples: 20
+    nb_test_samples: 10
     nb_export_samples: 10
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.14
+  fdq_version: 0.1.22
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
@@ -159,5 +159,5 @@ slurm_cluster:
   account: cai_ivs
   auto_resubmit: true
   additional_pip_packages:
-  - h5py
+  - datasets
   - monai==1.5.2

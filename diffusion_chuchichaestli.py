@@ -2,13 +2,13 @@ import torch
 from fdq.ui_functions import startProgBar, iprint
 from fdq.misc import save_wandb
 from chuchichaestli.diffusion.ddpm import DDPM
-from image_functions import createSubplots
+from image_functions import createSubplots, stack_images_vertically
 
 
 @torch.no_grad()
-def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
+def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None, condition=None):
     targs = experiment.cfg.train.args
-    model = experiment.models[targs.model_name]
+    model = experiment.get_eval_model(targs.model_name)
     model.eval()
 
     imgs = []
@@ -17,6 +17,7 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None):
         diffuser.generate(
             model=model,
             shape=tuple(gen_shape),
+            condition=condition,
             n=1,
             yield_intermediate=True,
         )
@@ -58,6 +59,12 @@ def fdq_train(experiment) -> None:
     img_shape = None
     is_grayscale = False
 
+    # Optional auxiliary perceptual loss on top of the standard noise-prediction MSE.
+    # Off by default (lpips_weight=0.0) - existing experiments that don't define
+    # 'lpips_weight' or a 'LPIPS' loss are completely unaffected.
+    lpips_weight = targs.get("lpips_weight", 0.0)
+    lpips_loss_fn = experiment.losses["LPIPS"].to(experiment.device).eval() if lpips_weight > 0 else None
+
     for epoch in range(experiment.start_epoch, experiment.nb_epochs):
         experiment.on_epoch_start(epoch=epoch)
 
@@ -65,15 +72,19 @@ def fdq_train(experiment) -> None:
 
         model.train()
         train_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
             if isinstance(batch, (list, tuple)):
-                # Legacy loader compatibility: TODO cleanup!
                 images_gt = batch[0].to(experiment.device)
+                condition = batch[1].to(experiment.device) if len(batch) == 2 else None
             else:
                 images_gt = batch.to(experiment.device)
+                condition = None
+
+            n_train_processed += images_gt.shape[0]
 
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
@@ -84,10 +95,13 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = images_gt.shape[1:]
-                if img_shape[1] == 1:
+                if img_shape[0] == 1:
                     is_grayscale = True
 
-                # first test batch: store inputs
+                # first test batch: store inputs. GT and (if present) Condition are
+                # built as separate 2-row (images + histogram) figures, then stacked
+                # into one 4-row image so they're easier to compare side by side
+                # instead of as two separate wandb panels.
                 gt_imgs_path = createSubplots(
                     image_list=images_gt,
                     grayscale=is_grayscale,
@@ -97,15 +111,48 @@ def fdq_train(experiment) -> None:
                     figure_title="Input GT",
                     export_transform=t_img_exp,
                 )
-                imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
+
+                if condition is not None:
+                    cond_imgs_path = createSubplots(
+                        image_list=condition,
+                        grayscale=is_grayscale,
+                        experiment=experiment,
+                        histogram=True,
+                        hide_ticks=True,
+                        figure_title="Input Condition",
+                        export_transform=t_img_exp,
+                    )
+                    combined_path = stack_images_vertically(
+                        [gt_imgs_path, cond_imgs_path],
+                        save_path=experiment.get_next_export_fn(name="train_gt_cond"),
+                    )
+                    imgs_to_log.append({"name": "train_imgs", "path": combined_path})
+                else:
+                    imgs_to_log.append({"name": "train_imgs", "path": gt_imgs_path})
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-                noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
-                noise_pred = model(noisy_imgs, t)
-                train_loss_tensor = (
-                    experiment.losses["MAE"](noise, noise_pred)
-                    / experiment.gradacc_iter
+                noisy_imgs, noise, t = chuchi_diffuser.noise_step(
+                    x_t=images_gt, condition=condition
                 )
+                noise_pred = model(noisy_imgs, t)
+                loss_tensor = experiment.losses["MSE"](noise, noise_pred)
+
+                if lpips_loss_fn is not None:
+                    # Reconstruct the estimated clean image x0_hat from the predicted
+                    # noise (standard DDPM closed-form), then compare it to the GT with
+                    # LPIPS. noisy_imgs is [condition, noisy_target] channel-concatenated
+                    # (see DDPM.noise_step) - slice back out just the noisy target.
+                    noisy_target = noisy_imgs[:, -images_gt.shape[1] :, ...]
+                    t_shape = [-1] + [1] * (images_gt.dim() - 1)
+                    sqrt_ac = chuchi_diffuser.sqrt_alpha_cumprod[t].reshape(t_shape)
+                    sqrt_1m_ac = chuchi_diffuser.sqrt_1m_alpha_cumprod[t].reshape(t_shape)
+                    # x0_hat is a poor/noisy estimate at high t (early in the forward
+                    # process) - clamp to the data range rather than trying to weight it
+                    # away, keeping this simple.
+                    x0_hat = ((noisy_target - sqrt_1m_ac * noise_pred) / sqrt_ac).clamp(-1, 1)
+                    loss_tensor = loss_tensor + lpips_weight * lpips_loss_fn(x0_hat, images_gt).mean()
+
+                train_loss_tensor = loss_tensor / experiment.gradacc_iter
                 if experiment.useAMP:
                     experiment.scaler.scale(train_loss_tensor).backward()
                 else:
@@ -120,11 +167,12 @@ def fdq_train(experiment) -> None:
             train_loss_sum += train_loss_tensor.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
 
         model.eval()
         pbar = startProgBar(data.n_val_batches, "validation...")
         val_loss_sum = 0.0
+        n_val_processed = 0
 
         with (
             torch.no_grad(),
@@ -133,16 +181,20 @@ def fdq_train(experiment) -> None:
             for nb_vbatch, batch in enumerate(data.val_data_loader):
                 pbar.update(nb_vbatch)
                 if isinstance(batch, (list, tuple)):
-                    # Legacy loader compatibility: TODO cleanup!
                     images_gt = batch[0].to(experiment.device)
+                    condition = batch[1].to(experiment.device) if len(batch) == 2 else None
                 else:
                     images_gt = batch.to(experiment.device)
+                    condition = None
 
-                noisy_imgs, noise, t = chuchi_diffuser.noise_step(images_gt)
+                n_val_processed += images_gt.shape[0]
+                noisy_imgs, noise, t = chuchi_diffuser.noise_step(
+                    x_t=images_gt, condition=condition
+                )
                 noise_pred = model(noisy_imgs, t)
-                val_loss_sum += experiment.losses["MAE"](noise, noise_pred).item()
+                val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
 
-            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
+            experiment.valLoss = val_loss_sum / n_val_processed
 
             # Additional dummy validation: generate samples
             idx_to_store = torch.linspace(
@@ -152,11 +204,19 @@ def fdq_train(experiment) -> None:
                 dtype=torch.int,
             ).tolist()
 
+            # These preview plots pass explicit per-row/per-step labels sized for a single
+            # sample (e.g. one "GT"/"Condition"/"Generated" row, one image per diffusion
+            # step) - createSubplots silently explodes a multi-sample batch into one image
+            # per sample, which would then no longer match those labels. Generate from a
+            # single validation sample here so the shapes the labels expect are the shapes
+            # actually produced (mirrors the equivalent fix already in diffusion_monai.py).
+            sample_condition = condition[:1] if condition is not None else None
             images = get_sample_from_noise(
                 experiment=experiment,
                 diffuser=chuchi_diffuser,
                 gen_shape=img_shape,
                 idx_to_store=idx_to_store,
+                condition=sample_condition,
             )
 
             history_path = createSubplots(
@@ -175,6 +235,24 @@ def fdq_train(experiment) -> None:
                     {"name": "gen_hist", "path": history_path},
                 ]
             )
+
+            if condition is not None:
+                cond_diff_path = createSubplots(
+                    image_list=[
+                        images_gt[:1],
+                        sample_condition,
+                        images[-1],
+                        images_gt[:1] - images[-1],
+                    ],
+                    grayscale=is_grayscale,
+                    experiment=experiment,
+                    histogram=True,
+                    figure_title="Generative Diffusion Steps",
+                    export_transform=t_img_exp,
+                    labels=["GT", "Condition", "Generated", "GT - Generated"],
+                    apply_global_range=False,
+                )
+                imgs_to_log.append({"name": "gen_cond_diff", "path": cond_diff_path})
 
             experiment.on_epoch_end(log_images_wandb=imgs_to_log)
 
@@ -210,13 +288,7 @@ def fdq_test(experiment):
     ).tolist()
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
-    test_sample = next(iter(data.test_data_loader))
-    # legacy compatibility
-    if isinstance(test_sample, (list, tuple)):
-        test_sample = test_sample[0]
-
-    img_shape = test_sample.shape[1:]
-    is_grayscale = img_shape[1] == 1
+    test_iter = iter(data.test_data_loader)
 
     chuchi_diffuser = DDPM(
         num_timesteps=targs.diffusion_nb_steps,
@@ -228,10 +300,31 @@ def fdq_test(experiment):
 
     pbar = startProgBar(nb_test_samples, "evaluation...")
 
-    results = []
+    gts, conditions, results = [], [], []
+    img_shape = None
+    is_grayscale = None
 
     for inf_nb in range(nb_test_samples):
         pbar.update(inf_nb)
+
+        # fetch a fresh sample/condition pair each iteration - reusing the
+        # same one for every sample made every "different" test result
+        # condition on an identical source image.
+        test_sample = next(test_iter)
+        if isinstance(test_sample, (list, tuple)):
+            images_gt = test_sample[0].to(experiment.device)
+            condition = (
+                test_sample[1].to(experiment.device)
+                if len(test_sample) == 2
+                else None
+            )
+        else:
+            images_gt = test_sample.to(experiment.device)
+            condition = None
+
+        if img_shape is None:
+            img_shape = images_gt.shape[1:]
+            is_grayscale = img_shape[0] == 1
 
         with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
             images = get_sample_from_noise(
@@ -239,6 +332,7 @@ def fdq_test(experiment):
                 diffuser=chuchi_diffuser,
                 gen_shape=img_shape,
                 idx_to_store=idx_to_store,
+                condition=condition,
             )
 
         history_path = createSubplots(
@@ -255,19 +349,44 @@ def fdq_test(experiment):
             experiment, images={"name": "test_gen_history", "path": history_path}
         )
 
+        gts.append(images_gt.cpu())
+        if condition is not None:
+            conditions.append(condition.cpu())
         results.append(images[-1].cpu())
 
     pbar.finish()
 
-    res_path = createSubplots(
-        image_list=results,
-        grayscale=is_grayscale,
-        experiment=experiment,
-        histogram=False,
-        figure_title="Generated test samples",
-        export_transform=t_img_exp,
-        hide_ticks=True,
-        show_colorbar=False,
-    )
+    if conditions:
+        # 4 rows: ground truth / condition / result / ground truth - result
+        gt_batch = torch.cat(gts, dim=0)
+        result_batch = torch.cat(results, dim=0)
+        res_path = createSubplots(
+            image_list=[
+                gt_batch,
+                torch.cat(conditions, dim=0),
+                result_batch,
+                gt_batch - result_batch,
+            ],
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples (rows: ground truth / condition / result / GT - result)",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+            apply_global_range=False,
+            max_cols=nb_test_samples,
+        )
+    else:
+        res_path = createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title="Generated test samples",
+            export_transform=t_img_exp,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
 
     save_wandb(experiment, images={"name": "test_samples", "path": res_path})

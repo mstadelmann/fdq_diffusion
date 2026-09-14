@@ -1,0 +1,24 @@
+defaults:
+  - vae_cbct_x64_v0_dist2
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_128
+
+store:
+  wandb_project: cbct_vae_x128
+
+slurm_cluster:
+  world_size: 2
+  cpus_per_task: 16
+  cpus_per_task_test: 8
+  gres: gpu:h200sxm:2
+  gres_test: gpu:h200sxm:1
+  mem: 280G
+  mem_test: 180G

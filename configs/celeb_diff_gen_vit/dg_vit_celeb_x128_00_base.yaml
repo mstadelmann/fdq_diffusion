@@ -1,0 +1,191 @@
+defaults:
+  - wandb_keys
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+  uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: false
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
+
+transforms:
+  random_h_flip:
+  - RandomHorizontalFlip:
+      p: 0.5
+  resize_norm:
+  - Float32
+  - Resize_HW:
+      h: 128
+      w: 128
+  - ReRange:
+      in_min: 0
+      in_max: 255
+      out_min: -1
+      out_max: 1
+  norm_to_rgb:
+  - ReRange:
+      in_min: -1
+      in_max: 1
+      out_min: 0
+      out_max: 255
+  - CLAMP_abs:
+      lower: 0
+      upper: 255
+  - Uint8
+
+data:
+  celeb_HF:
+    processor: ~/dev/fdq_diffusion/hf_preparator_celeb.py
+    args:
+      # datasets library cache_dir for the public bitmind/celeb-a-hq dataset
+      # (downloaded once, reused after). Named hf_cache_dir rather than
+      # base_path since fdq's copy_data_to_scratch() rsyncs any 'base_path'
+      # arg into ephemeral scratch and trains against that copy instead -
+      # which would re-download this every job. base_path: null below is an
+      # inert placeholder so that same function's unconditional attribute
+      # read doesn't raise (see hf_preparator_celeb.py for details).
+      hf_cache_dir: ~/data_ML/celeba_HQ_HF/
+      base_path: null
+      # single 'train' split only; val/test are carved off by fixed row index
+      # (not random), so with subset_*=1.0 below the same images land in
+      # train/val/test on every run.
+      val_from_train_ratio: 0.05
+      test_from_train_ratio: 0.05
+      subset_train: 1.0
+      subset_val: 1.0
+      subset_test: 1.0
+      pin_memory: true
+      num_workers: 4
+      prefetch_factor: 2
+      train_batch_size: 16
+      val_batch_size: 8
+      test_batch_size: 1
+      shuffle_train: true
+      shuffle_val: false
+      shuffle_test: false
+      drop_last: true
+      transform: resize_norm
+      transform_test: resize_norm
+
+    caching:
+      enabled: true
+      cache_dir: /scratch/fdq_cache/
+      shuffle_train: true
+      shuffle_val: false
+      shuffle_test: false
+      pin_memory: true
+      compress_cache: false
+      nondeterministic_transforms:
+        processor: ~/dev/fdq_diffusion/celeb_augmentation.py
+
+models:
+  ViT:
+    path: ~/dev/fdq_diffusion/vit_diffusion_model.py
+    class_name: DiTNoisePredictor
+    args:
+      # DiT-B/4 (Peebles & Xie, "Scalable Diffusion Models with Transformers"), applied directly
+      # in pixel space at 128x128 -> patch_size 4 gives a 32x32 = 1024 token sequence, 4x finer
+      # than the 256-token latent grids DiT is normally run on. Finer patches (more tokens) cost
+      # ~16x the attention FLOPs of patch_size 8 but reliably improve FID at fixed depth/width
+      # (Peebles & Xie, Table 3) - kept here despite the compute cost since raw pixels carry far
+      # less information per patch than a compressed VAE latent does.
+      sample_size: 128
+      in_channels: 3
+      out_channels: 3
+      patch_size: 4
+      num_layers: 12
+      num_attention_heads: 12
+      attention_head_dim: 64
+      dropout: 0.0
+    # EMA of the weights, updated every optimizer step and used for sampling/
+    # export - averages out per-step SGD noise, standard practice for diffusion
+    # models and a large lever on generated sample sharpness.
+    ema_decay: 0.999
+    optimizer:
+      class_name: torch.optim.AdamW
+      args:
+        lr: 5.0e-05
+        weight_decay: 0.01
+    lr_scheduler:
+      class_name: torch.optim.lr_scheduler.StepLR
+      args:
+        step_size: 20
+        gamma: 0.95
+
+train:
+  path: ~/dev/fdq_diffusion/diffusion_chuchichaestli.py
+  args:
+    epochs: 10
+    use_GPU: true
+    use_AMP: true
+    accumulate_grad_batches: 1
+    # A ViT/DiT backbone lacks the convolutional locality bias a U-Net has: its
+    # denoising loss plateaus long before samples become visually coherent, so
+    # a U-Net-tuned val-loss patience stops it far too early. Disabled here;
+    # early_stop_train_loss/early_stop_nan still guard against a stuck/diverged run.
+    early_stop_val_loss: null
+    early_stop_train_loss: 70
+    early_stop_nan: 5
+    diffusion_scheduler: linear
+    diffusion_nb_steps: 800
+    diffusion_shd_beta_start: 0.0001
+    diffusion_shd_beta_end: 0.02
+    diffusion_nb_plot_steps: 10
+    dataloader_name: celeb_HF
+    model_name: ViT
+
+losses:
+  MAE:
+    class_name: torch.nn.L1Loss
+  MSE:
+    class_name: torch.nn.MSELoss
+
+store:
+  results_path: ~/data_ML/results
+  img_exp_nb: 4
+  save_last_model: true
+  save_best_val_model: true
+  save_best_train_model: true
+  checkpoint_frequency: 2
+  use_tensorboard: false
+  use_wandb: true
+  wandb_project: celeb_diff_gen_vit_x128
+  wandb_entity: zhaw_stmd
+  img_exp_transform: norm_to_rgb
+
+test:
+  processor: ~/dev/fdq_diffusion/diffusion_chuchichaestli.py
+  test_model: best
+  args:
+    nb_test_samples: 10
+
+slurm_cluster:
+  fdq_test_repo: false
+  fdq_version: 0.1.22
+  python_env_module: python/3.12.4
+  uv_env_module: uv/0.6.12
+  cuda_env_module: cuda/12.8.0
+  scratch_results_path: /scratch/fdq_results/
+  scratch_data_path: /scratch/fdq_data/
+  log_path: ~/dev/fdq_diffusion/slurm_log
+  job_time: 1400
+  stop_grace_time: 15
+  ntasks: 1
+  cpus_per_task: 8
+  gres: gpu:a100sxm:1
+  mem: 120G
+  partition: gpu_top
+  account: cai_ivs
+  auto_resubmit: true
+  additional_pip_packages:
+  - datasets
+  - chuchichaestli==0.2.17
+  - diffusers==0.40.0

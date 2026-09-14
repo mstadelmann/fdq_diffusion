@@ -39,8 +39,8 @@ transforms:
 
 
 store:
-  wandb_project: diff_gen_celeb_x256
+  wandb_project: celeb_diff_gen_x256
 
 slurm_cluster:
-  gres: gpu:h200sxm:1
+  gres: gpu:h200sxm:2
   gres_test: gpu:h200sxm:1

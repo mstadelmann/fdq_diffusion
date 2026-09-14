@@ -1,7 +1,7 @@
 import torch
 from fdq.ui_functions import startProgBar, iprint
 from fdq.misc import save_wandb
-from image_functions import createSubplots
+from image_functions import create_category_grid, createSubplots
 
 # from monai.losses.perceptual import PerceptualLoss
 
@@ -61,6 +61,7 @@ def fdq_train(experiment) -> None:
         train_loss_sum = 0.0
         train_kl_loss_sum = 0.0
         train_recon_loss_sum = 0.0
+        n_train_processed = 0
         pbar = startProgBar(data.n_train_batches, "training...")
 
         for nb_tbatch, batch in enumerate(train_loader):
@@ -71,6 +72,7 @@ def fdq_train(experiment) -> None:
             else:
                 images_gt = batch.to(experiment.device)
 
+            n_train_processed += images_gt.shape[0]
             is_grayscale = images_gt.shape[1] == 1
 
             with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
@@ -98,15 +100,16 @@ def fdq_train(experiment) -> None:
             train_recon_loss_sum += recon_loss.detach().item()
 
         pbar.finish()
-        experiment.trainLoss = train_loss_sum / len(train_loader.dataset)
-        train_kl_loss_sum = train_kl_loss_sum / len(data.val_data_loader.dataset)
-        train_recon_loss_sum = train_recon_loss_sum / len(data.val_data_loader.dataset)
+        experiment.trainLoss = train_loss_sum / n_train_processed
+        train_kl_loss_sum = train_kl_loss_sum / n_train_processed
+        train_recon_loss_sum = train_recon_loss_sum / n_train_processed
 
         model.eval()
         pbar = startProgBar(data.n_val_batches, "validation...")
         val_loss_sum = 0.0
         val_kl_loss_sum = 0.0
         val_recon_loss_sum = 0.0
+        n_val_processed = 0
 
         with torch.no_grad():
             for nb_vbatch, batch in enumerate(data.val_data_loader):
@@ -118,6 +121,7 @@ def fdq_train(experiment) -> None:
                 else:
                     images_gt = batch.to(experiment.device)
 
+                n_val_processed += images_gt.shape[0]
                 reconstruction, z_mu, z_sigma = model(images_gt)
                 # z_mu, z_sigma = model.encode(images_gt)
                 # z_vae = model.sampling(z_mu, z_sigma)
@@ -132,9 +136,9 @@ def fdq_train(experiment) -> None:
                 val_recon_loss_sum += recon_loss.detach().item()
                 val_kl_loss_sum += kl_loss.detach().item()
 
-            experiment.valLoss = val_loss_sum / len(data.val_data_loader.dataset)
-            val_recon_loss_sum = val_recon_loss_sum / len(data.val_data_loader.dataset)
-            val_kl_loss_sum = val_kl_loss_sum / len(data.val_data_loader.dataset)
+            experiment.valLoss = val_loss_sum / n_val_processed
+            val_recon_loss_sum = val_recon_loss_sum / n_val_processed
+            val_kl_loss_sum = val_kl_loss_sum / n_val_processed
             pbar.finish()
 
             # epsilon = torch.randn_like(z_sigma)
@@ -250,7 +254,14 @@ def fdq_test(experiment):
     kl_losses = []
     recon_losses = []
     weighted_losses = []
-    results = []
+    psnr_scores = []
+    psnr_hu_scores = []
+
+    gt_samples = []
+    recon_samples = []
+    diff_samples = []
+    gt_hu_samples = []
+    recon_hu_samples = []
 
     print(f"Testset sample size: {data.n_test_samples}")
     pbar = startProgBar(data.n_test_samples, "evaluation...")
@@ -268,48 +279,23 @@ def fdq_test(experiment):
 
         reconstruction, z_mu, z_sigma = model(images_gt)
 
-        results.append(reconstruction.cpu())
-
         is_grayscale = images_gt.shape[1] == 1
 
-        img_list = [
-            images_gt,
-            reconstruction,
-            images_gt - reconstruction,
-        ]
-
-        labels = ["gt", "recon", "diff"]
+        gt_samples.append(images_gt.cpu())
+        recon_samples.append(reconstruction.cpu())
+        diff_samples.append((images_gt - reconstruction).cpu())
 
         if norm_to_hu is not None:
             result_hu = norm_to_hu(reconstruction)
             images_gt_hu = norm_to_hu(images_gt)
-            img_list.extend([images_gt_hu, result_hu])
-            labels.extend(["gt_hu", "recon_hu"])
-            PSNR = experiment.losses["PSNR"](images_gt, reconstruction).item()
-            PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
-            log_scalars = {"PSNR_test": PSNR, "PSNR_test_HU": PSNR_hu}
-        else:
-            log_scalars = None
-
-        eval_path = createSubplots(
-            image_list=img_list,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=True,
-            figure_title=f"test image {nb_tbatch}",
-            labels=labels,
-            export_transform=t_img_exp,
-            show_colorbar=False,
-            apply_global_range=False,
-        )
-
-        save_wandb(
-            experiment,
-            images=[
-                {"name": "test_samples", "path": eval_path},
-            ],
-            scalars=log_scalars,
-        )
+            gt_hu_samples.append(images_gt_hu.cpu())
+            recon_hu_samples.append(result_hu.cpu())
+            psnr_scores.append(
+                experiment.losses["PSNR"](images_gt, reconstruction).item()
+            )
+            psnr_hu_scores.append(
+                experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
+            )
 
         kl_loss = KL_loss(z_mu, z_sigma).detach().item()
         kl_losses.append(kl_loss)
@@ -328,25 +314,39 @@ def fdq_test(experiment):
         "kl_loss": float(torch.tensor(kl_losses).mean()),
     }
 
+    if norm_to_hu is not None:
+        results_scalars["PSNR_test"] = float(torch.tensor(psnr_scores).mean())
+        results_scalars["PSNR_test_HU"] = float(torch.tensor(psnr_hu_scores).mean())
+
     print(results_scalars)
 
-    res_path = createSubplots(
-        image_list=results,
+    categories = [
+        ("gt", gt_samples),
+        ("recon", recon_samples),
+        ("diff", diff_samples),
+    ]
+    if norm_to_hu is not None:
+        categories.extend(
+            [
+                ("gt_hu", gt_hu_samples),
+                ("recon_hu", recon_hu_samples),
+            ]
+        )
+
+    overview_path = create_category_grid(
+        categories=categories,
         grayscale=is_grayscale,
         experiment=experiment,
-        histogram=False,
-        figure_title="Generated test samples",
+        figure_title="Test results",
         export_transform=t_img_exp,
-        hide_ticks=True,
-        show_colorbar=False,
     )
 
-    images = [{"name": "results overview", "path": res_path}]
+    images = [{"name": "test_results", "path": overview_path}]
 
     # sagital and coronal planes
     if "extract_2d_from_3d_sag" in experiment.transformers:
         res_path_sag = createSubplots(
-            image_list=results,
+            image_list=recon_samples,
             grayscale=is_grayscale,
             experiment=experiment,
             histogram=False,
@@ -359,7 +359,7 @@ def fdq_test(experiment):
 
     if "extract_2d_from_3d_cor" in experiment.transformers:
         res_path_cor = createSubplots(
-            image_list=results,
+            image_list=recon_samples,
             grayscale=is_grayscale,
             experiment=experiment,
             histogram=False,

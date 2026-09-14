@@ -1,0 +1,26 @@
+defaults:
+  - dg_m_cele_x128_00_base_dist2
+  - _self_
+
+globals:
+  project: Celeb_Generation
+  author: Marc
+
+# fixes the random color-cast issue: standard linear beta schedule leaves a nonzero
+# terminal SNR (residual signal at t=T-1), so the model never learns to produce a
+# correct global color from truly pure noise at inference. Rescaling for zero terminal
+# SNR requires v_prediction, since epsilon-prediction divides by sqrt(alpha_prod_t),
+# which is exactly 0 at the last training timestep once alphas_cumprod is rescaled to 0.
+train:
+  args:
+    diffusion_prediction_type: v_prediction
+    diffusion_zero_terminal_snr: true
+
+mode:
+  run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null

@@ -98,7 +98,11 @@ def fdq_test(experiment):
         pbar.update(nb_tbatch)
 
         with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
-            images_gt = batch[0].to(experiment.device)
+            if isinstance(batch, (list, tuple)):
+                # Legacy loader compatibility: TODO cleanup!
+                images_gt = batch[0].to(experiment.device)
+            else:
+                images_gt = batch.to(experiment.device)
             z_mu, z_sigma = maisi_model.encode(images_gt)
             z_vae = maisi_model.sampling(z_mu, z_sigma)
             z_vae_decoded = maisi_model.decode(z_vae)

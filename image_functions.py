@@ -2,11 +2,185 @@ import torch
 from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+
+
+def stack_images_vertically(paths, save_path):
+    """Vertically stack multiple already-saved images into one combined image.
+
+    Useful to combine separate createSubplots() outputs (e.g. one 2-row GT+histogram
+    figure and one 2-row Condition+histogram figure) into a single figure, rather than
+    logging them as separate images.
+
+    Args:
+        paths: List of image file paths to stack, top to bottom. None entries (e.g. a
+            createSubplots() call that failed and returned None) are skipped.
+        save_path: Path to write the combined image to.
+
+    Returns:
+        str: save_path, or None if fewer than one valid path was given.
+    """
+    imgs = [Image.open(p) for p in paths if p is not None]
+    if not imgs:
+        return None
+    if len(imgs) == 1:
+        imgs[0].save(save_path)
+        return save_path
+
+    width = max(im.width for im in imgs)
+    total_height = sum(im.height for im in imgs)
+    combined = Image.new(imgs[0].mode, (width, total_height), color="white")
+
+    y = 0
+    for im in imgs:
+        combined.paste(im, (0, y))
+        y += im.height
+
+    combined.save(save_path)
+    return save_path
 
 
 def compute_histo(image, nb_bins=100):
     bins = torch.linspace(image.min(), image.max(), nb_bins).cpu()
     return torch.histogram(image.cpu().float(), bins=bins)
+
+
+@torch.no_grad()
+def create_category_grid(
+    categories,
+    grayscale=False,
+    experiment=None,
+    save_path=None,
+    figure_title=None,
+    fig_size=3,
+    export_transform=None,
+    show_colorbar=False,
+    hide_ticks=True,
+):
+    """Build a grid figure with one column per sample and, for each category
+    (e.g. ground truth / reconstruction / difference), one image row directly
+    followed by one histogram row.
+
+    Args:
+        categories: list of (label, tensors) tuples. `tensors` is a list of
+            per-sample tensors/arrays (one column each); every category must
+            provide the same number of samples.
+        grayscale (bool): whether images are single-channel.
+        experiment (class, optional): experiment object, used to derive
+            `save_path` and to skip plotting on non-main processes.
+        save_path (str, optional): where to write the figure. Derived from
+            `experiment` if not given.
+        figure_title (str, optional): overall figure title.
+        fig_size (float): size (inches) of a single grid cell.
+        export_transform (callable, optional): transform applied to each
+            sample tensor before plotting (e.g. denormalization).
+        show_colorbar (bool): whether to draw a colorbar next to each image.
+        hide_ticks (bool): whether to hide axis ticks on the image rows.
+
+    Returns:
+        str: save_path the figure was written to, or None on failure / if not
+        the main process.
+    """
+    fig = None
+    try:
+        if save_path is None and experiment is not None:
+            if hasattr(experiment, "is_main_process") and not experiment.is_main_process():
+                return None
+
+        if export_transform is None:
+            export_transform = transforms.Lambda(lambda t: t)
+
+        nb_cols = len(categories[0][1])
+        nb_rows = 2 * len(categories)
+
+        fig, axs = plt.subplots(
+            nb_rows, nb_cols, figsize=(fig_size * nb_cols, fig_size * nb_rows)
+        )
+        axs = np.atleast_2d(axs)
+        if axs.shape != (nb_rows, nb_cols):
+            axs = axs.reshape(nb_rows, nb_cols)
+
+        if figure_title is not None:
+            plt.suptitle(figure_title)
+
+        for cat_idx, (label, tensors) in enumerate(categories):
+            if len(tensors) != nb_cols:
+                raise ValueError(
+                    f"ERROR - category '{label}' has {len(tensors)} samples, expected {nb_cols}!"
+                )
+
+            img_row = 2 * cat_idx
+            hist_row = img_row + 1
+
+            for col, img in enumerate(tensors):
+                img = (
+                    img.detach().cpu()
+                    if isinstance(img, torch.Tensor)
+                    else torch.tensor(img)
+                )
+                img_t = export_transform(img).cpu()
+
+                if len(img_t.shape) > 3:
+                    img_t = img_t[0, ...]
+                    img_t = torch.squeeze(img_t, 0)
+
+                if grayscale:
+                    hist = compute_histo(img_t)
+                    axs[hist_row, col].plot(hist.bin_edges[:-1], hist.hist, color="r")
+                else:
+                    sq = torch.squeeze(img_t)
+                    for ch, color in zip(range(min(3, sq.shape[0])), "rgb"):
+                        hist = compute_histo(sq[ch])
+                        axs[hist_row, col].plot(hist.bin_edges[:-1], hist.hist, color=color)
+
+                plot_t = img_t
+                if not grayscale and len(plot_t.shape) == 3:
+                    plot_t = plot_t.permute(1, 2, 0)
+
+                cmap = "gray" if grayscale else None
+                im = axs[img_row, col].imshow(
+                    plot_t,
+                    cmap=cmap,
+                    vmin=float(img_t.min()),
+                    vmax=float(img_t.max()),
+                )
+                if show_colorbar:
+                    fig.colorbar(im, ax=axs[img_row, col])
+
+                if col == 0:
+                    axs[img_row, col].set_ylabel(label)
+                    axs[hist_row, col].set_ylabel(f"hist {label}")
+
+                if cat_idx == 0:
+                    axs[img_row, col].set_title(f"sample {col}")
+
+                axs[hist_row, col].set_yticks([])
+                axs[hist_row, col].set_yticklabels([])
+
+                if hide_ticks:
+                    axs[img_row, col].set_xticks([])
+                    axs[img_row, col].set_yticks([])
+                    axs[img_row, col].set_xticklabels([])
+                    axs[img_row, col].set_yticklabels([])
+
+        if save_path is None:
+            if experiment is None:
+                raise ValueError("create_category_grid requires save_path or experiment.")
+            save_path = experiment.get_next_export_fn()
+
+        if save_path is None:
+            return None
+
+        plt.savefig(save_path)
+
+        return save_path
+
+    except Exception as e:
+        print(f"An error occurred while creating category grid: {e}")
+        return None
+    finally:
+        if fig is not None:
+            plt.close(fig)
 
 
 @torch.no_grad()

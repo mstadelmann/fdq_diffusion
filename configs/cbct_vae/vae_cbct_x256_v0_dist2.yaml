@@ -1,0 +1,24 @@
+defaults:
+  - vae_cbct_x64_v0_dist2
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_256
+      train_batch_size: 2
+      val_batch_size: 1
+
+store:
+  wandb_project: cbct_vae_x256
+
+slurm_cluster:
+  mem: 320G
+  mem_test: 320G
+  # rank 0 alone caches the 256px train set (~15min observed); default 10min NCCL
+  # watchdog timeout aborts the job mid-cache, so raise it with margin here.
+  ddp_init_timeout_min: 30

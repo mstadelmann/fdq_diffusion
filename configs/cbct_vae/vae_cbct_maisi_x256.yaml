@@ -1,0 +1,19 @@
+defaults:
+  - vae_cbct_maisi_x128
+  - _self_
+
+globals:
+  project: CBCT_VAE
+  author: Marc
+
+data:
+  ctrate:
+    args:
+      root_path: /cluster/projects/2026_stmd_orthosense/public_data/ct-rate/preproc_256
+      # preproc_256 volumes are 8x the voxel count of preproc_128 (256x256x128 vs
+      # 128x128x64) - train_batch_size/val_batch_size are inherited unchanged from
+      # vae_cbct_maisi_x128 since this hasn't actually been run yet; may need
+      # cutting if it OOMs.
+
+store:
+  wandb_project: cbct_vae_maisi_x256
