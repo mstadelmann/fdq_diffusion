@@ -27,7 +27,7 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF GEN
 #--------------------------------------------------------------------------------------------------
-
+# TODO 58158 - 63
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml         # MONAI UNet, baseline/memory check only
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml
 fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml                # chuchichaestli UNet

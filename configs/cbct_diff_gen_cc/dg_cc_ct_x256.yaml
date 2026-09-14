@@ -1,5 +1,5 @@
 defaults:
-  - diff_cbct_x128
+  - dg_cc_ct_x128
   - _self_
 
 globals:
