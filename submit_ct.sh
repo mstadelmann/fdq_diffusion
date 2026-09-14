@@ -46,8 +46,6 @@ fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x128_deblur.yaml
 fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml       # chuchichaestli UNet
 
 
-
-
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
