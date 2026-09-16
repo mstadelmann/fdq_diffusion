@@ -32,9 +32,9 @@ fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml         # MONAI UN
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml   # ERROR, rerun 58494 - still running, crashed during finalization, restart as 95585
 fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml                # chuchichaestli UNet 76168, config error, resubmit as 95615
 
-fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0.yaml         # MONAI UNet # OOM crash -> reduce data, rerun 58496, crash, reduce data, restart as 76312
-fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0_dist2.yaml   # 58497 - crash, restart as 76345
-fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchichaestli UNet # OOM crash -> reduce data, rerun: 58500 OOM, resduce and restart as 76375
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0.yaml         # MONAI UNet # OOM crash -> reduce data, rerun 58496, crash, reduce data, restart as 76312 -> 95947
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x256_v0_dist2.yaml   # 58497 - crash, restart as 76345 -> 95948
+fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchichaestli UNet # OOM crash -> reduce data, rerun: 58500 OOM, resduce and restart as 76375 -> 95949
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF Cnd
