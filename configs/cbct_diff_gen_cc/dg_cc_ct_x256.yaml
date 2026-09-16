@@ -21,6 +21,7 @@ data:
       # guess to avoid an immediate OOM; this hasn't actually been run yet.
       train_batch_size: 1
       val_batch_size: 1
+      subset_train: 0.5 # cheap hack to avoid OOM -> todo: fix the dataloader instead!
 
 store:
   wandb_project: cbct_diff_gen_x256

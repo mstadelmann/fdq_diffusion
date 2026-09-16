@@ -21,3 +21,7 @@ slurm_cluster:
   gres_test: gpu:h200sxm:1
   mem: 280G
   mem_test: 180G
+  # rank 0 alone does the post-epoch wandb image upload + checkpoint save after
+  # every 800-step sampling pass; default 10min NCCL watchdog timeout aborted
+  # job 58159 mid-upload, so raise it with margin here.
+  ddp_init_timeout_min: 30

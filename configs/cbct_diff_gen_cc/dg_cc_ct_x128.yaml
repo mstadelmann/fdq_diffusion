@@ -8,7 +8,7 @@ globals:
   uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
-  run_train: false
+  run_train: true
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
@@ -137,6 +137,8 @@ train:
 losses:
   MAE:
     class_name: torch.nn.L1Loss
+  MSE:
+    class_name: torch.nn.MSELoss
 
 store:
   results_path: ~/data_ML/results
@@ -160,7 +162,7 @@ test:
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.22
+  fdq_version: 0.1.23
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0
