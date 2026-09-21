@@ -18,5 +18,30 @@ data:
     # fdq's dataset caching loads the whole split into RAM; at x256 that OOM-killed this job
     caching:
       enabled: false
+
+models:
+  monaiUNET:
+    class_name: monai.networks.nets.DiffusionModelUNet
+    args:
+      spatial_dims: 3
+      in_channels: 1
+      out_channels: 1
+      resblock_updown: true
+      num_res_blocks:
+      - 2
+      - 2
+      - 2
+      - 2
+      channels:
+      - 32
+      - 64
+      - 128
+      - 256
+      attention_levels:
+      - false
+      - false
+      - false
+      - false
+
 store:
   wandb_project: cbct_diff_gen_x256
