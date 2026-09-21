@@ -24,6 +24,11 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x256.yaml
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v1.yaml
 fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 
+#--------------------------------------------------------------------------------------------------
+# CT-Rate  VAE WAN2.2 TEST
+#--------------------------------------------------------------------------------------------------
+fdq_submit configs/cbct_vae/vae_cbct_wan2_x128.yaml # 142522
+
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF GEN
