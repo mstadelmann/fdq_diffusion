@@ -161,6 +161,16 @@ losses:
     class_name: torch.nn.L1Loss
   MSE:
     class_name: torch.nn.MSELoss
+  PSNR:
+    path: ~/dev/fdq_diffusion/common.py
+    class_name: PSNR
+    args:
+      mode: norm
+  PSNR_hu:
+    path: ~/dev/fdq_diffusion/common.py
+    class_name: PSNR
+    args:
+      mode: HU
 
 store:
   results_path: ~/data_ML/results
@@ -171,7 +181,7 @@ store:
   checkpoint_frequency: 5
   use_tensorboard: false
   use_wandb: true
-  wandb_project: diff_cond_cbct_x64
+  wandb_project: cbct_diff_cond_x64
   wandb_entity: zhaw_stmd
   img_exp_transform: extract_2d_from_3d
 

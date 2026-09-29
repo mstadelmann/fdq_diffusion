@@ -315,7 +315,7 @@ def fdq_train(experiment) -> None:
             if norm_to_hu is not None and condition is not None:
                 result_hu = norm_to_hu(image)
                 images_gt_hu = norm_to_hu(images_gt[:1])
-                PSNR = experiment.losses["PSNR"](images_gt_hu, result_hu).item()
+                PSNR = experiment.losses["PSNR"](images_gt[:1], image).item()
                 PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
                 log_scalars = {"PSNR": PSNR, "PSNR_hu": PSNR_hu}
             else:

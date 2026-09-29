@@ -59,9 +59,11 @@ train:
     epochs: 150
 
 store:
-  wandb_project: diff_cond_cbct_x128
+  wandb_project: cbct_diff_cond_x128
 
 slurm_cluster:
   gres: gpu:h200sxm:1
   gres_test: gpu:h200sxm:1
   partition: gpu_top
+  mem: 300G
+  mem_test: 300G
