@@ -28,7 +28,49 @@ def get_sample_from_noise(experiment, diffuser, gen_shape, idx_to_store=None, co
         else:
             imgs = img
 
+    # Optional post-processing of the final (clean) sample only, e.g. clamping to the
+    # data range (DDPM.generate doesn't clip). Intermediates are still noisy, so they
+    # are left untouched. Configured by name via train.args.sample_output_transform.
+    t_name = targs.get("sample_output_transform", None)
+    if t_name is not None:
+        t_out = experiment.transformers[t_name]
+        if isinstance(imgs, list):
+            if imgs:
+                imgs[-1] = t_out(imgs[-1])
+        else:
+            imgs = t_out(imgs)
+
     return imgs
+
+
+@torch.no_grad()
+def get_psnr_scalars(experiment, images_gt, result, condition=None):
+    """PSNR (norm + HU) of result vs GT, plus the same for the condition as a baseline.
+
+    Returns None if the experiment doesn't define PSNR/PSNR_hu losses and a
+    norm_to_HU transform, so configs without them are unaffected.
+    """
+    losses = experiment.losses
+    if (
+        "PSNR" not in losses
+        or "PSNR_hu" not in losses
+        or "norm_to_HU" not in experiment.transformers
+    ):
+        return None
+    norm_to_hu = experiment.transformers["norm_to_HU"]
+    images_gt_hu = norm_to_hu(images_gt)
+
+    scalars = {
+        "PSNR": losses["PSNR"](images_gt, result).item(),
+        "PSNR_hu": losses["PSNR_hu"](images_gt_hu, norm_to_hu(result)).item(),
+    }
+    if condition is not None and condition.shape == images_gt.shape:
+        # e.g. for deblurring: the model is only useful if it beats its own input
+        scalars["PSNR_cond"] = losses["PSNR"](images_gt, condition).item()
+        scalars["PSNR_hu_cond"] = losses["PSNR_hu"](
+            images_gt_hu, norm_to_hu(condition)
+        ).item()
+    return scalars
 
 
 def fdq_train(experiment) -> None:
@@ -253,8 +295,13 @@ def fdq_train(experiment) -> None:
                     apply_global_range=False,
                 )
                 imgs_to_log.append({"name": "gen_cond_diff", "path": cond_diff_path})
+                log_scalars = get_psnr_scalars(
+                    experiment, images_gt[:1], images[-1], sample_condition
+                )
+            else:
+                log_scalars = None
 
-            experiment.on_epoch_end(log_images_wandb=imgs_to_log)
+            experiment.on_epoch_end(log_scalars=log_scalars, log_images_wandb=imgs_to_log)
 
             if experiment.check_early_stop():
                 break
@@ -301,6 +348,7 @@ def fdq_test(experiment):
     pbar = startProgBar(nb_test_samples, "evaluation...")
 
     gts, conditions, results = [], [], []
+    psnr_scalars = []
     img_shape = None
     is_grayscale = None
 
@@ -349,12 +397,24 @@ def fdq_test(experiment):
             experiment, images={"name": "test_gen_history", "path": history_path}
         )
 
+        psnr = get_psnr_scalars(experiment, images_gt, images[-1].float(), condition)
+        if psnr is not None:
+            psnr_scalars.append(psnr)
+
         gts.append(images_gt.cpu())
         if condition is not None:
             conditions.append(condition.cpu())
         results.append(images[-1].cpu())
 
     pbar.finish()
+
+    if psnr_scalars:
+        mean_psnr = {
+            f"test_{k}": sum(s[k] for s in psnr_scalars) / len(psnr_scalars)
+            for k in psnr_scalars[0]
+        }
+        iprint(f"Test PSNR (mean over {len(psnr_scalars)} samples): {mean_psnr}")
+        save_wandb(experiment, scalars=mean_psnr)
 
     if conditions:
         # 4 rows: ground truth / condition / result / ground truth - result
