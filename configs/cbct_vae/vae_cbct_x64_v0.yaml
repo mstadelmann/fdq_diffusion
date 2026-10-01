@@ -8,7 +8,7 @@ globals:
   uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
-  run_train: true
+  run_train: false
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
@@ -35,6 +35,8 @@ transforms:
   extract_2d_from_3d:
   - Get2DFrom3D:
       axis: 2
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
   - Float32
   - CLAMP_perc:
       lower_perc: 0.01
@@ -45,6 +47,8 @@ transforms:
   extract_2d_from_3d_sag:
   - Get2DFrom3D:
       axis: 4
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
   - Float32
   - CLAMP_perc:
       lower_perc: 0.01
@@ -55,6 +59,8 @@ transforms:
   extract_2d_from_3d_cor:
   - Get2DFrom3D:
       axis: 3
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
   - Float32
   - CLAMP_perc:
       lower_perc: 0.01

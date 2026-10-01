@@ -28,11 +28,11 @@ fdq_submit configs/cbct_vae/vae_cbct_wan2_x128.yaml
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF GEN
 #--------------------------------------------------------------------------------------------------
-# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml         # MONAI UNet, baseline/memory check only
-fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml   # ERROR, rerun 58494 - still running, crashed during finalization, restart as 95585 -> done, waiting for test: 124832 - ok
-fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml                # chuchichaestli UNet 76168, config error, resubmit as 95615 -> running as 133560, done, test in 141956 OK
-
-fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchichaestli UNet # OOM crash 141824 -> 142215 -> 142320 --> manually stopped, test in 144082 crash, another test: 145534
+# fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0.yaml       # baseline/memory check only
+fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml
+fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml
+fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml
+# test again: 146325-146327
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF Cnd

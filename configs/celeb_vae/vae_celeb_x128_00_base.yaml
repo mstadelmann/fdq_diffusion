@@ -137,7 +137,6 @@ test:
   test_model: best
   args:
     nb_test_samples: 10
-    nb_export_samples: 10
 
 slurm_cluster:
   fdq_test_repo: false
