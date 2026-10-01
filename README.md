@@ -65,8 +65,8 @@ once.
 | `configs/celeb_latent_diff_vit` | latent DDPM, DiT/ViT backbone |
 | `configs/celeb_fm_gen` | flow matching, UNet backbone |
 | `configs/cbct_vae` | VAE pretraining on CT volumes |
-| `configs/cbct_diff_gen`, `cbct_diff_gen_monai` | pixel-space DDPM on CT volumes |
-| `configs/cbct_diff_cond_monai` | conditional DDPM, artifact/blur correction |
+| `configs/cbct_diff_gen_monai`, `cbct_diff_gen_cc` | pixel-space DDPM on CT volumes, MONAI / chuchichaestli UNet |
+| `configs/cbct_diff_cond_monai`, `cbct_diff_cond_cc` | conditional DDPM, artifact/blur correction, MONAI / chuchichaestli UNet |
 | `configs/cbct_latent_diff` | latent DDPM on CT volumes |
 
 ## Data
@@ -394,8 +394,6 @@ All CBCT autoencoders share the same test routine (`ae_test_eval.py`). Each test
 - the detailed result of test sample 0: GT / Recon / Diff / GT HU / Recon HU, each with an axial slice, a histogram of the full volume, and two orthogonal slices
 - the `results_overview`: an axial slice of the reconstruction of every test sample
 
-> Note: in these test runs (slurm 146183-146191) the rows labelled "sagittal" and "coronal" are swapped. The "sagittal" row actually shows a coronal slice and vice versa. Fixed in the configs for future runs.
-
 | Experiment | Res | PSNR | PSNR HU |
 | --- | --- | --- | --- |
 | vae_cbct_x64_v0_dist2 (trained) | 64 | 27.6 | 25.7 |
@@ -413,7 +411,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 - Keywords: VAE, KL-regularized autoencoder, CT-RATE chest CT volumes, 64px
 - GPU: 2x H200
 - Train: 89 EP, 3h50m, 2m35s/EP (stopped early: ValLoss_stagnated)
-- Test: 20 samples, PSNR 27.6 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x64/runs/p7qu3kov) (146183)
+- Test: 20 samples, PSNR 27.6 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x64/runs/ydd9q4me) (146311)
 
 ![vae_cbct_x64_v0_dist2 test sample 0](assets/vae_cbct_x64_v0_dist2_test_sample.jpg)
 ![vae_cbct_x64_v0_dist2 results overview](assets/vae_cbct_x64_v0_dist2_overview.jpg)
@@ -423,7 +421,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 - Keywords: VAE, 128px, higher-resolution CT latents
 - GPU: 2x H200
 - Train: 113 EP, 18h2m, 9m34s/EP (stopped early: ValLoss_stagnated)
-- Test: 20 samples, PSNR 27.9 (25.9 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x128/runs/i0upzmvm) (146184)
+- Test: 20 samples, PSNR 27.9 (25.9 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x128/runs/ovtozz1o) (146312)
 
 ![vae_cbct_x128_v0 test sample 0](assets/vae_cbct_x128_v0_test_sample.jpg)
 ![vae_cbct_x128_v0 results overview](assets/vae_cbct_x128_v0_overview.jpg)
@@ -433,7 +431,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 - Keywords: VAE, 256px
 - GPU: H200
 - Train: 41/50 EP, ~142h combined over 8 resubmitted jobs, ~3.5h/EP (training not finished)
-- Test: 20 samples, PSNR 27.7 (25.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x256/runs/v38gegmx) (146185)
+- Test: 20 samples, PSNR 27.7 (25.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x256/runs/u6uc6jmz) (146313)
 
 ![vae_cbct_x256_v0 test sample 0](assets/vae_cbct_x256_v0_test_sample.jpg)
 ![vae_cbct_x256_v0 results overview](assets/vae_cbct_x256_v0_overview.jpg)
@@ -444,7 +442,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 ##### vae_cbct_maisi_x128.yaml
 - Keywords: pretrained NVIDIA MAISI VAE, no training, 128px
 - GPU: H200
-- Test: 20 samples, 15s, PSNR 26.8 (24.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x128/runs/ueah7q62) (146187)
+- Test: 20 samples, 15s, PSNR 26.8 (24.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x128/runs/knqrlyx2) (146314)
 
 ![vae_cbct_maisi_x128 test sample 0](assets/vae_cbct_maisi_x128_test_sample.jpg)
 ![vae_cbct_maisi_x128 results overview](assets/vae_cbct_maisi_x128_overview.jpg)
@@ -453,7 +451,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 ##### vae_cbct_maisi_x256.yaml
 - Keywords: same pretrained MAISI VAE, 256px
 - GPU: H200
-- Test: 20 samples, 33s, PSNR 28.6 (26.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/50yf9t53) (146188)
+- Test: 20 samples, 33s, PSNR 28.6 (26.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/vb5sud53) (146315)
 
 ![vae_cbct_maisi_x256 test sample 0](assets/vae_cbct_maisi_x256_test_sample.jpg)
 ![vae_cbct_maisi_x256 results overview](assets/vae_cbct_maisi_x256_overview.jpg)
@@ -462,7 +460,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 ##### vae_cbct_maisi_x256_v1.yaml (HU window narrowed to [-1000,1000])
 - Keywords: same as x256, HU_to_norm window narrowed from [-1500,1000] to [-1000,1000], still normalized to [-1,1]
 - GPU: H200
-- Test: 20 samples, 32s, PSNR 25.7 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/lv75d53i) (146189)
+- Test: 20 samples, 32s, PSNR 25.7 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/fpwcmypo) (146316)
 
 ![vae_cbct_maisi_x256_v1 test sample 0](assets/vae_cbct_maisi_x256_v1_test_sample.jpg)
 ![vae_cbct_maisi_x256_v1 results overview](assets/vae_cbct_maisi_x256_v1_overview.jpg)
@@ -471,7 +469,7 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 ##### vae_cbct_maisi_x256_v2.yaml (HU window [-1000,1000], normalized to [0,1])
 - Keywords: same [-1000,1000] HU window as v1, but normalized to [0,1] instead of [-1,1]
 - GPU: H200
-- Test: 20 samples, 46s, PSNR 35.6 (29.6 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/63rgxz9e) (146190)
+- Test: 20 samples, 46s, PSNR 35.6 (29.6 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/pd98a9l0) (146317)
 
 ![vae_cbct_maisi_x256_v2 test sample 0](assets/vae_cbct_maisi_x256_v2_test_sample.jpg)
 ![vae_cbct_maisi_x256_v2 results overview](assets/vae_cbct_maisi_x256_v2_overview.jpg)
@@ -482,8 +480,75 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 ##### vae_cbct_wan2_x128.yaml
 - Keywords: pretrained Wan2.2 video VAE (TI2V-5B), depth axis used as the time axis, grayscale repeated to 3 channels, 128px
 - GPU: H200
-- Test: 20 samples, 13s, PSNR 28.2 (26.3 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_wan2_x128/runs/svt7f8f1) (146191)
+- Test: 20 samples, 13s, PSNR 28.2 (26.3 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_wan2_x128/runs/wm716aay) (146318)
 
 ![vae_cbct_wan2_x128 test sample 0](assets/vae_cbct_wan2_x128_test_sample.jpg)
 ![vae_cbct_wan2_x128 results overview](assets/vae_cbct_wan2_x128_overview.jpg)
 - Quality: sharp, vessels and lung texture preserved, slightly speckled. Clearly better than MAISI at the same 128px resolution (+1.4 dB PSNR HU) and better than all the trained VAEs
+
+---
+
+### CBCT DIFF GEN
+
+Unconditional pixel-space DDPM on CT-RATE volumes. Each test generates 10 volumes from pure noise; the overview shows an axial slice of each. The `test_gen_history` plot below it follows test sample 0 through the reverse diffusion process: an axial slice (top) and the histogram of the full volume (bottom) at 10 evenly spaced denoising steps.
+
+#### dg_m_cbct_x128_v0_dist2.yaml (MONAI UNet)
+- Keywords: pixel-space 3D DDPM, MONAI UNet, CT-RATE chest CT volumes, 128px
+- GPU: 2x H200
+- Train: 59 EP, 19h50m, 19m42s/EP (stopped early: TrainLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x128/runs/hmfs1ow7) (146325)
+
+![dg_m_cbct_x128_v0_dist2 generated test samples](assets/dg_m_cbct_x128_v0_dist2.jpg)
+![dg_m_cbct_x128_v0_dist2 generation history of test sample 0](assets/dg_m_cbct_x128_v0_dist2_gen_history.jpg)
+- Quality: best CT generator so far. Most slices are plausible chest CTs (body outline, lungs with vessels, heart, spine, table), some even with pathology-like opacities. 2-3/10 have grainy soft tissue or odd anatomy (e.g. a slice cut through the abdomen with a detached blob above it). The generation history shows the body outline emerging around step 480. The final histogram is CT-like: a sharp air peak plus a soft-tissue peak
+
+#### dg_cc_ct_x128.yaml (chuchichaestli UNet)
+- Keywords: pixel-space 3D DDPM, chuchichaestli UNet, 128px
+- GPU: H200
+- Train: 51 EP, ~31h combined over 2 jobs, ~20m/EP (stopped early: ValLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x128/runs/ccboe3v3) (146326)
+
+![dg_cc_ct_x128 generated test samples](assets/dg_cc_ct_x128.jpg)
+![dg_cc_ct_x128 generation history of test sample 0](assets/dg_cc_ct_x128_gen_history.jpg)
+- Quality: poor. Body outline, ribs, spine and heart are in the right place, but the lungs are filled with grey instead of air (only dark blobs, no vessels) and the background is covered in smudgy noise. Clearly behind the MONAI version at the same resolution. In the generation history the final histogram has no distinct air peak: the air and soft-tissue peaks sit close together, matching the grey lungs and noisy background
+
+#### dg_cc_ct_x256.yaml (chuchichaestli UNet, 256px)
+- Keywords: same chuchichaestli setup, scaled to 256px, batch size 1, no dataset caching
+- GPU: H200
+- Train: 27/500 EP, ~126h combined over 6 resubmitted jobs, ~5.5h/EP (training cancelled, not finished)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x256/runs/mprjrddy) (146327)
+
+![dg_cc_ct_x256 generated test samples](assets/dg_cc_ct_x256.jpg)
+![dg_cc_ct_x256 generation history of test sample 0](assets/dg_cc_ct_x256_gen_history.jpg)
+- Quality: bad. Local textures (lung parenchyma, vessels, table lines) look CT-like, but the global anatomy is melted and swirled, no sample has a coherent body outline. Expected after only 27 epochs. The generation history shows the same pattern as at 128px: structure appears around step 530, and the final histogram lacks a clean air peak
+
+---
+
+### CBCT DIFF COND
+
+Conditional DDPM, deblurring: the condition is the same volume with a 3D Gaussian blur. The overview shows 10 test samples, rows: ground truth / condition / result / GT - result. The `test_gen_history` plot below it follows test sample 0 through the reverse diffusion process: an axial slice (top) and the histogram of the full volume (bottom) at 10 evenly spaced denoising steps.
+
+#### dc_m_ct_x64_deblur.yaml (MONAI UNet, 64px)
+- Keywords: conditional 3D DDPM, deblurring, MONAI UNet (small, 3 levels), 64px, blur sigma 2.5px
+- GPU: V100
+- Train: 82 EP, 9h19m, 6m41s/EP (stopped early: TrainLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x64/runs/1fgjljmc) (146329). No PSNR logged by the MONAI test
+
+![dc_m_ct_x64_deblur generated test samples](assets/dc_m_ct_x64_deblur.jpg)
+![dc_m_ct_x64_deblur generation history of test sample 0](assets/dc_m_ct_x64_deblur_gen_history.jpg)
+- Quality: good. The result recovers the overall anatomy and lung structure from a heavily blurred condition. The diff maps still show the anatomy (body outline, heart), i.e. a systematic intensity offset, plus fine lung detail that is invented rather than reconstructed. In the generation history the lung outline appears around step 560-640, and the final histogram is CT-like, with a clean air peak and a soft-tissue peak
+
+#### dc_m_ct_x128_deblur.yaml (MONAI UNet, 128px)
+- Keywords: conditional 3D DDPM, deblurring, full-size MONAI UNet (4 levels), 128px, blur sigma 10px
+- GPU: H200
+- Status: no test result. The first job reached epoch 30/150 (~23h, 45m/EP), the auto-resubmitted job then hit CUDA OOM while resuming from the epoch 25 checkpoint (145800). The test job (146330) failed because no trained model was found in `store.results_path`
+
+#### dc_cc_ct_x64_deblur.yaml (chuchichaestli UNet, 64px)
+- Keywords: conditional 3D DDPM, deblurring, chuchichaestli UNet (4 levels, attention at the deepest level), 64px, blur sigma 2px, best-val checkpoint
+- GPU: H200
+- Train: 124 EP, 5h10m, 2m25s/EP (stopped early: ValLoss_stagnated)
+- Test: 10 samples, PSNR 22.2 (20.2 HU) vs. 21.7 (19.8 HU) for the condition itself - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x64/runs/1tr7y4gx) (146331)
+
+![dc_cc_ct_x64_deblur generated test samples](assets/dc_cc_ct_x64_deblur.jpg)
+![dc_cc_ct_x64_deblur generation history of test sample 0](assets/dc_cc_ct_x64_deblur_gen_history.jpg)
+- Quality: visually good, results look sharp and close to the GT. Unlike the MONAI run, the diff maps are mostly structureless noise without an intensity offset. But PSNR is only +0.5 dB above the blurred condition: the fine detail is plausible, not faithful (pixel-wise it is no better than the blur). The generation history is nearly identical to the MONAI run: the outline appears around step 530-620, and the final histogram has a clean air and soft-tissue peak
