@@ -32,15 +32,13 @@ fdq_submit configs/cbct_vae/vae_cbct_wan2_x128.yaml
 fdq_submit configs/cbct_diff_gen_monai/dg_m_cbct_x128_v0_dist2.yaml
 fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x128.yaml
 fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml
-# test again: 146325-146327
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF Cnd
 #--------------------------------------------------------------------------------------------------
 fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x64_deblur.yaml
-fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x128_deblur.yaml
+fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x128_deblur.yaml # 146373
 fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml
-# new test: 146329-146331
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  LAT DIFF GEN

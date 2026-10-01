@@ -9,7 +9,7 @@ globals:
   comment: "Conditional diffusion using a blurred GT as condition."
 
 mode:
-  run_train: false
+  run_train: true
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
@@ -147,7 +147,7 @@ models:
 train:
   path: ~/dev/fdq_diffusion/diffusion_monai.py
   args:
-    epochs: 100
+    epochs: 150
     use_GPU: true
     use_AMP: true
     accumulate_grad_batches: 1

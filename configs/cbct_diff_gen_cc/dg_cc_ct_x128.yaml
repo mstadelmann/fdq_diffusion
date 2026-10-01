@@ -8,7 +8,7 @@ globals:
   uv_cache_dir: "/cluster/home/stmd/UV_CACHE"
 
 mode:
-  run_train: false
+  run_train: true
   run_test_interactive: false
   run_test_auto: true
   dump_model: false

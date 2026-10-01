@@ -9,7 +9,7 @@ globals:
   comment: "Conditional diffusion using a blurred GT as condition. chuchichaestli UNet variant of dc_m_ct_x64_deblur.yaml."
 
 mode:
-  run_train: false
+  run_train: true
   run_test_interactive: false
   run_test_auto: true
   dump_model: false
