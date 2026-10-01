@@ -6,9 +6,6 @@ globals:
   project: CBCT_VAE
   author: Marc
 
-mode:
-  run_test_auto: true
-
 train:
   args:
     epochs: 500

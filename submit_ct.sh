@@ -10,7 +10,7 @@
 # fdq_submit configs/cbct_vae/vae_cbct_x64_v0.yaml            # baseline/memory check only
 fdq_submit configs/cbct_vae/vae_cbct_x64_v0_dist2.yaml
 fdq_submit configs/cbct_vae/vae_cbct_x128_v0.yaml
-fdq_submit configs/cbct_vae/vae_cbct_x256_v0.yaml           # 142475 - running --> manually stopped, test in 145437
+fdq_submit configs/cbct_vae/vae_cbct_x256_v0.yaml
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  VAE MAESI TEST
@@ -23,7 +23,7 @@ fdq_submit configs/cbct_vae/vae_cbct_maisi_x256_v2.yaml
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  VAE WAN2 TEST
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/cbct_vae/vae_cbct_wan2_x128.yaml # 142522
+fdq_submit configs/cbct_vae/vae_cbct_wan2_x128.yaml
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF GEN
@@ -37,8 +37,7 @@ fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml                # chuchich
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF Cnd
 #--------------------------------------------------------------------------------------------------
-# 145457 - 145459
-fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x64_deblur.yaml     # MONAI UNet - again: 145535
+fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x64_deblur.yaml     # MONAI UNet
 fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x128_deblur.yaml
 fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml       # chuchichaestli UNet
 

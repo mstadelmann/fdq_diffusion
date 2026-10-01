@@ -6,8 +6,8 @@ from monai.apps.utils import download_url
 from safetensors.torch import load_model
 from torch.nn.modules import Module
 from fdq.ui_functions import startProgBar, iprint
-from fdq.misc import save_wandb
 from image_functions import createSubplots
+from ae_test_eval import AETestEvaluator
 
 
 MAISI_URL = "https://drive.switch.ch/index.php/s/HXdr8gRS0GkajyS/download?path=%2F&files=maisai_autoencoder.safetensors"
@@ -65,17 +65,7 @@ def fdq_test(experiment):
 
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
 
-    exp_trans_name = experiment.cfg.store.img_exp_transform
-    if exp_trans_name is None:
-        raise ValueError(
-            "Experiment definition must contain an 'img_exp_transform' entry!"
-        )
-    t_img_exp = experiment.transformers[exp_trans_name]
-
-    if "norm_to_HU" in experiment.transformers:
-        norm_to_hu = experiment.transformers["norm_to_HU"]
-    else:
-        norm_to_hu = None
+    evaluator = AETestEvaluator(experiment, model_name="MAISI")
 
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
@@ -93,8 +83,6 @@ def fdq_test(experiment):
             iprint(f"Stopping after {nb_test_samples} test samples.")
             break
 
-        imgs_to_log = []
-
         pbar.update(nb_tbatch)
 
         with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
@@ -107,54 +95,23 @@ def fdq_test(experiment):
             z_vae = maisi_model.sampling(z_mu, z_sigma)
             z_vae_decoded = maisi_model.decode(z_vae)
 
-        img_list = [
-            images_gt,
-            z_vae_decoded,
-            torch.abs(images_gt - z_vae_decoded),
-        ]
-
-        labels = ["GT", "Decoded", "abs(GT - Decoded)"]
-
-        if norm_to_hu is not None:
-            result_hu = norm_to_hu(z_vae_decoded)
-            images_gt_hu = norm_to_hu(images_gt)
-            img_list.extend([images_gt_hu, result_hu])
-            labels.extend(["gt_hu", "recon_hu"])
-            PSNR = experiment.losses["PSNR"](images_gt, z_vae_decoded).item()
-            PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
-            log_scalars = {"PSNR_test": PSNR, "PSNR_test_HU": PSNR_hu}
-        else:
-            log_scalars = None
-
-        gt_imgs_path = createSubplots(
-            image_list=img_list,
-            labels=labels,
-            grayscale=True,
-            experiment=experiment,
-            histogram=True,
-            figure_title="Maisi eval",
-            hide_ticks=True,
-            apply_global_range=False,
-            export_transform=t_img_exp,
-            show_colorbar=False,
-        )
         latent_imgs_path = createSubplots(
             image_list=z_vae[:, :3, ...],
             grayscale=False,
             experiment=experiment,
             histogram=True,
             figure_title=f"Latent sample (CH1-3). orig shape: {z_vae.shape}",
-            export_transform=t_img_exp,
+            export_transform=evaluator.t_axial,
             hide_ticks=True,
         )
 
-        imgs_to_log.extend(
-            [
-                {"name": "inf_results", "path": gt_imgs_path},
-                {"name": "latent", "path": latent_imgs_path},
-            ]
+        evaluator.add_sample(
+            nb_tbatch,
+            images_gt,
+            z_vae_decoded,
+            extra_images=[{"name": "latent", "path": latent_imgs_path}],
         )
 
-        save_wandb(experiment=experiment, images=imgs_to_log, scalars=log_scalars)
-
     pbar.finish()
+
+    return evaluator.finish()

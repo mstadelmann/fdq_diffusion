@@ -1,7 +1,8 @@
 import torch
 from fdq.ui_functions import startProgBar, iprint
 from fdq.misc import save_wandb
-from image_functions import create_category_grid, createSubplots
+from image_functions import createSubplots
+from ae_test_eval import AETestEvaluator
 
 # from monai.losses.perceptual import PerceptualLoss
 
@@ -231,19 +232,6 @@ def fdq_test(experiment):
     data = experiment.data[targs.dataloader_name]
     model = experiment.models[targs.model_name]
 
-    exp_trans_name = experiment.cfg.store.img_exp_transform
-    if exp_trans_name is None:
-        raise ValueError(
-            "Experiment definition must contain an 'img_exp_transform' entry!"
-        )
-    t_img_exp = experiment.transformers[exp_trans_name]
-
-    if "norm_to_HU" in experiment.transformers:
-        norm_to_hu = experiment.transformers["norm_to_HU"]
-    else:
-        norm_to_hu = None
-
-    test_loader = data.test_data_loader
     nb_test_samples = experiment.cfg.test.args.get("nb_test_samples", 10)
 
     if experiment.cfg.data.get(targs.dataloader_name).args.test_batch_size != 1:
@@ -251,22 +239,12 @@ def fdq_test(experiment):
             "Error: Test batch size must be 1 for this experiment. Please change the experiment file."
         )
 
-    kl_losses = []
-    recon_losses = []
-    weighted_losses = []
-    psnr_scores = []
-    psnr_hu_scores = []
-
-    gt_samples = []
-    recon_samples = []
-    diff_samples = []
-    gt_hu_samples = []
-    recon_hu_samples = []
+    evaluator = AETestEvaluator(experiment, model_name="VAE")
 
     print(f"Testset sample size: {data.n_test_samples}")
-    pbar = startProgBar(data.n_test_samples, "evaluation...")
+    pbar = startProgBar(nb_test_samples, "evaluation...")
 
-    for nb_tbatch, batch in enumerate(test_loader):
+    for nb_tbatch, batch in enumerate(data.test_data_loader):
         if nb_tbatch >= nb_test_samples:
             break
 
@@ -279,97 +257,21 @@ def fdq_test(experiment):
 
         reconstruction, z_mu, z_sigma = model(images_gt)
 
-        is_grayscale = images_gt.shape[1] == 1
-
-        gt_samples.append(images_gt.cpu())
-        recon_samples.append(reconstruction.cpu())
-        diff_samples.append((images_gt - reconstruction).cpu())
-
-        if norm_to_hu is not None:
-            result_hu = norm_to_hu(reconstruction)
-            images_gt_hu = norm_to_hu(images_gt)
-            gt_hu_samples.append(images_gt_hu.cpu())
-            recon_hu_samples.append(result_hu.cpu())
-            psnr_scores.append(
-                experiment.losses["PSNR"](images_gt, reconstruction).item()
-            )
-            psnr_hu_scores.append(
-                experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
-            )
-
         kl_loss = KL_loss(z_mu, z_sigma).detach().item()
-        kl_losses.append(kl_loss)
         recon_loss = experiment.losses["MAE"](images_gt, reconstruction).detach().item()
-        recon_losses.append(recon_loss)
-        weighted_loss = (
-            recon_loss + experiment.cfg.train.args.kl_loss_weight * kl_loss
+        weighted_loss = recon_loss + targs.kl_loss_weight * kl_loss
+
+        evaluator.add_sample(
+            nb_tbatch,
+            images_gt,
+            reconstruction,
+            extra_scalars={
+                "weighted_loss": weighted_loss,
+                "recon_loss": recon_loss,
+                "kl_loss": kl_loss,
+            },
         )
-        weighted_losses.append(weighted_loss)
 
     pbar.finish()
 
-    results_scalars = {
-        "weighted_loss": float(torch.tensor(weighted_losses).mean()),
-        "recon_loss": float(torch.tensor(recon_losses).mean()),
-        "kl_loss": float(torch.tensor(kl_losses).mean()),
-    }
-
-    if norm_to_hu is not None:
-        results_scalars["PSNR_test"] = float(torch.tensor(psnr_scores).mean())
-        results_scalars["PSNR_test_HU"] = float(torch.tensor(psnr_hu_scores).mean())
-
-    print(results_scalars)
-
-    categories = [
-        ("gt", gt_samples),
-        ("recon", recon_samples),
-        ("diff", diff_samples),
-    ]
-    if norm_to_hu is not None:
-        categories.extend(
-            [
-                ("gt_hu", gt_hu_samples),
-                ("recon_hu", recon_hu_samples),
-            ]
-        )
-
-    overview_path = create_category_grid(
-        categories=categories,
-        grayscale=is_grayscale,
-        experiment=experiment,
-        figure_title="Test results",
-        export_transform=t_img_exp,
-    )
-
-    images = [{"name": "test_results", "path": overview_path}]
-
-    # sagital and coronal planes
-    if "extract_2d_from_3d_sag" in experiment.transformers:
-        res_path_sag = createSubplots(
-            image_list=recon_samples,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=False,
-            figure_title="Generated test samples sag",
-            export_transform=experiment.transformers["extract_2d_from_3d_sag"],
-            hide_ticks=True,
-            show_colorbar=False,
-        )
-        images.append({"name": "results overview sag", "path": res_path_sag})
-
-    if "extract_2d_from_3d_cor" in experiment.transformers:
-        res_path_cor = createSubplots(
-            image_list=recon_samples,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=False,
-            figure_title="Generated test samples cor",
-            export_transform=experiment.transformers["extract_2d_from_3d_cor"],
-            hide_ticks=True,
-            show_colorbar=False,
-        )
-        images.append({"name": "results overview cor", "path": res_path_cor})
-
-    save_wandb(experiment, images=images)
-
-    return results_scalars
+    return evaluator.finish()

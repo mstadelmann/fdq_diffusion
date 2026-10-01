@@ -390,52 +390,100 @@ download-once approach used for Celeb is planned.
 
 ### CBCT VAE
 
+All CBCT autoencoders share the same test routine (`ae_test_eval.py`). Each test uses the same 20 CT-RATE validation scans, in the same order, so sample 0 is the same patient in every experiment. Each entry shows:
+- the detailed result of test sample 0: GT / Recon / Diff / GT HU / Recon HU, each with an axial slice, a histogram of the full volume, and two orthogonal slices
+- the `results_overview`: an axial slice of the reconstruction of every test sample
+
+> Note: in these test runs (slurm 146183-146191) the rows labelled "sagittal" and "coronal" are swapped. The "sagittal" row actually shows a coronal slice and vice versa. Fixed in the configs for future runs.
+
+| Experiment | Res | PSNR | PSNR HU |
+| --- | --- | --- | --- |
+| vae_cbct_x64_v0_dist2 (trained) | 64 | 27.6 | 25.7 |
+| vae_cbct_x128_v0 (trained) | 128 | 27.9 | 25.9 |
+| vae_cbct_x256_v0 (trained) | 256 | 27.7 | 25.8 |
+| vae_cbct_maisi_x128 (pretrained) | 128 | 26.8 | 24.8 |
+| vae_cbct_maisi_x256 (pretrained) | 256 | 28.6 | 26.7 |
+| vae_cbct_maisi_x256_v1 (pretrained) | 256 | 25.7 | 25.7 |
+| vae_cbct_maisi_x256_v2 (pretrained) | 256 | 35.6* | **29.6** |
+| vae_cbct_wan2_x128 (pretrained) | 128 | 28.2 | 26.3 |
+
+Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for v2's [0,1] normalization it is inflated by ~6 dB. Compare runs on PSNR HU.
+
 #### vae_cbct_x64_v0_dist2.yaml
 - Keywords: VAE, KL-regularized autoencoder, CT-RATE chest CT volumes, 64px
 - GPU: 2x H200
 - Train: 89 EP, 3h50m, 2m35s/EP (stopped early: ValLoss_stagnated)
+- Test: 20 samples, PSNR 27.6 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x64/runs/p7qu3kov) (146183)
 
-![vae_cbct_x64_v0_dist2 results overview](assets/vae_cbct_x64_v0_dist2.jpg)
-- Quality: coarse - overall body outline and lung shape are captured, but fine vascular/bronchial detail is lost; reconstructions look overly smooth compared to gt
+![vae_cbct_x64_v0_dist2 test sample 0](assets/vae_cbct_x64_v0_dist2_test_sample.jpg)
+![vae_cbct_x64_v0_dist2 results overview](assets/vae_cbct_x64_v0_dist2_overview.jpg)
+- Quality: coarse. Body outline, lungs and heart are correct, but the reconstruction is a smooth "cartoon": lung vessels/bronchi and image noise are gone, so the diff map is dominated by fine lung structure
 
 #### vae_cbct_x128_v0.yaml
 - Keywords: VAE, 128px, higher-resolution CT latents
 - GPU: 2x H200
 - Train: 113 EP, 18h2m, 9m34s/EP (stopped early: ValLoss_stagnated)
+- Test: 20 samples, PSNR 27.9 (25.9 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x128/runs/i0upzmvm) (146184)
 
-![vae_cbct_x128_v0 results overview](assets/vae_cbct_x128_v0.jpg)
-- Quality: coarse - same pattern as the 64px VAE: correct overall anatomy, fine structures (vessels, bronchi) smoothed away
+![vae_cbct_x128_v0 test sample 0](assets/vae_cbct_x128_v0_test_sample.jpg)
+![vae_cbct_x128_v0 results overview](assets/vae_cbct_x128_v0_overview.jpg)
+- Quality: coarse, same pattern as 64px. Sharper outlines, ribs and spine, but the lung vasculature is still smoothed away (clearly visible as structure in the diff map). Large pathologies survive (e.g. the cavity in sample 19)
+
+#### vae_cbct_x256_v0.yaml
+- Keywords: VAE, 256px
+- GPU: H200
+- Train: 41/50 EP, ~142h combined over 8 resubmitted jobs, ~3.5h/EP (training not finished)
+- Test: 20 samples, PSNR 27.7 (25.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x256/runs/v38gegmx) (146185)
+
+![vae_cbct_x256_v0 test sample 0](assets/vae_cbct_x256_v0_test_sample.jpg)
+![vae_cbct_x256_v0 results overview](assets/vae_cbct_x256_v0_overview.jpg)
+- Quality: crisp edges, but no lung vessels or bronchi and no noise texture. No PSNR gain over 128px; the trained VAE does not use the extra resolution
 
 #### MAISI (pretrained, zero-shot test - no training)
 
 ##### vae_cbct_maisi_x128.yaml
 - Keywords: pretrained NVIDIA MAISI VAE, no training, 128px
 - GPU: H200
-- Test: 200 samples, 39s total, PSNR 25.8 (23.8 HU)
+- Test: 20 samples, 15s, PSNR 26.8 (24.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x128/runs/ueah7q62) (146187)
 
-![vae_cbct_maisi_x128 test sample](assets/vae_cbct_maisi_x128.jpg)
-- Quality: sharp, faithful reconstruction - fine vascular/bronchial detail preserved, unlike the trained-from-scratch VAEs above
+![vae_cbct_maisi_x128 test sample 0](assets/vae_cbct_maisi_x128_test_sample.jpg)
+![vae_cbct_maisi_x128 results overview](assets/vae_cbct_maisi_x128_overview.jpg)
+- Quality: keeps lung vessels and texture, unlike the trained VAEs, but looks grainy. There is a small intensity offset (air peak shifted, diff histogram not centered at 0), so its PSNR is below the trained VAEs despite much more detail
 
 ##### vae_cbct_maisi_x256.yaml
 - Keywords: same pretrained MAISI VAE, 256px
 - GPU: H200
-- Test: 200 samples, 1m17s total, PSNR 27.9 (26.0 HU)
+- Test: 20 samples, 33s, PSNR 28.6 (26.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/50yf9t53) (146188)
 
-![vae_cbct_maisi_x256 test sample](assets/vae_cbct_maisi_x256.jpg)
-- Quality: sharp, faithful reconstruction, on par with (slightly better than) the 128px MAISI VAE
+![vae_cbct_maisi_x256 test sample 0](assets/vae_cbct_maisi_x256_test_sample.jpg)
+![vae_cbct_maisi_x256 results overview](assets/vae_cbct_maisi_x256_overview.jpg)
+- Quality: sharp, faithful reconstruction, vessels and bronchi well preserved. The diff map is mostly noise plus a slight intensity bias
 
 ##### vae_cbct_maisi_x256_v1.yaml (HU window narrowed to [-1000,1000])
 - Keywords: same as x256, HU_to_norm window narrowed from [-1500,1000] to [-1000,1000], still normalized to [-1,1]
 - GPU: H200
-- Test: 200 samples, 1m11s total, PSNR 24.3 (24.3 HU)
+- Test: 20 samples, 32s, PSNR 25.7 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/lv75d53i) (146189)
 
-![vae_cbct_maisi_x256_v1 test sample](assets/vae_cbct_maisi_x256_v1.jpg)
-- Quality: still a sharp reconstruction, but a visibly noisier diff map and lower PSNR than the base x256 run - narrowing the HU window this way doesn't help
+![vae_cbct_maisi_x256_v1 test sample 0](assets/vae_cbct_maisi_x256_v1_test_sample.jpg)
+![vae_cbct_maisi_x256_v1 results overview](assets/vae_cbct_maisi_x256_v1_overview.jpg)
+- Quality: visually as sharp as x256, but with a clear intensity bias. The diff map shows the body as a brighter region and the diff histogram peaks off 0. Worst of the MAISI runs; narrowing the window this way doesn't help
 
 ##### vae_cbct_maisi_x256_v2.yaml (HU window [-1000,1000], normalized to [0,1])
 - Keywords: same [-1000,1000] HU window as v1, but normalized to [0,1] instead of [-1,1]
 - GPU: H200
-- Test: 200 samples, 1m10s total, PSNR 33.7 (27.7 HU)
+- Test: 20 samples, 46s, PSNR 35.6 (29.6 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/63rgxz9e) (146190)
 
-![vae_cbct_maisi_x256_v2 test sample](assets/vae_cbct_maisi_x256_v2.jpg)
-- Quality: best of the four MAISI runs - clearly the cleanest diff map and highest PSNR by a wide margin; the [0,1] normalization (rather than [-1,1]) appears to matter more than the HU window itself
+![vae_cbct_maisi_x256_v2 test sample 0](assets/vae_cbct_maisi_x256_v2_test_sample.jpg)
+![vae_cbct_maisi_x256_v2 results overview](assets/vae_cbct_maisi_x256_v2_overview.jpg)
+- Quality: best overall. The diff map is structureless noise centered at 0, with no bias or anatomical edges. Highest PSNR HU by ~3 dB; the [0,1] input normalization (which matches MAISI's training range) is what matters
+
+#### Wan2.2 (pretrained video VAE, zero-shot test - no training)
+
+##### vae_cbct_wan2_x128.yaml
+- Keywords: pretrained Wan2.2 video VAE (TI2V-5B), depth axis used as the time axis, grayscale repeated to 3 channels, 128px
+- GPU: H200
+- Test: 20 samples, 13s, PSNR 28.2 (26.3 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_wan2_x128/runs/svt7f8f1) (146191)
+
+![vae_cbct_wan2_x128 test sample 0](assets/vae_cbct_wan2_x128_test_sample.jpg)
+![vae_cbct_wan2_x128 results overview](assets/vae_cbct_wan2_x128_overview.jpg)
+- Quality: sharp, vessels and lung texture preserved, slightly speckled. Clearly better than MAISI at the same 128px resolution (+1.4 dB PSNR HU) and better than all the trained VAEs
