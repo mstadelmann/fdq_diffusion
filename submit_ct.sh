@@ -37,10 +37,10 @@ fdq_submit configs/cbct_diff_gen_cc/dg_cc_ct_x256.yaml
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  DIFF Cnd
 #--------------------------------------------------------------------------------------------------
-fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x64_deblur.yaml     # MONAI UNet
+fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x64_deblur.yaml
 fdq_submit configs/cbct_diff_cond_monai/dc_m_ct_x128_deblur.yaml
-fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml       # chuchichaestli UNet
-
+fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml
+# new test: 146329-146331
 
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  LAT DIFF GEN
