@@ -43,7 +43,7 @@ fdq_submit configs/cbct_diff_cond_cc/dc_cc_ct_x64_deblur.yaml
 #--------------------------------------------------------------------------------------------------
 # CT-Rate  LAT DIFF GEN
 #--------------------------------------------------------------------------------------------------
-# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256.yaml
-# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256_01norm.yaml
-
-# fdq_submit configs/cbct_latent_diff/lat_diff_cbct_monai_x256.yaml
+fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x128.yaml
+fdq_submit configs/cbct_latent_diff/lat_diff_cbct_maisi_x256.yaml
+fdq_submit configs/cbct_latent_diff/lat_diff_cbct_monai_x128.yaml
+fdq_submit configs/cbct_latent_diff/lat_diff_cbct_monai_x256.yaml

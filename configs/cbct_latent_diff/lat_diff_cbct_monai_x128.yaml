@@ -1,0 +1,59 @@
+defaults:
+  - lat_diff_cbct_maisi_x128
+  - _self_
+
+globals:
+  project: CBCT_LatentDiff
+  author: Marc
+  comment: "Latent diffusion in the latent space of the frozen vae_cbct_x128_v0 VAE."
+
+transforms:
+  # Must match the window/range the VAE was trained with (vae_cbct_x64_v0), not
+  # MAISI's [0,1]. Restated in full: OmegaConf replaces list-valued keys as a whole.
+  HU_to_norm:
+  - Float32
+  - ReRange:
+      in_min: -1500
+      in_max: 1000
+      out_min: -1
+      out_max: 1
+  norm_to_HU:
+  - ReRange:
+      in_min: -1
+      in_max: 1
+      out_min: -1500
+      out_max: 1000
+
+models:
+  # vae_cbct_x128_v0, best val checkpoint (README: PSNR 27.9 / 25.9 HU).
+  # Downsamples 4x per axis into 1 latent channel: 128x128x64 -> 1x32x32x16.
+  monaivae:
+    class_name: monai.networks.nets.AutoencoderKL
+    trained_model_path: /cluster/home/stmd/data_ML/results/CBCT_VAE/vae_cbct_x128_v0/20260912_07_30_51__inspiring_lewin__57644/best_val_monaivae_e99.fdqm
+    freeze: true
+    args:
+      spatial_dims: 3
+      in_channels: 1
+      out_channels: 1
+      latent_channels: 1
+      channels:
+      - 64
+      - 128
+      - 256
+      num_res_blocks: 2
+      norm_num_groups: 32
+      norm_eps: 1.0e-06
+      attention_levels:
+      - false
+      - false
+      - false
+      with_encoder_nonlocal_attn: false
+      with_decoder_nonlocal_attn: false
+  ccUNET:
+    args:
+      in_channels: 1
+      out_channels: 1
+
+train:
+  args:
+    encoder_name: monaivae

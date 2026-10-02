@@ -67,7 +67,7 @@ once.
 | `configs/cbct_vae` | VAE pretraining on CT volumes |
 | `configs/cbct_diff_gen_monai`, `cbct_diff_gen_cc` | pixel-space DDPM on CT volumes, MONAI / chuchichaestli UNet |
 | `configs/cbct_diff_cond_monai`, `cbct_diff_cond_cc` | conditional DDPM, artifact/blur correction, MONAI / chuchichaestli UNet |
-| `configs/cbct_latent_diff` | latent DDPM on CT volumes |
+| `configs/cbct_latent_diff` | latent DDPM on CT volumes, frozen pretrained MAISI or trained CBCT VAE |
 
 ## Data
 
