@@ -541,7 +541,12 @@ Conditional DDPM, deblurring: the condition is the same volume with a 3D Gaussia
 #### dc_m_ct_x128_deblur.yaml (MONAI UNet, 128px)
 - Keywords: conditional 3D DDPM, deblurring, full-size MONAI UNet (4 levels), 128px, blur sigma 10px
 - GPU: H200
-- Status: no test result. The first job reached epoch 30/150 (~23h, 45m/EP), the auto-resubmitted job then hit CUDA OOM while resuming from the epoch 25 checkpoint (145800). The test job (146330) failed because no trained model was found in `store.results_path`
+- Train: still training. Rerun with batch size 6 (the first attempt hit CUDA OOM on resume and never produced a model). It checkpoints and auto-resubmits itself: 3 segments completed (~69h combined, ~107m/EP in the 1st job, ~37m/EP after that), the 4th is running at epoch ~104/150
+- Test: intermediate test on the epoch 80 checkpoint, 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x128/runs/cv1y3ybv) (147037). No PSNR logged by the MONAI test
+
+![dc_m_ct_x128_deblur generated test samples](assets/dc_m_ct_x128_deblur.jpg)
+![dc_m_ct_x128_deblur generation history of test sample 0](assets/dc_m_ct_x128_deblur_gen_history.jpg)
+- Quality: impressive given the condition. The 10px blur leaves only a vague lung/body silhouette, yet the results show sharp, plausible chest CTs with the right body shape, heart, spine, ribs, table and pathologies (e.g. the ground-glass opacities in samples 2-3 and 6). But the fine detail is invented: the diff maps show the full anatomy and lung vessels, i.e. vessel positions and textures do not match the GT, and there is visible grain in the background. In the generation history the body outline appears around step 480 and the lungs around step 560-640; the final histogram is CT-like, with a clean air peak and a soft-tissue peak
 
 #### dc_cc_ct_x64_deblur.yaml (chuchichaestli UNet, 64px)
 - Keywords: conditional 3D DDPM, deblurring, chuchichaestli UNet (4 levels, attention at the deepest level), 64px, blur sigma 2px, best-val checkpoint
@@ -552,3 +557,49 @@ Conditional DDPM, deblurring: the condition is the same volume with a 3D Gaussia
 ![dc_cc_ct_x64_deblur generated test samples](assets/dc_cc_ct_x64_deblur.jpg)
 ![dc_cc_ct_x64_deblur generation history of test sample 0](assets/dc_cc_ct_x64_deblur_gen_history.jpg)
 - Quality: visually good, results look sharp and close to the GT. Unlike the MONAI run, the diff maps are mostly structureless noise without an intensity offset. But PSNR is only +0.5 dB above the blurred condition: the fine detail is plausible, not faithful (pixel-wise it is no better than the blur). The generation history is nearly identical to the MONAI run: the outline appears around step 530-620, and the final histogram has a clean air and soft-tissue peak
+
+---
+
+### CBCT Latent Diffusion
+
+Unconditional latent DDPM on CT-RATE volumes: a 3D chuchichaestli UNet is trained in the latent space of a frozen VAE, either the pretrained NVIDIA MAISI VAE (with the [0,1] normalization of `vae_cbct_maisi_x256_v2`) or the trained `vae_cbct_x*_v0` VAE from above. Each test generates 10 volumes from pure noise; the overview shows a transversal, sagittal and coronal slice of each. The `test_gen_history` plot below it follows test sample 0 through the reverse diffusion process, decoded to pixel space (top) and in latent space (bottom): a slice and the histogram of the full volume at 10 evenly spaced denoising steps.
+
+#### lat_diff_cbct_maisi_x128.yaml (frozen MAISI VAE, 128px)
+- Keywords: latent 3D DDPM, frozen pretrained MAISI VAE, latents 4x32x32x16, chuchichaestli UNet, 128px
+- GPU: H200
+- Train: 56 EP, 9h38m, 10m7s/EP (stopped early: TrainLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x128/runs/p7a765ik) (147033)
+
+![lat_diff_cbct_maisi_x128 generated test samples](assets/lat_diff_cbct_maisi_x128.jpg)
+![lat_diff_cbct_maisi_x128 generation history of test sample 0](assets/lat_diff_cbct_maisi_x128_gen_history.jpg)
+- Quality: best CT generator so far. All 10 transversal slices are plausible chest CTs with body outline, air-filled lungs with vessels, heart, spine and table; sagittal and coronal views are coherent too (spine, diaphragm, mediastinum). Edges are slightly soft and some soft tissue is a bit grainy, but there are no melted or swirled samples. In the generation history the body outline appears around step 440 and the final histogram is CT-like, with a sharp air peak and a soft-tissue peak
+
+#### lat_diff_cbct_maisi_x256.yaml (frozen MAISI VAE, 256px)
+- Keywords: same MAISI latent setup, scaled to 256px, latents 4x64x64x32, batch size 2
+- GPU: H200
+- Train: 37 EP, ~42h combined over 2 jobs, ~73m/EP in the 1st and ~50m/EP in the 2nd job (stopped early: ValLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x256/runs/b362gmmy) (147034)
+
+![lat_diff_cbct_maisi_x256 generated test samples](assets/lat_diff_cbct_maisi_x256.jpg)
+![lat_diff_cbct_maisi_x256 generation history of test sample 0](assets/lat_diff_cbct_maisi_x256_gen_history.jpg)
+- Quality: mixed. Anatomy is mostly in the right place (body outline, heart, spine, ribs, table), but almost every sample is covered in strong high-frequency noise, the background is grey instead of black and the lungs are filled with hazy texture. Only 1/10 looks like a clean CT. Clearly behind the 128px run, likely undertrained after 37 epochs. The generation history shows the outline appearing around step 440, but the final histogram has a broad shoulder instead of a clean soft-tissue peak, matching the noisy look
+
+#### lat_diff_cbct_monai_x128.yaml (frozen trained VAE, 128px)
+- Keywords: latent 3D DDPM, frozen `vae_cbct_x128_v0` (trained above), latents 1x32x32x16, chuchichaestli UNet, 128px
+- GPU: H200
+- Train: 38 EP, 2h25m, 3m34s/EP (stopped early: TrainLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x128/runs/uncbtfzz) (147035)
+
+![lat_diff_cbct_monai_x128 generated test samples](assets/lat_diff_cbct_monai_x128.jpg)
+![lat_diff_cbct_monai_x128 generation history of test sample 0](assets/lat_diff_cbct_monai_x128_gen_history.jpg)
+- Quality: coherent but cartoon-like. Global anatomy is correct in most samples (body outline, lungs, heart, spine, ribs, table, also in sagittal/coronal views), but everything is smooth: no lung vessels, no noise texture, the same "cartoon" look as the VAE's own reconstructions. 1/10 is a slice through the liver/abdomen with barely any lung. The decoder limits the quality here, not the diffusion model. In the generation history the anatomy only appears late, around step 530-620; the final histogram has a clean air peak and a narrow soft-tissue peak
+
+#### lat_diff_cbct_monai_x256.yaml (frozen trained VAE, 256px)
+- Keywords: same setup with the frozen `vae_cbct_x256_v0`, latents 1x64x64x32, batch size 2, 256px
+- GPU: H200
+- Train: 36 EP, 17h23m, 28m9s/EP (stopped early: TrainLoss_stagnated)
+- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x256/runs/77q8y3iz) (147036)
+
+![lat_diff_cbct_monai_x256 generated test samples](assets/lat_diff_cbct_monai_x256.jpg)
+![lat_diff_cbct_monai_x256 generation history of test sample 0](assets/lat_diff_cbct_monai_x256_gen_history.jpg)
+- Quality: bad. About 5/10 samples are clean, smooth chest CTs similar to the 128px run, the other half are broken: bright blotches scattered across the background, fragmented body outline and lungs. The generation history of sample 0 shows one of the broken cases: a ring-shaped body outline forms around step 440, but the blotches present from the start never disappear
