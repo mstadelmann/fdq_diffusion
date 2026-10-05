@@ -6,11 +6,14 @@ globals:
   project: CBCT_Diff_Gen
   author: Marc
 
-# diff_cbct_x128 currently has run_train: false (left in a test-only state from
-# after that experiment finished training) - this is a fresh, untrained config,
-# so training needs to be turned back on explicitly.
 mode:
   run_train: true
+  run_test_interactive: false
+  run_test_auto: true
+  dump_model: false
+  run_inference: false
+  print_model_summary: false
+  resume_chpt_path: null
 
 data:
   ctrate:
@@ -21,6 +24,8 @@ data:
       # guess to avoid an immediate OOM; this hasn't actually been run yet.
       train_batch_size: 1
       val_batch_size: 1
-
+    # fdq's dataset caching loads the whole split into RAM; at x256 that OOM-killed this job
+    caching:
+      enabled: false
 store:
   wandb_project: cbct_diff_gen_x256

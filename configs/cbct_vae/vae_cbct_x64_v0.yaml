@@ -10,7 +10,7 @@ globals:
 mode:
   run_train: true
   run_test_interactive: false
-  run_test_auto: false
+  run_test_auto: true
   dump_model: false
   run_inference: false
   print_model_summary: false
@@ -30,15 +30,44 @@ transforms:
       in_max: 1
       out_min: -1500
       out_max: 1000
+  # 2D slices for plotting (axial / sagittal / coronal); same for all CBCT autoencoder
+  # experiments (VAE, MAISI, Wan2.2) so their test plots are directly comparable.
   extract_2d_from_3d:
   - Get2DFrom3D:
       axis: 2
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
+  - Float32
+  - CLAMP_perc:
+      lower_perc: 0.01
+      upper_perc: 0.99
+  - ReRange_minmax:
+      out_min: 0
+      out_max: 1
   extract_2d_from_3d_sag:
   - Get2DFrom3D:
-      axis: 3
+      axis: 4
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
+  - Float32
+  - CLAMP_perc:
+      lower_perc: 0.01
+      upper_perc: 0.99
+  - ReRange_minmax:
+      out_min: 0
+      out_max: 1
   extract_2d_from_3d_cor:
   - Get2DFrom3D:
-      axis: 4
+      axis: 3
+  - RandomVerticalFlip:  # volumes are stored head-down; flip slices upright for display
+      p: 1.0
+  - Float32
+  - CLAMP_perc:
+      lower_perc: 0.01
+      upper_perc: 0.99
+  - ReRange_minmax:
+      out_min: 0
+      out_max: 1
 
 data:
   ctrate:
@@ -169,11 +198,11 @@ test:
   processor: ~/dev/fdq_diffusion/vae.py
   test_model: best
   args:
-    nb_test_samples: 10
+    nb_test_samples: 20
 
 slurm_cluster:
   fdq_test_repo: false
-  fdq_version: 0.1.22
+  fdq_version: 0.1.24
   python_env_module: python/3.12.4
   uv_env_module: uv/0.6.12
   cuda_env_module: cuda/12.8.0

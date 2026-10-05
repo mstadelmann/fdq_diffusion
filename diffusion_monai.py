@@ -315,7 +315,7 @@ def fdq_train(experiment) -> None:
             if norm_to_hu is not None and condition is not None:
                 result_hu = norm_to_hu(image)
                 images_gt_hu = norm_to_hu(images_gt[:1])
-                PSNR = experiment.losses["PSNR"](images_gt_hu, result_hu).item()
+                PSNR = experiment.losses["PSNR"](images_gt[:1], image).item()
                 PSNR_hu = experiment.losses["PSNR_hu"](images_gt_hu, result_hu).item()
                 log_scalars = {"PSNR": PSNR, "PSNR_hu": PSNR_hu}
             else:
@@ -459,14 +459,25 @@ def fdq_test(experiment):
             mode=monai_mode,
         )
 
-        _ = createSubplots(
+        # MONAI stores an intermediate whenever the timestep t (counting down)
+        # is a multiple of isteps - label them as denoising steps from the start
+        stored_steps = [
+            targs.diffusion_nb_steps - 1 - int(t)
+            for t in scheduler.timesteps
+            if t % isteps == 0
+        ]
+        history_path = createSubplots(
             image_list=intermediates,
             grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
-            figure_title=f"Test img {inf_nb + 1}",
+            figure_title="Generative Diffusion Steps",
+            labels=[f"Step {s}" for s in stored_steps],
             export_transform=t_img_exp,
-            show_colorbar=False,
+        )
+
+        save_wandb(
+            experiment, images={"name": "test_gen_history", "path": history_path}
         )
 
         gts.append(images_gt.cpu())

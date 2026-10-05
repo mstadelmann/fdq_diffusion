@@ -2,7 +2,7 @@ import torch
 from fdq.misc import save_wandb
 from fdq.ui_functions import startProgBar, iprint
 from chuchichaestli.diffusion.ddpm import DDPM
-from image_functions import createSubplots
+from image_functions import createSubplots, stack_images_vertically
 
 
 @torch.no_grad()
@@ -28,6 +28,41 @@ def get_sample_from_noise(model, diffuser, gen_shape, idx_to_store=None):
     return imgs
 
 
+def get_encoder(experiment):
+    """Frozen autoencoder that maps images to/from the diffusion latent space.
+
+    train.args.encoder_name is either the name of a model in experiment.models (a
+    VAE trained with vae.py, loaded via its trained_model_path), or "maisi" for the
+    pretrained NVIDIA MAISI VAE, downloaded from MAISI_URL (see maisi.py).
+    """
+    encoder_name = experiment.cfg.train.args.encoder_name
+    if encoder_name != "maisi":
+        return experiment.models[encoder_name]
+    # imported here so the non-MAISI configs don't need monai's maisi deps/safetensors
+    from monai.apps.generation.maisi.networks.autoencoderkl_maisi import (
+        AutoencoderKlMaisi,
+    )
+    from maisi import MAISI_ARGS, MAISI_URL, load_url
+
+    return load_url(AutoencoderKlMaisi(**MAISI_ARGS), url=MAISI_URL, freeze=True).to(
+        experiment.device
+    )
+
+
+def get_images_gt(batch, device):
+    # nifity_preparator returns a tuple when transform_train/test is a list
+    if isinstance(batch, (list, tuple)):
+        batch = batch[0]
+    return batch.to(device)
+
+
+def latent_for_plot(z, nb_img_channels):
+    # MAISI latents have 4 channels for a 1-channel CT: only plot the first one
+    if z.shape[1] != nb_img_channels:
+        return z[:, :1, ...]
+    return z
+
+
 def fdq_train(experiment) -> None:
     iprint("Chuchichaestli Diffusion Training")
 
@@ -41,7 +76,8 @@ def fdq_train(experiment) -> None:
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
     unet_model = experiment.models[targs.model_name]
-    vae_model = experiment.models[targs.encoder_name]
+    vae_model = get_encoder(experiment)
+    vae_model.eval()
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
@@ -67,10 +103,13 @@ def fdq_train(experiment) -> None:
 
         for nb_tbatch, batch in enumerate(train_loader):
             pbar.update(nb_tbatch)
-            images_gt = batch.to(experiment.device)
+            images_gt = get_images_gt(batch, experiment.device)
             n_train_processed += images_gt.shape[0]
-            z_mu, z_sigma = vae_model.encode(images_gt)
-            z_vae = vae_model.sampling(z_mu, z_sigma)
+            with torch.no_grad(), torch.autocast(
+                device_type=device_type, enabled=experiment.useAMP
+            ):
+                z_mu, z_sigma = vae_model.encode(images_gt)
+                z_vae = vae_model.sampling(z_mu, z_sigma)
 
             if nb_tbatch == 0 and epoch in (0, experiment.start_epoch):
                 # run dummy forward pass to visualize noise schedule
@@ -81,7 +120,8 @@ def fdq_train(experiment) -> None:
 
                 # store input img
                 img_shape = z_vae.shape[1:]
-                is_grayscale = images_gt.shape[1] == 1
+                nb_img_channels = images_gt.shape[1]
+                is_grayscale = nb_img_channels == 1
 
                 # first test batch: store inputs
                 gt_imgs_path = createSubplots(
@@ -95,7 +135,7 @@ def fdq_train(experiment) -> None:
                     show_colorbar=False,
                 )
                 latent_imgs_path = createSubplots(
-                    image_list=z_vae,
+                    image_list=latent_for_plot(z_vae, nb_img_channels),
                     grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
@@ -104,8 +144,10 @@ def fdq_train(experiment) -> None:
                     hide_ticks=True,
                     show_colorbar=False,
                 )
+                with torch.no_grad():
+                    z_vae_decoded = vae_model.decode(z_vae)
                 decoded_imgs_path = createSubplots(
-                    image_list=vae_model.decode(z_vae),
+                    image_list=z_vae_decoded,
                     grayscale=is_grayscale,
                     experiment=experiment,
                     histogram=True,
@@ -155,13 +197,13 @@ def fdq_train(experiment) -> None:
         n_val_processed = 0
         with torch.no_grad():
             for batch in data.val_data_loader:
-                images_gt = batch.to(experiment.device)
+                images_gt = get_images_gt(batch, experiment.device)
                 n_val_processed += images_gt.shape[0]
-                z_mu, z_sigma = vae_model.encode(images_gt)
-                z_vae = vae_model.sampling(z_mu, z_sigma)
                 with torch.autocast(
                     device_type=device_type, enabled=experiment.useAMP
                 ):
+                    z_mu, z_sigma = vae_model.encode(images_gt)
+                    z_vae = vae_model.sampling(z_mu, z_sigma)
                     noisy_imgs, noise, t = chuchi_diffuser.noise_step(z_vae)
                     noise_pred = unet_model(noisy_imgs, t)
                     val_loss_sum += experiment.losses["MSE"](noise, noise_pred).item()
@@ -183,7 +225,7 @@ def fdq_train(experiment) -> None:
         )
 
         history_path_latent = createSubplots(
-            image_list=diff_history_latent,
+            image_list=[latent_for_plot(i, nb_img_channels) for i in diff_history_latent],
             grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
@@ -194,7 +236,10 @@ def fdq_train(experiment) -> None:
             show_colorbar=False,
         )
 
-        diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
+        with torch.no_grad(), torch.autocast(
+            device_type=device_type, enabled=experiment.useAMP
+        ):
+            diff_history_norm = [vae_model.decode(i).float() for i in diff_history_latent]
 
         history_path = createSubplots(
             image_list=diff_history_norm,
@@ -227,8 +272,8 @@ def fdq_test(experiment):
 
     targs = experiment.cfg.train.args
     data = experiment.data[targs.dataloader_name]
-    unet_model = experiment.models[targs.model_name]
-    vae_model = experiment.models[targs.encoder_name]
+    vae_model = get_encoder(experiment)
+    device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
 
     exp_trans_name = experiment.cfg.store.img_exp_transform
     if exp_trans_name is None:
@@ -249,16 +294,14 @@ def fdq_test(experiment):
         dtype=torch.int,
     ).tolist()
 
-    test_sample = next(iter(data.test_data_loader))
-    # Legacy loader compatibility: TODO cleanup!
-    if isinstance(test_sample, (list, tuple)):
-        test_sample = test_sample[0]
-    test_sample = test_sample.to(experiment.device)
+    test_sample = get_images_gt(next(iter(data.test_data_loader)), experiment.device)
 
     vae_model.eval()
-    _, z_sigma = vae_model.encode(test_sample)
+    with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+        _, z_sigma = vae_model.encode(test_sample)
     img_shape = z_sigma.shape[1:]
-    is_grayscale = test_sample.shape[1] == 1
+    nb_img_channels = test_sample.shape[1]
+    is_grayscale = nb_img_channels == 1
 
     chuchi_diffuser = DDPM(
         num_timesteps=targs.diffusion_nb_steps,
@@ -282,10 +325,13 @@ def fdq_test(experiment):
             gen_shape=img_shape,
             idx_to_store=idx_to_store,
         )
-        diff_history_norm = [vae_model.decode(i) for i in diff_history_latent]
+        with torch.autocast(device_type=device_type, enabled=experiment.useAMP):
+            diff_history_norm = [
+                vae_model.decode(i).float() for i in diff_history_latent
+            ]
 
         history_path_latent = createSubplots(
-            image_list=diff_history_latent,
+            image_list=[latent_for_plot(i, nb_img_channels) for i in diff_history_latent],
             grayscale=is_grayscale,
             experiment=experiment,
             histogram=True,
@@ -308,56 +354,43 @@ def fdq_test(experiment):
             show_colorbar=False,
         )
 
+        # pixel history (2 rows) on top, latent history (2 rows) below
+        combined_history_path = stack_images_vertically(
+            [history_path, history_path_latent],
+            save_path=experiment.get_next_export_fn(name="test_gen_history"),
+        )
         save_wandb(
             experiment,
-            images=[
-                {"name": "test_gen_history_lat", "path": history_path_latent},
-                {"name": "test_gen_history", "path": history_path},
-            ],
+            images=[{"name": "test_gen_history", "path": combined_history_path}],
         )
 
         results.append(diff_history_norm[-1].cpu())
 
     pbar.finish()
 
-    res_path = createSubplots(
-        image_list=results,
-        grayscale=is_grayscale,
-        experiment=experiment,
-        histogram=False,
-        figure_title="Generated test samples",
-        export_transform=t_img_exp,
-        hide_ticks=True,
-        show_colorbar=False,
+    # one row per plane (transversal, sagittal, coronal), stacked into one image
+    views = [("transversal", t_img_exp)]
+    if "extract_2d_from_3d_sag" in experiment.transformers:
+        views.append(("sagittal", experiment.transformers["extract_2d_from_3d_sag"]))
+    if "extract_2d_from_3d_cor" in experiment.transformers:
+        views.append(("coronal", experiment.transformers["extract_2d_from_3d_cor"]))
+
+    view_paths = [
+        createSubplots(
+            image_list=results,
+            grayscale=is_grayscale,
+            experiment=experiment,
+            histogram=False,
+            figure_title=f"Generated test samples - {view_name}",
+            max_cols=len(results),
+            export_transform=view_transform,
+            hide_ticks=True,
+            show_colorbar=False,
+        )
+        for view_name, view_transform in views
+    ]
+    res_path = stack_images_vertically(
+        view_paths, save_path=experiment.get_next_export_fn(name="test_samples")
     )
 
-    images = [{"name": "test_samples", "path": res_path}]
-
-    # sagital and coronal planes
-    if "extract_2d_from_3d_sag" in experiment.transformers:
-        res_path_sag = createSubplots(
-            image_list=results,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=False,
-            figure_title="Generated test samples sag",
-            export_transform=experiment.transformers["extract_2d_from_3d_sag"],
-            hide_ticks=True,
-            show_colorbar=False,
-        )
-        images.append({"name": "test_samples sag", "path": res_path_sag})
-
-    if "extract_2d_from_3d_cor" in experiment.transformers:
-        res_path_cor = createSubplots(
-            image_list=results,
-            grayscale=is_grayscale,
-            experiment=experiment,
-            histogram=False,
-            figure_title="Generated test samples cor",
-            export_transform=experiment.transformers["extract_2d_from_3d_cor"],
-            hide_ticks=True,
-            show_colorbar=False,
-        )
-        images.append({"name": "test_samples cor", "path": res_path_cor})
-
-    save_wandb(experiment, images=images)
+    save_wandb(experiment, images=[{"name": "test_samples", "path": res_path}])
