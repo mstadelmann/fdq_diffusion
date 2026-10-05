@@ -94,7 +94,7 @@ download-once approach used for Celeb is planned.
 - Train: 365 EP, 5h4m, 54s/EP
 
 ![vae_celeb_x128_00_dist2 results overview](assets/vae_celeb_x128_00_dist2.jpg)
-- Quality: sharp, faithful reconstructions, no visible artifacts
+- Quality: good. Sharp reconstructions, no visible artifacts
 
 #### vae_celeb_x256_00.yaml
 - Keywords: VAE, 256px, higher-resolution latents
@@ -102,15 +102,15 @@ download-once approach used for Celeb is planned.
 - Train: 223 EP, 17h51m, 7m32s/EP
 
 ![vae_celeb_x256_00 results overview](assets/vae_celeb_x256_00.jpg)
-- Quality: sharp, faithful reconstructions, on par with the 128px VAE
+- Quality: good, same as the 128px VAE
 
 #### vae_celeb_x512_00.yaml
 - Keywords: VAE, 512px, highest-resolution latents
 - GPU: H200
-- Train: 259 EP, 42h19m combined, 9m28s/EP (stopped early: ValLoss_stagnated)
+- Train: 259 EP, 42h19m, 9m28s/EP (stopped early: ValLoss_stagnated)
 
 ![vae_celeb_x512_00 results overview](assets/vae_celeb_x512_00.jpg)
-- Quality: sharp, faithful reconstructions, no degradation despite early stop
+- Quality: good, same as the smaller VAEs
 
 ---
 
@@ -124,7 +124,7 @@ download-once approach used for Celeb is planned.
 - Train: 129 EP, 8h33m, 3m59s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_m_cele_x128_00_base_dist2 generated test samples](assets/dg_m_cele_x128_00_base_dist2.jpg)
-- Quality: About 2-3/10 faces show a mild olive/yellow color-cast, rest look real
+- Quality: ok. Most faces look real, 2-3/10 have a slight olive/yellow color cast
 
 ##### dg_m_cele_x128_01.yaml (resblock_updown: false)
 - Keywords: architecture ablation, UNet residual blocks disabled
@@ -132,7 +132,7 @@ download-once approach used for Celeb is planned.
 - Train: 183 EP, 10h36m, 3m22s/EP
 
 ![dg_m_cele_x128_01 generated test samples](assets/dg_m_cele_x128_01.jpg)
-- Quality: good - all 10 faces read as real, no color-cast or anatomical distortion
+- Quality: good. All 10 faces look real, no color cast
 
 ##### dg_m_cele_x128_02.yaml (3 att levels)
 - Keywords: architecture ablation, attention at 3 resolution levels
@@ -140,7 +140,7 @@ download-once approach used for Celeb is planned.
 - Train: 153 EP, 19h58m, 7m42s/EP
 
 ![dg_m_cele_x128_02 generated test samples](assets/dg_m_cele_x128_02.jpg)
-- Quality: good - all 10 faces read as real, only faint background bleed on 1-2
+- Quality: good. All 10 faces look real, slight background bleed on 1-2
 
 ##### dg_m_cele_x128_03.yaml (4 layers only)
 - Keywords: capacity ablation, UNet depth reduced to 4 levels
@@ -148,7 +148,7 @@ download-once approach used for Celeb is planned.
 - Train: 85 EP, 9h51m, 6m52s/EP
 
 ![dg_m_cele_x128_03 generated test samples](assets/dg_m_cele_x128_03.jpg)
-- Quality: good - coherent, real-looking faces despite heavy punk/goth styling; no anatomical distortion
+- Quality: good. Faces are coherent, no distorted anatomy
 
 ##### dg_m_cele_x128_08_zero_snr.yaml (zero-SNR fix, v-pred)
 - Keywords: zero terminal-SNR noise schedule, v-prediction parameterization
@@ -156,15 +156,16 @@ download-once approach used for Celeb is planned.
 - Train: 96 EP, 6h16m, 3m46s/EP
 
 ![dg_m_cele_x128_08_zero_snr generated test samples](assets/dg_m_cele_x128_08_zero_snr.jpg)
-- Quality: good - real, coherent faces despite heavy makeup styling
+- Quality: good. Faces look real
 
 ##### dg_m_cele_x256_00.yaml (256px, 2 GPUs)
 - Keywords: same baseline architecture, scaled to 256px
 - GPU: 2x H200
-- Train: 149 EP, 40h35m combined, 13m35s/EP (stopped early: TrainLoss_stagnated)
+- Train: 149 EP, 40h35m, 13m35s/EP (stopped early: TrainLoss_stagnated)
 
 ![dg_m_cele_x256_00 generated test samples](assets/dg_m_cele_x256_00.jpg)
-- Quality: bad - every one of the 10 faces has an unnatural color-cast (teal/blue/red/maroon skin), none look like real skin tones
+- Quality: bad. All 10 faces have a strong color cast (teal, blue, red skin)
+- Next: try the zero-SNR schedule (see below)
 
 ##### dg_m_cele_x256_01_zero_snr.yaml (256px, zero-SNR fix)
 - Keywords: zero-SNR/v-pred fix applied at 256px
@@ -172,7 +173,7 @@ download-once approach used for Celeb is planned.
 - Train: 109 EP, 11h2m, 6m0s/EP
 
 ![dg_m_cele_x256_01_zero_snr generated test samples](assets/dg_m_cele_x256_01_zero_snr.jpg)
-- Quality: bad - only about 4/10 faces look genuinely real; the rest are severely textured, melted, or scribbled beyond recognition
+- Quality: bad. The color cast is gone, but only about 4/10 faces look real, the rest are melted or covered in texture
 
 #### Chuchichaestli UNet
 
@@ -182,54 +183,38 @@ download-once approach used for Celeb is planned.
 - Train: 266 EP, 4h6m, 56s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_c_celeb_x128_00_base generated test samples](assets/dg_c_celeb_x128_00_base.jpg)
-- Quality: good - all 10 faces read as real and coherent, no color-cast or texture-bleed artifacts
+- Quality: good. All 10 faces look real, no color cast
 
 ##### dg_c_celeb_x128_01.yaml (LR param, 4 parallel runs)
 - Keywords: learning-rate sweep, 4 parallel runs at different LR values
 - GPU: 2x A100
 
-| Train | Image | Quality |
-|---|---|---|
-| 178 EP, 2h55m, 1m0s/EP | <img src="assets/dg_c_celeb_x128_01_p001.jpg" width="400"> | 1/10 badly melted/deformed (not a real face), rest look real |
-| 116 EP, 1h52m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p002.jpg" width="400"> | 1/10 an indistinct blurry non-face, rest look real |
-| 166 EP, 2h40m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p003.jpg" width="400"> | bad - every face rendered as a thick oil-painting texture, none look like real photos |
-| 146 EP, 2h22m, 59s/EP | <img src="assets/dg_c_celeb_x128_01_p004.jpg" width="400"> | bad - most faces (6/10) are foggy, ghostly, or indistinct, not recognizable as real |
+| LR | Train | Image | Quality |
+|---|---|---|---|
+| 1e-5 | 178 EP, 2h55m, 1m0s/EP | <img src="assets/dg_c_celeb_x128_01_p001.jpg" width="400"> | ok, 1/10 deformed |
+| 1.67e-3 | 116 EP, 1h52m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p002.jpg" width="400"> | ok, 1/10 blurry non-face |
+| 3.33e-3 | 166 EP, 2h40m, 54s/EP | <img src="assets/dg_c_celeb_x128_01_p003.jpg" width="400"> | bad, all faces look like oil paintings |
+| 5e-3 | 146 EP, 2h22m, 59s/EP | <img src="assets/dg_c_celeb_x128_01_p004.jpg" width="400"> | bad, 6/10 foggy or not recognizable |
 
-> **Parameter study**: `lr@p: [0.00001:0.005:4]` is a *linear* sweep (fdq's `@p` range
-> syntax interpolates linearly, not log-spaced), giving LR ≈ 1e-5, 1.67e-3, 3.33e-3,
-> 5e-3 - vs. the baseline's 5e-5.
-> **Outcome**: training holds up to ~1.67e-3 (33x the baseline LR), then breaks down
-> somewhere between 1.67e-3 and 3.33e-3 - p003 collapses into a uniform oil-painting
-> texture and p004 (max LR) never resolves fine detail, staying foggy/washed out.
-> There's no data point between 5e-5 and 1.67e-3, so whether anything above baseline
-> is an actual improvement (vs. simply not-yet-broken) is unknown.
-> **Before rerunning**: use a log-spaced sweep bracketing the instability cliff (e.g.
-> `[0.00005:0.002:5]`) instead of a linear one, and run the surviving LRs with 2-3
-> seeds each - a single 10-sample grid can't separate "this LR is better" from
-> ordinary run-to-run variance (see the baseline note above).
+> **Note**: `lr@p: [0.00001:0.005:4]` is a linear sweep, not log-spaced (baseline LR is
+> 5e-5). Training works up to 1.67e-3 and breaks somewhere between 1.67e-3 and 3.33e-3.
+> There is no point between 5e-5 and 1.67e-3, so it is unclear whether a higher LR helps.
+> Next: use a log-spaced sweep, e.g. `[0.00005:0.002:5]`.
 
 ##### dg_c_celeb_x128_02.yaml (lin/cos/sig param, 3 parallel runs)
 - Keywords: noise-schedule sweep, linear vs cosine vs sigmoid beta schedule, 3 parallel runs
 - GPU: 2x A100
 
-| Train | Image | Quality |
-|---|---|---|
-| 200 EP, 3h11m, 56s/EP | <img src="assets/dg_c_celeb_x128_02_p001.jpg" width="400"> | good - all 10 faces look real and coherent |
-| 172 EP, 2h44m, 53s/EP | <img src="assets/dg_c_celeb_x128_02_p002.jpg" width="400"> | 2/10 unnatural (bright orange scalp patch, deep magenta face), rest look real |
-| 216 EP, 3h31m, 54s/EP | <img src="assets/dg_c_celeb_x128_02_p003.jpg" width="400"> | 2/10 clearly unrealistic (indistinct dark face, magenta cast), rest look real |
+| Schedule | Train | Image | Quality |
+|---|---|---|---|
+| linear | 200 EP, 3h11m, 56s/EP | <img src="assets/dg_c_celeb_x128_02_p001.jpg" width="400"> | good, all 10 look real |
+| cosine | 172 EP, 2h44m, 53s/EP | <img src="assets/dg_c_celeb_x128_02_p002.jpg" width="400"> | ok, 2/10 with an unnatural color |
+| sigmoid | 216 EP, 3h31m, 54s/EP | <img src="assets/dg_c_celeb_x128_02_p003.jpg" width="400"> | ok, 2/10 unrealistic |
 
-> **Parameter study**: categorical sweep over `diffusion_scheduler`
-> (linear/cosine/sigmoid), same `beta_start`/`beta_end` for all three - otherwise
-> identical to the baseline config (same LR, same architecture).
-> **Outcome**: linear scored best (10/10 real), cosine and sigmoid each had 2/10
-> unnatural samples. But the linear run here (p001) is the *same config* as
-> `dg_c_celeb_x128_00_base.yaml` above, just trained ~35 epochs longer, and it scored
-> noticeably better than that baseline run did (10/10 vs. mixed with background
-> bleed). That gap - from epoch count and seed alone - is at least as large as the
-> gap between schedules, so this ranking is likely confounded rather than a real
-> "linear beats cosine/sigmoid" result.
-> **Before rerunning**: pin all three to the same epoch count (or the same
-> early-stop criterion) and run 2-3 seeds per schedule before trusting any ranking.
+> **Note**: linear looks best, but the difference is small. The linear run uses the same
+> config as the baseline above, and those two runs differ by about as much, only from
+> epoch count and seed. So this is not a reliable ranking.
+> Next: same epoch count for all three and 2-3 seeds each.
 
 ##### dg_c_celeb_x256_00_base.yaml (256px)
 - Keywords: same baseline architecture, scaled to 256px
@@ -237,32 +222,26 @@ download-once approach used for Celeb is planned.
 - Train: 263 EP, 4h58m, 1m8s/EP (stopped early: ValLoss_stagnated)
 
 ![dg_c_celeb_x256_00_base generated test samples](assets/dg_c_celeb_x256_00_base.jpg)
-- Quality: bad - only about 2/10 faces look real, rest show strong blue/purple/green color-cast or heavy distortion
+- Quality: bad. Only about 2/10 faces look real, the rest have a strong color cast or are distorted
 
 #### VIT (DiT)
 
 ##### dg_vit_celeb_x128_00_base_dist2.yaml (2 GPUs)
 - Keywords: pixel-space DDPM, DiT/ViT backbone instead of UNet, 128px
 - GPU: 2x A100
-- Train: 350 EP, 56h33m combined, 9m32s/EP
+- Train: 350 EP, 56h33m, 9m32s/EP
 
 ![dg_vit_celeb_x128_00_base_dist2 generated test samples](assets/dg_vit_celeb_x128_00_base_dist2.jpg)
-- Quality: mixed - 2/10 have a dark disfiguring blob over the mouth/chin, rest look real
+- Quality: ok. 8/10 faces look real, 2/10 have a dark blob over the mouth/chin
 
 ##### dg_vit_celeb_x256_00_base.yaml (256px, 2 GPUs)
 - Keywords: same ViT/DiT backbone, scaled to 256px
 - GPU: 2x H200
-- Train: 302 EP, 35h16m combined, 10m50s/EP (stopped early: TrainLoss_stagnated)
+- Train: 302 EP, 35h16m, 10m50s/EP (stopped early: TrainLoss_stagnated)
 
 ![dg_vit_celeb_x256_00_base generated test samples](assets/dg_vit_celeb_x256_00_base.jpg)
-- Quality: bad - half the faces (5/10) are heavily smeared or textured, not recognizable as real skin
-
-> **Note**: `patch_size` was doubled to 8 here (from 4 at 128px) to keep the token
-> count/attention compute constant at the larger resolution. This is pixel-space
-> diffusion, so the coarser patch likely trades
-> away exactly the per-patch fidelity that mattered - `patch_size` would probably need
-> to come back down to 4 to fix the smearing, at the cost of ~4x more tokens and
-> correspondingly more compute/VRAM.
+- Quality: bad. 5/10 faces are smeared
+- Next: `patch_size` was doubled to 8 here (4 at 128px) to keep the token count constant. Going back to 4 probably fixes the smearing, at ~4x the compute
 
 ---
 
@@ -276,17 +255,7 @@ download-once approach used for Celeb is planned.
 - Train: 151 EP, 20h1m, 7m57s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_m_celeb_x128_deblur generated test samples](assets/dc_m_celeb_x128_deblur.jpg)
-- Quality: excellent, deblurred result nearly indistinguishable from ground truth
-
-##### dc_m_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
-- Keywords: conditional DDPM, MONAI UNet, condition stacks blur with random cutout patches, salt-and-pepper noise, and Gaussian noise (resampled every epoch), inpainting/denoising rather than plain deblurring
-- GPU: A100
-- Status: still training - `job_time` (23.3h) is shorter than this run needs, so it checkpoints and auto-resubmits itself rather than finishing in one job. 2 segments completed so far (~46h combined), last checkpoint at epoch 204/350, a 3rd segment is queued (pending on cluster priority as of this check). No test results yet.
-
-##### dc_m_celeb_x128_halfface.yaml (condition is half the face blacked out)
-- Keywords: conditional DDPM, MONAI UNet, outpainting, condition is the GT with a random half (left/right, resampled every epoch via RandomEdgeMask) blacked out, model reconstructs the missing half
-- GPU: A100
-- Status: still training - same checkpoint/auto-resubmit pattern as the `hard` run above. 1st segment reached epoch 104/350 (~23h) before hitting the job time limit; the 2nd segment is running now. No test results yet.
+- Quality: good. Results are close to the ground truth
 
 #### Chuchichaestli UNet
 
@@ -296,7 +265,7 @@ download-once approach used for Celeb is planned.
 - Train: 219 EP, 3h29m, 57s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_deblur generated test samples](assets/dc_cc_celeb_x128_deblur.jpg)
-- Quality: excellent, on par with the MONAI version
+- Quality: good, same as the MONAI version
 
 ##### dc_cc_celeb_x128_hard.yaml (harder condition: blur + cutout + salt-pepper + Gaussian noise)
 - Keywords: conditional DDPM, chuchichaestli UNet, condition stacks blur with random cutout patches, salt-and-pepper noise, and Gaussian noise (resampled every epoch), inpainting/denoising rather than plain deblurring
@@ -304,7 +273,7 @@ download-once approach used for Celeb is planned.
 - Train: 213 EP, 6h20m, 1m47s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_hard generated test samples](assets/dc_cc_celeb_x128_hard.jpg)
-- Quality: good - all 10 results plausibly reconstruct the GT despite the heavy corruption, no clear residual artifacts this time (an improvement on the previous run's 1/10 dark-eye artifact)
+- Quality: good. All 10 results are plausible reconstructions, no obvious artifacts
 
 ##### dc_cc_celeb_x128_halfface.yaml (condition is half the face blacked out)
 - Keywords: conditional DDPM, chuchichaestli UNet, outpainting, condition is the GT with a random half (left/right, resampled every epoch via RandomEdgeMask) blacked out, model reconstructs the missing half
@@ -312,7 +281,7 @@ download-once approach used for Celeb is planned.
 - Train: 170 EP, 4h28m, 1m35s/EP (stopped early: ValLoss_stagnated)
 
 ![dc_cc_celeb_x128_halfface generated test samples](assets/dc_cc_celeb_x128_halfface.jpg)
-- Quality: good - most outpainted halves (9/10) are plausible and coherent with the visible half, 1/10 (the striped-shirt sample) shows the shirt's pattern bleeding into the outpainted face region
+- Quality: good. 9/10 missing halves match the visible half, in 1/10 a striped shirt pattern bleeds into the face
 
 ---
 
@@ -324,7 +293,7 @@ download-once approach used for Celeb is planned.
 - Train: 224 EP, 15h2m, 4m2s/EP (stopped early: ValLoss_stagnated)
 
 ![lat_diff_celeb_x128_00_base generated test samples](assets/lat_diff_celeb_x128_00_base.jpg)
-- Quality: good - 19/20 faces look real, 1 with rough discolored skin
+- Quality: good. 19/20 faces look real, 1 with rough discolored skin
 
 #### lat_diff_celeb_x256_00.yaml (256px)
 - Keywords: same latent UNet approach, scaled to 256px
@@ -332,7 +301,7 @@ download-once approach used for Celeb is planned.
 - Train: 174 EP, 13h5m, 4m31s/EP (stopped early: TrainLoss_stagnated)
 
 ![lat_diff_celeb_x256_00 generated test samples](assets/lat_diff_celeb_x256_00.jpg)
-- Quality: good - 19/20 faces look real, 1 clearly non-human (rough beast-like texture)
+- Quality: good. 19/20 faces look real, 1 is not human-looking
 
 #### VIT (DiT) backbone, same pretrained VAEs
 
@@ -342,49 +311,50 @@ download-once approach used for Celeb is planned.
 - Train: 400 EP, 13h27m, 2m2s/EP
 
 ![lat_diff_vit_celeb_x128_00_base generated test samples](assets/lat_diff_vit_celeb_x128_00_base.jpg)
-- Quality: good - all 20 faces look real, no standout failures
+- Quality: good. All 20 faces look real
 
 ##### lat_diff_vit_celeb_x256_00.yaml (256px)
 - Keywords: same latent ViT/DiT approach, scaled to 256px
 - GPU: H200
-- Train: 400 EP, 52h29m combined, 7m47s/EP
+- Train: 400 EP, 52h29m, 7m47s/EP
 
 ![lat_diff_vit_celeb_x256_00 generated test samples](assets/lat_diff_vit_celeb_x256_00.jpg)
-- Quality: good - 19/20 faces look real, 1 clearly non-human (same recurring beast-like texture as the UNet 256px run)
+- Quality: good. 19/20 faces look real, 1 is not human-looking (same failure as the UNet 256px run)
 
 ### CELEB Flow Matching Generative
 
 #### fm_meta_cele_x128_v0.yaml (baseline)
 - Keywords: flow matching, MetaUNet, straight-line velocity-field regression, no fixed noise schedule, 128px
 - GPU: 2x H200
-- Train: 650 EP, 84h20m combined, 7m47s/EP
+- Train: 650 EP, 84h20m, 7m47s/EP
 
 ![fm_meta_cele_x128_v0 generated test samples](assets/fm_meta_cele_x128_v0.png)
-- Quality: excellent, the sharpest and most photorealistic results in this repo
+- Quality: good. Sharp, realistic faces
 
 #### fm_meta_cele_x128_v1.yaml (smaller batch)
 - Keywords: same flow matching setup, smaller training batch size
 - GPU: 2x H200
-- Train: 650 EP, 80h26m combined, ~7m25s/EP (1 restart from scratch after a DDP/NCCL crash)
+- Train: 650 EP, 80h26m, ~7m25s/EP
 
 ![fm_meta_cele_x128_v1 generated test samples](assets/fm_meta_cele_x128_v1.png)
-- Quality: excellent, on par with the baseline
+- Quality: good, same as the baseline
 
 #### fm_meta_cele_x128_v2.yaml (EMA, attn tweaks)
 - Keywords: adds EMA weight averaging and attention-head tweaks to the baseline
 - GPU: 2x H200
-- Train: 426/650 EP, 45h41m combined, 6m26s/EP
+- Train: 426 EP, 45h41m, 6m26s/EP
 
 ![fm_meta_cele_x128_v2 generated test samples](assets/fm_meta_cele_x128_v2.png)
-- Quality: all 16 faces look sharp, no color-cast or major anatomical distortion
+- Quality: good. All 16 faces are sharp, no color cast
 
 #### fm_meta_cele_x256_v0.yaml (256px)
 - Keywords: same baseline flow matching setup, scaled to 256px
 - GPU: 2x H200
-- Train: 71/650 EP, 122h41m combined, 1h43m/EP
+- Train: 71 EP, 122h41m, 1h43m/EP
 
 ![fm_meta_cele_x256_v0 generated test samples](assets/fm_meta_cele_x256_v0.png)
-- Quality: surprisingly good for only 71/650 EP - most of the 16 faces are coherent and mostly photorealistic, a few show soft/noisy texture typical of an undertrained model
+- Quality: ok. Most faces are coherent, a few have soft or noisy texture. Undertrained at 71 EP
+- Next: train longer
 
 ---
 
@@ -411,80 +381,82 @@ Mean over the 20 test samples. \*PSNR (norm) assumes a [-1,1] data range, so for
 - Keywords: VAE, KL-regularized autoencoder, CT-RATE chest CT volumes, 64px
 - GPU: 2x H200
 - Train: 89 EP, 3h50m, 2m35s/EP (stopped early: ValLoss_stagnated)
-- Test: 20 samples, PSNR 27.6 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x64/runs/ydd9q4me) (146311)
+- Test: 20 samples, PSNR 27.6 (25.7 HU)
 
 ![vae_cbct_x64_v0_dist2 test sample 0](assets/vae_cbct_x64_v0_dist2_test_sample.jpg)
 ![vae_cbct_x64_v0_dist2 results overview](assets/vae_cbct_x64_v0_dist2_overview.jpg)
-- Quality: coarse. Body outline, lungs and heart are correct, but the reconstruction is a smooth "cartoon": lung vessels/bronchi and image noise are gone, so the diff map is dominated by fine lung structure
+- Quality: coarse. Body outline, lungs and heart are correct, but the result is very smooth: lung vessels and image noise are gone
 
 #### vae_cbct_x128_v0.yaml
 - Keywords: VAE, 128px, higher-resolution CT latents
 - GPU: 2x H200
 - Train: 113 EP, 18h2m, 9m34s/EP (stopped early: ValLoss_stagnated)
-- Test: 20 samples, PSNR 27.9 (25.9 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x128/runs/ovtozz1o) (146312)
+- Test: 20 samples, PSNR 27.9 (25.9 HU)
 
 ![vae_cbct_x128_v0 test sample 0](assets/vae_cbct_x128_v0_test_sample.jpg)
 ![vae_cbct_x128_v0 results overview](assets/vae_cbct_x128_v0_overview.jpg)
-- Quality: coarse, same pattern as 64px. Sharper outlines, ribs and spine, but the lung vasculature is still smoothed away (clearly visible as structure in the diff map). Large pathologies survive (e.g. the cavity in sample 19)
+- Quality: coarse, like 64px. Sharper outlines, ribs and spine, but lung vessels are still smoothed away. Large pathologies are kept (e.g. the cavity in sample 19)
 
 #### vae_cbct_x256_v0.yaml
 - Keywords: VAE, 256px
 - GPU: H200
-- Train: 41/50 EP, ~142h combined over 8 resubmitted jobs, ~3.5h/EP (training not finished)
-- Test: 20 samples, PSNR 27.7 (25.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_x256/runs/u6uc6jmz) (146313)
+- Train: 41 EP, ~142h, ~3.5h/EP
+- Test: 20 samples, PSNR 27.7 (25.8 HU)
 
 ![vae_cbct_x256_v0 test sample 0](assets/vae_cbct_x256_v0_test_sample.jpg)
 ![vae_cbct_x256_v0 results overview](assets/vae_cbct_x256_v0_overview.jpg)
-- Quality: crisp edges, but no lung vessels or bronchi and no noise texture. No PSNR gain over 128px; the trained VAE does not use the extra resolution
+- Quality: sharp edges, but no lung vessels and no noise texture. No PSNR gain over 128px
+- Next: the trained VAEs all lose fine lung detail. A lower KL weight or a perceptual/adversarial loss might help
 
 #### MAISI (pretrained, zero-shot test - no training)
 
 ##### vae_cbct_maisi_x128.yaml
 - Keywords: pretrained NVIDIA MAISI VAE, no training, 128px
 - GPU: H200
-- Test: 20 samples, 15s, PSNR 26.8 (24.8 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x128/runs/knqrlyx2) (146314)
+- Test: 20 samples, 15s, PSNR 26.8 (24.8 HU)
 
 ![vae_cbct_maisi_x128 test sample 0](assets/vae_cbct_maisi_x128_test_sample.jpg)
 ![vae_cbct_maisi_x128 results overview](assets/vae_cbct_maisi_x128_overview.jpg)
-- Quality: keeps lung vessels and texture, unlike the trained VAEs, but looks grainy. There is a small intensity offset (air peak shifted, diff histogram not centered at 0), so its PSNR is below the trained VAEs despite much more detail
+- Quality: ok. Keeps lung vessels and texture, but looks grainy. A small intensity offset lowers the PSNR below the trained VAEs, even though it keeps more detail
 
 ##### vae_cbct_maisi_x256.yaml
 - Keywords: same pretrained MAISI VAE, 256px
 - GPU: H200
-- Test: 20 samples, 33s, PSNR 28.6 (26.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/vb5sud53) (146315)
+- Test: 20 samples, 33s, PSNR 28.6 (26.7 HU)
 
 ![vae_cbct_maisi_x256 test sample 0](assets/vae_cbct_maisi_x256_test_sample.jpg)
 ![vae_cbct_maisi_x256 results overview](assets/vae_cbct_maisi_x256_overview.jpg)
-- Quality: sharp, faithful reconstruction, vessels and bronchi well preserved. The diff map is mostly noise plus a slight intensity bias
+- Quality: good. Vessels and bronchi are kept, the diff map is mostly noise with a slight intensity offset
 
 ##### vae_cbct_maisi_x256_v1.yaml (HU window narrowed to [-1000,1000])
 - Keywords: same as x256, HU_to_norm window narrowed from [-1500,1000] to [-1000,1000], still normalized to [-1,1]
 - GPU: H200
-- Test: 20 samples, 32s, PSNR 25.7 (25.7 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/fpwcmypo) (146316)
+- Test: 20 samples, 32s, PSNR 25.7 (25.7 HU)
 
 ![vae_cbct_maisi_x256_v1 test sample 0](assets/vae_cbct_maisi_x256_v1_test_sample.jpg)
 ![vae_cbct_maisi_x256_v1 results overview](assets/vae_cbct_maisi_x256_v1_overview.jpg)
-- Quality: visually as sharp as x256, but with a clear intensity bias. The diff map shows the body as a brighter region and the diff histogram peaks off 0. Worst of the MAISI runs; narrowing the window this way doesn't help
+- Quality: worse than x256. As sharp, but with a clear intensity offset (the body shows up in the diff map). The narrower window alone does not help
 
 ##### vae_cbct_maisi_x256_v2.yaml (HU window [-1000,1000], normalized to [0,1])
 - Keywords: same [-1000,1000] HU window as v1, but normalized to [0,1] instead of [-1,1]
 - GPU: H200
-- Test: 20 samples, 46s, PSNR 35.6 (29.6 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_maisi_x256/runs/pd98a9l0) (146317)
+- Test: 20 samples, 46s, PSNR 35.6 (29.6 HU)
 
 ![vae_cbct_maisi_x256_v2 test sample 0](assets/vae_cbct_maisi_x256_v2_test_sample.jpg)
 ![vae_cbct_maisi_x256_v2 results overview](assets/vae_cbct_maisi_x256_v2_overview.jpg)
-- Quality: best overall. The diff map is structureless noise centered at 0, with no bias or anatomical edges. Highest PSNR HU by ~3 dB; the [0,1] input normalization (which matches MAISI's training range) is what matters
+- Quality: good. No intensity offset, the diff map is just noise. Highest PSNR HU (~3 dB above the others). The [0,1] input range, which matches MAISI's training data, is what makes the difference
 
 #### Wan2.2 (pretrained video VAE, zero-shot test - no training)
 
 ##### vae_cbct_wan2_x128.yaml
 - Keywords: pretrained Wan2.2 video VAE (TI2V-5B), depth axis used as the time axis, grayscale repeated to 3 channels, 128px
 - GPU: H200
-- Test: 20 samples, 13s, PSNR 28.2 (26.3 HU) - [wandb](https://wandb.ai/zhaw_stmd/cbct_vae_wan2_x128/runs/wm716aay) (146318)
+- Test: 20 samples, 13s, PSNR 28.2 (26.3 HU)
 
 ![vae_cbct_wan2_x128 test sample 0](assets/vae_cbct_wan2_x128_test_sample.jpg)
 ![vae_cbct_wan2_x128 results overview](assets/vae_cbct_wan2_x128_overview.jpg)
-- Quality: sharp, vessels and lung texture preserved, slightly speckled. Clearly better than MAISI at the same 128px resolution (+1.4 dB PSNR HU) and better than all the trained VAEs
+- Quality: good. Vessels and lung texture are kept, slightly speckled. Better than MAISI and the trained VAEs at 128px
+- Next: try the [0,1] normalization that helped MAISI
 
 ---
 
@@ -496,31 +468,29 @@ Unconditional pixel-space DDPM on CT-RATE volumes. Each test generates 10 volume
 - Keywords: pixel-space 3D DDPM, MONAI UNet, CT-RATE chest CT volumes, 128px
 - GPU: 2x H200
 - Train: 59 EP, 19h50m, 19m42s/EP (stopped early: TrainLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x128/runs/hmfs1ow7) (146325)
 
 ![dg_m_cbct_x128_v0_dist2 generated test samples](assets/dg_m_cbct_x128_v0_dist2.jpg)
 ![dg_m_cbct_x128_v0_dist2 generation history of test sample 0](assets/dg_m_cbct_x128_v0_dist2_gen_history.jpg)
-- Quality: best CT generator so far. Most slices are plausible chest CTs (body outline, lungs with vessels, heart, spine, table), some even with pathology-like opacities. 2-3/10 have grainy soft tissue or odd anatomy (e.g. a slice cut through the abdomen with a detached blob above it). The generation history shows the body outline emerging around step 480. The final histogram is CT-like: a sharp air peak plus a soft-tissue peak
+- Quality: good. Most slices look like real chest CTs (body outline, lungs with vessels, heart, spine, table). 2-3/10 have grainy soft tissue or odd anatomy. The final histogram has a clear air and soft-tissue peak
 
 #### dg_cc_ct_x128.yaml (chuchichaestli UNet)
 - Keywords: pixel-space 3D DDPM, chuchichaestli UNet, 128px
 - GPU: H200
-- Train: 51 EP, ~31h combined over 2 jobs, ~20m/EP (stopped early: ValLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x128/runs/ccboe3v3) (146326)
+- Train: 51 EP, ~31h, ~20m/EP (stopped early: ValLoss_stagnated)
 
 ![dg_cc_ct_x128 generated test samples](assets/dg_cc_ct_x128.jpg)
 ![dg_cc_ct_x128 generation history of test sample 0](assets/dg_cc_ct_x128_gen_history.jpg)
-- Quality: poor. Body outline, ribs, spine and heart are in the right place, but the lungs are filled with grey instead of air (only dark blobs, no vessels) and the background is covered in smudgy noise. Clearly behind the MONAI version at the same resolution. In the generation history the final histogram has no distinct air peak: the air and soft-tissue peaks sit close together, matching the grey lungs and noisy background
+- Quality: bad. Body outline, ribs, spine and heart are in the right place, but the lungs are grey instead of black and the background is noisy. Worse than the MONAI version. The histogram has no separate air peak
 
 #### dg_cc_ct_x256.yaml (chuchichaestli UNet, 256px)
 - Keywords: same chuchichaestli setup, scaled to 256px, batch size 1, no dataset caching
 - GPU: H200
-- Train: 27/500 EP, ~126h combined over 6 resubmitted jobs, ~5.5h/EP (training cancelled, not finished)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_gen_x256/runs/mprjrddy) (146327)
+- Train: 27 EP, ~126h, ~5.5h/EP
 
 ![dg_cc_ct_x256 generated test samples](assets/dg_cc_ct_x256.jpg)
 ![dg_cc_ct_x256 generation history of test sample 0](assets/dg_cc_ct_x256_gen_history.jpg)
-- Quality: bad. Local textures (lung parenchyma, vessels, table lines) look CT-like, but the global anatomy is melted and swirled, no sample has a coherent body outline. Expected after only 27 epochs. The generation history shows the same pattern as at 128px: structure appears around step 530, and the final histogram lacks a clean air peak
+- Quality: bad. Local textures look like CT, but no sample has a coherent body. Too few epochs
+- Next: pixel-space 3D diffusion at 256px is too slow here; latent diffusion (below) is the better option
 
 ---
 
@@ -532,31 +502,30 @@ Conditional DDPM, deblurring: the condition is the same volume with a 3D Gaussia
 - Keywords: conditional 3D DDPM, deblurring, MONAI UNet (small, 3 levels), 64px, blur sigma 2.5px
 - GPU: V100
 - Train: 82 EP, 9h19m, 6m41s/EP (stopped early: TrainLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x64/runs/1fgjljmc) (146329). No PSNR logged by the MONAI test
 
 ![dc_m_ct_x64_deblur generated test samples](assets/dc_m_ct_x64_deblur.jpg)
 ![dc_m_ct_x64_deblur generation history of test sample 0](assets/dc_m_ct_x64_deblur_gen_history.jpg)
-- Quality: good. The result recovers the overall anatomy and lung structure from a heavily blurred condition. The diff maps still show the anatomy (body outline, heart), i.e. a systematic intensity offset, plus fine lung detail that is invented rather than reconstructed. In the generation history the lung outline appears around step 560-640, and the final histogram is CT-like, with a clean air peak and a soft-tissue peak
+- Quality: ok. Overall anatomy and lung structure are recovered. The diff maps still show the body outline and heart (intensity offset), and the fine lung detail is made up rather than reconstructed
 
 #### dc_m_ct_x128_deblur.yaml (MONAI UNet, 128px)
 - Keywords: conditional 3D DDPM, deblurring, full-size MONAI UNet (4 levels), 128px, blur sigma 10px
 - GPU: H200
-- Train: still training. Rerun with batch size 6 (the first attempt hit CUDA OOM on resume and never produced a model). It checkpoints and auto-resubmits itself: 3 segments completed (~69h combined, ~107m/EP in the 1st job, ~37m/EP after that), the 4th is running at epoch ~104/150
-- Test: intermediate test on the epoch 80 checkpoint, 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x128/runs/cv1y3ybv) (147037). No PSNR logged by the MONAI test
+- Train: 80 EP, ~68h, ~37m/EP
 
 ![dc_m_ct_x128_deblur generated test samples](assets/dc_m_ct_x128_deblur.jpg)
 ![dc_m_ct_x128_deblur generation history of test sample 0](assets/dc_m_ct_x128_deblur_gen_history.jpg)
-- Quality: impressive given the condition. The 10px blur leaves only a vague lung/body silhouette, yet the results show sharp, plausible chest CTs with the right body shape, heart, spine, ribs, table and pathologies (e.g. the ground-glass opacities in samples 2-3 and 6). But the fine detail is invented: the diff maps show the full anatomy and lung vessels, i.e. vessel positions and textures do not match the GT, and there is visible grain in the background. In the generation history the body outline appears around step 480 and the lungs around step 560-640; the final histogram is CT-like, with a clean air peak and a soft-tissue peak
+- Quality: ok. The blur leaves only a rough outline, but the results are plausible chest CTs with the right body shape, heart, spine and ribs. The fine detail does not match the GT though: the diff maps show the full anatomy and lung vessels. Some grain in the background
+- Next: blur sigma 10px removes too much to reconstruct; a smaller sigma would make it a real deblurring test
 
 #### dc_cc_ct_x64_deblur.yaml (chuchichaestli UNet, 64px)
 - Keywords: conditional 3D DDPM, deblurring, chuchichaestli UNet (4 levels, attention at the deepest level), 64px, blur sigma 2px, best-val checkpoint
 - GPU: H200
 - Train: 124 EP, 5h10m, 2m25s/EP (stopped early: ValLoss_stagnated)
-- Test: 10 samples, PSNR 22.2 (20.2 HU) vs. 21.7 (19.8 HU) for the condition itself - [wandb](https://wandb.ai/zhaw_stmd/cbct_diff_cond_x64/runs/1tr7y4gx) (146331)
+- Test: 10 samples, PSNR 22.2 (20.2 HU) vs. 21.7 (19.8 HU) for the condition itself
 
 ![dc_cc_ct_x64_deblur generated test samples](assets/dc_cc_ct_x64_deblur.jpg)
 ![dc_cc_ct_x64_deblur generation history of test sample 0](assets/dc_cc_ct_x64_deblur_gen_history.jpg)
-- Quality: visually good, results look sharp and close to the GT. Unlike the MONAI run, the diff maps are mostly structureless noise without an intensity offset. But PSNR is only +0.5 dB above the blurred condition: the fine detail is plausible, not faithful (pixel-wise it is no better than the blur). The generation history is nearly identical to the MONAI run: the outline appears around step 530-620, and the final histogram has a clean air and soft-tissue peak
+- Quality: ok. Results look sharp and the diff maps have no intensity offset. But PSNR is only 0.5 dB above the blurred input, so the detail looks plausible but is not accurate
 
 ---
 
@@ -568,38 +537,35 @@ Unconditional latent DDPM on CT-RATE volumes: a 3D chuchichaestli UNet is traine
 - Keywords: latent 3D DDPM, frozen pretrained MAISI VAE, latents 4x32x32x16, chuchichaestli UNet, 128px
 - GPU: H200
 - Train: 56 EP, 9h38m, 10m7s/EP (stopped early: TrainLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x128/runs/p7a765ik) (147033)
 
 ![lat_diff_cbct_maisi_x128 generated test samples](assets/lat_diff_cbct_maisi_x128.jpg)
 ![lat_diff_cbct_maisi_x128 generation history of test sample 0](assets/lat_diff_cbct_maisi_x128_gen_history.jpg)
-- Quality: best CT generator so far. All 10 transversal slices are plausible chest CTs with body outline, air-filled lungs with vessels, heart, spine and table; sagittal and coronal views are coherent too (spine, diaphragm, mediastinum). Edges are slightly soft and some soft tissue is a bit grainy, but there are no melted or swirled samples. In the generation history the body outline appears around step 440 and the final histogram is CT-like, with a sharp air peak and a soft-tissue peak
+- Quality: good. All 10 samples look like chest CTs, with lung vessels, heart, spine and table, also in the sagittal and coronal views. Edges are a bit soft and some soft tissue is grainy
 
 #### lat_diff_cbct_maisi_x256.yaml (frozen MAISI VAE, 256px)
 - Keywords: same MAISI latent setup, scaled to 256px, latents 4x64x64x32, batch size 2
 - GPU: H200
-- Train: 37 EP, ~42h combined over 2 jobs, ~73m/EP in the 1st and ~50m/EP in the 2nd job (stopped early: ValLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x256/runs/b362gmmy) (147034)
+- Train: 37 EP, ~42h, ~50-73m/EP (stopped early: ValLoss_stagnated)
 
 ![lat_diff_cbct_maisi_x256 generated test samples](assets/lat_diff_cbct_maisi_x256.jpg)
 ![lat_diff_cbct_maisi_x256 generation history of test sample 0](assets/lat_diff_cbct_maisi_x256_gen_history.jpg)
-- Quality: mixed. Anatomy is mostly in the right place (body outline, heart, spine, ribs, table), but almost every sample is covered in strong high-frequency noise, the background is grey instead of black and the lungs are filled with hazy texture. Only 1/10 looks like a clean CT. Clearly behind the 128px run, likely undertrained after 37 epochs. The generation history shows the outline appearing around step 440, but the final histogram has a broad shoulder instead of a clean soft-tissue peak, matching the noisy look
+- Quality: bad. The anatomy is mostly in the right place, but almost all samples are very noisy, with a grey background and hazy lungs. Only 1/10 looks clean
+- Next: train longer, e.g. with a larger `early_stop_val_loss` patience
 
 #### lat_diff_cbct_monai_x128.yaml (frozen trained VAE, 128px)
 - Keywords: latent 3D DDPM, frozen `vae_cbct_x128_v0` (trained above), latents 1x32x32x16, chuchichaestli UNet, 128px
 - GPU: H200
 - Train: 38 EP, 2h25m, 3m34s/EP (stopped early: TrainLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x128/runs/uncbtfzz) (147035)
 
 ![lat_diff_cbct_monai_x128 generated test samples](assets/lat_diff_cbct_monai_x128.jpg)
 ![lat_diff_cbct_monai_x128 generation history of test sample 0](assets/lat_diff_cbct_monai_x128_gen_history.jpg)
-- Quality: coherent but cartoon-like. Global anatomy is correct in most samples (body outline, lungs, heart, spine, ribs, table, also in sagittal/coronal views), but everything is smooth: no lung vessels, no noise texture, the same "cartoon" look as the VAE's own reconstructions. 1/10 is a slice through the liver/abdomen with barely any lung. The decoder limits the quality here, not the diffusion model. In the generation history the anatomy only appears late, around step 530-620; the final histogram has a clean air peak and a narrow soft-tissue peak
+- Quality: ok. The anatomy is correct in most samples, but everything is very smooth, with no lung vessels. This is the same smooth look as the VAE's own reconstructions, so the VAE is the limit here
 
 #### lat_diff_cbct_monai_x256.yaml (frozen trained VAE, 256px)
 - Keywords: same setup with the frozen `vae_cbct_x256_v0`, latents 1x64x64x32, batch size 2, 256px
 - GPU: H200
 - Train: 36 EP, 17h23m, 28m9s/EP (stopped early: TrainLoss_stagnated)
-- Test: 10 samples - [wandb](https://wandb.ai/zhaw_stmd/cbct_lat_diff_x256/runs/77q8y3iz) (147036)
 
 ![lat_diff_cbct_monai_x256 generated test samples](assets/lat_diff_cbct_monai_x256.jpg)
 ![lat_diff_cbct_monai_x256 generation history of test sample 0](assets/lat_diff_cbct_monai_x256_gen_history.jpg)
-- Quality: bad. About 5/10 samples are clean, smooth chest CTs similar to the 128px run, the other half are broken: bright blotches scattered across the background, fragmented body outline and lungs. The generation history of sample 0 shows one of the broken cases: a ring-shaped body outline forms around step 440, but the blotches present from the start never disappear
+- Quality: bad. About half the samples are smooth chest CTs like the 128px run, the other half have bright blotches all over the background and a broken body outline
