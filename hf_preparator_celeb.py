@@ -60,6 +60,9 @@ def create_datasets(experiment, args=None):
     """Downloads (once) and prepares the Hugging Face bitmind/celeb-a-hq dataset.
 
     https://huggingface.co/datasets/bitmind/celeb-a-hq
+    A mirror of CelebA-HQ (Karras et al., ICLR 2018), derived from CelebA (Liu et al.,
+    ICCV 2015). The images are subject to the CelebA terms (non-commercial research
+    only, no redistribution), regardless of the license tag on the mirror - see README.
 
     `hf_cache_dir` is used as the `datasets` library cache_dir: the first run
     downloads and converts the parquet shards there; every subsequent run

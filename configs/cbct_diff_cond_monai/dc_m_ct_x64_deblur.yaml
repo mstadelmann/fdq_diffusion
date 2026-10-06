@@ -45,6 +45,8 @@ transforms:
       # match dc_m_ct_x128_deblur's physical blur radius: 10px * 3.0mm/px (x128 spacing)
       # = 30mm; at x64's 6.0mm/px spacing that's 30 / 6.0 = 5px. kernel_size again
       # covers +/-3 sigma (see dc_m_ct_x128_deblur for why that matters).
+      # NOTE: the value actually used (and reported in the README) is 2.5px = 15mm,
+      # i.e. half of the matched 5px radius derived above.
       blur_sigma: 2.5
       blur_kernel_size: 15
   norm_to_HU:

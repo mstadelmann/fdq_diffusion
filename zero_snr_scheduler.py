@@ -11,7 +11,9 @@ class ZeroSNRDDPMScheduler(DDPMScheduler):
     At inference, sampling starts from true zero-mean Gaussian noise, which lacks that trace, so the
     model has to guess the global color from nothing and produces inconsistent color casts per sample.
     Rescaling betas to force alphas_cumprod[-1] == 0 removes this train/inference mismatch.
-    See Lin et al., "Common Diffusion Noise Schedules and Sample Steps are Flawed" (2023).
+    _rescale_zero_terminal_snr implements Algorithm 1 of
+    Lin et al., "Common Diffusion Noise Schedules and Sample Steps Are Flawed", WACV 2024,
+    arXiv:2305.08891.
     """
 
     def __init__(self, *args, **kwargs) -> None:

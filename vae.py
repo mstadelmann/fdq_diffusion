@@ -7,6 +7,10 @@ from ae_test_eval import AETestEvaluator
 # from monai.losses.perceptual import PerceptualLoss
 
 
+# KL term of the VAE objective (Kingma & Welling, "Auto-Encoding Variational Bayes",
+# ICLR 2014, arXiv:1312.6114), in the form used in the MONAI generative tutorials
+# (Apache-2.0), e.g.
+# https://github.com/Project-MONAI/tutorials/blob/main/generation/2d_autoencoderkl/2d_autoencoderkl_tutorial.ipynb
 def KL_loss(z_mu, z_sigma):
     """
     Compute the Kullback-Leibler (KL) divergence loss for a variational autoencoder (VAE).

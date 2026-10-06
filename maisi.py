@@ -3,14 +3,19 @@ import torch
 import tempfile
 from monai.apps.generation.maisi.networks.autoencoderkl_maisi import AutoencoderKlMaisi
 from monai.apps.utils import download_url
-from safetensors.torch import load_model
 from torch.nn.modules import Module
 from fdq.ui_functions import startProgBar, iprint
 from image_functions import createSubplots
 from ae_test_eval import AETestEvaluator
 
 
-MAISI_URL = "https://drive.switch.ch/index.php/s/HXdr8gRS0GkajyS/download?path=%2F&files=maisai_autoencoder.safetensors"
+# Pretrained MAISI VAE (Guo et al., "MAISI: Medical AI for Synthetic Imaging", WACV 2025,
+# https://arxiv.org/abs/2409.11169), downloaded from NVIDIA's official location as listed in
+# the MONAI model zoo bundle "maisi_ct_generative" (large_files.yml):
+# https://github.com/Project-MONAI/model-zoo/tree/dev/models/maisi_ct_generative
+# The weights are NOT part of this repository and are subject to NVIDIA's model weights
+# license (non-commercial, research/evaluation use only), see the bundle's LICENSE file.
+MAISI_URL = "https://developer.download.nvidia.com/assets/Clara/monai/tutorials/model_zoo/model_maisi_autoencoder_epoch273_alternative.pt"
 
 MAISI_ARGS = {
     "spatial_dims": 3,
@@ -44,9 +49,10 @@ def load_url(model: Module, url: str, freeze: bool = False) -> Module:
         Module: The PyTorch module with the loaded weights.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
-        weights_path = os.path.join(tmpdir, "weights.safetensors")
+        weights_path = os.path.join(tmpdir, "weights.pt")
         download_url(url, filepath=weights_path)
-        load_model(model, weights_path)
+        state_dict = torch.load(weights_path, map_location="cpu", weights_only=True)
+        model.load_state_dict(state_dict, strict=True)
     if freeze:
         for param in model.parameters():
             param.requires_grad = False

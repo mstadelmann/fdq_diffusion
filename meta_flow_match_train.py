@@ -1,9 +1,18 @@
+"""Flow matching training/sampling on top of fdq.
+
+Uses the flow_matching library (CC-BY-NC 4.0, installed as a dependency, not part of
+this repository): https://github.com/facebookresearch/flow_matching
+    Lipman et al., "Flow Matching Guide and Code", arXiv:2412.06264, 2024.
+    Lipman et al., "Flow Matching for Generative Modeling", ICLR 2023, arXiv:2210.02747.
+The overall training/sampling procedure (conditional OT probability path, velocity
+regression, midpoint ODE solver) follows the library's image example
+(examples/image/training/train_loop.py, eval_loop.py), re-implemented here for fdq.
+"""
+
 import gc
-import logging
 import math
 
 import torch
-from torch.nn import Module, Parameter, ParameterList
 from torchvision.utils import make_grid
 from fdq.ui_functions import startProgBar, iprint
 from fdq.misc import save_wandb
@@ -11,11 +20,6 @@ from fdq.misc import save_wandb
 from flow_matching.path import CondOTProbPath
 from flow_matching.utils import ModelWrapper
 from flow_matching.solver.ode_solver import ODESolver
-
-logger = logging.getLogger(__name__)
-
-MASK_TOKEN = 256
-PRINT_FREQUENCY = 50
 
 
 def wandb_image_entry(name: str, images: torch.Tensor, as_grid: bool) -> dict:
@@ -31,113 +35,63 @@ def wandb_image_entry(name: str, images: torch.Tensor, as_grid: bool) -> dict:
     return {"name": name, "data": images}
 
 
-def skewed_timestep_sample(num_samples: int, device: torch.device) -> torch.Tensor:
-    P_mean = -1.2
-    P_std = 1.2
-    rnd_normal = torch.randn((num_samples,), device=device)
-    sigma = (rnd_normal * P_std + P_mean).exp()
-    time = 1 / (1 + sigma)
-    time = torch.clip(time, min=0.0001, max=1.0)
-    return time
+class GuidedVelocityModel(ModelWrapper):
+    """Velocity field wrapper for the ODE solver with classifier-free guidance.
 
-
-class CFGScaledModel(ModelWrapper):
-    def __init__(self, model: torch.nn.Module):
-        super().__init__(model)
-        self.nfe_counter = 0
+    v = (1 + w) * v(x, t | label) - w * v(x, t), with guidance weight w = cfg_scale
+    (Ho & Salimans, "Classifier-Free Diffusion Guidance", arXiv:2207.12598, 2022).
+    For an unconditional model (num_classes: null) the label is ignored by the UNet,
+    so both terms are identical and the result equals the plain model output.
+    """
 
     def forward(self, x: torch.Tensor, t: torch.Tensor, cfg_scale: float, label: torch.Tensor):
-        t = torch.zeros(x.shape[0], device=x.device) + t
-
-        if cfg_scale != 0.0:
-            with torch.amp.autocast("cuda"), torch.no_grad():
-                conditional = self.model(x, t, extra={"label": label})
-                condition_free = self.model(x, t, extra={})
-            result = (1.0 + cfg_scale) * conditional - cfg_scale * condition_free
-        else:
-            # Model is fully conditional, no cfg weighting needed
-            with torch.amp.autocast("cuda"), torch.no_grad():
-                result = self.model(x, t, extra={"label": label})
-
-        self.nfe_counter += 1
-        return result.to(dtype=torch.float32)
-
-    def reset_nfe_counter(self) -> None:
-        self.nfe_counter = 0
-
-    def get_nfe(self) -> int:
-        return self.nfe_counter
+        # the solver passes a scalar time, the UNet expects one value per sample
+        t_batch = torch.zeros(x.shape[0], device=x.device) + t
+        with torch.no_grad(), torch.amp.autocast("cuda"):
+            v_cond = self.model(x, t_batch, extra={"label": label})
+            if cfg_scale == 0.0:
+                v = v_cond
+            else:
+                v_uncond = self.model(x, t_batch, extra={})
+                v = v_cond + cfg_scale * (v_cond - v_uncond)
+        return v.float()
 
 
-# Exponential moving average of model weights. Wired into fdq_train: shadow params are
-# updated after every optimizer step, then swapped into the model (via backup/copy_to_model
-# /restore_to_model) for sample generation and checkpointing, so training itself always
-# resumes from the raw (non-averaged) weights.
-class EMA(Module):
-    def __init__(self, model: Module, decay: float = 0.999):
-        super().__init__()
-        self.model = model
+class WeightEMA:
+    """Exponential moving average of a model's trainable parameters.
+
+    The decay is warmed up as min(decay, (1 + n) / (10 + n)) over the number of
+    updates n, so early (still poor) weights are forgotten quickly. The averaged
+    weights are not saved separately: use swap_in() to temporarily load them into
+    the model (e.g. for sampling/checkpointing) and swap_out() to go back to the
+    raw training weights.
+    """
+
+    def __init__(self, model: torch.nn.Module, decay: float = 0.999):
         self.decay = decay
+        self.n_updates = 0
+        self.params = [p for p in model.parameters() if p.requires_grad]
+        self.averaged = [p.detach().clone() for p in self.params]
+        self.stash: list[torch.Tensor] = []
 
-        # Put this in a buffer so that it gets included in the state dict
-        self.register_buffer("num_updates", torch.tensor(0))
+    @torch.no_grad()
+    def update(self) -> None:
+        self.n_updates += 1
+        d = min(self.decay, (1 + self.n_updates) / (10 + self.n_updates))
+        for avg, p in zip(self.averaged, self.params):
+            avg.mul_(d).add_(p.detach(), alpha=1 - d)
 
-        self.shadow_params: ParameterList = ParameterList(
-            [
-                Parameter(p.clone().detach(), requires_grad=False)
-                for p in model.parameters()
-                if p.requires_grad
-            ]
-        )
-        self.backup_params: list[torch.Tensor] = []
+    @torch.no_grad()
+    def swap_in(self) -> None:
+        self.stash = [p.detach().clone() for p in self.params]
+        for p, avg in zip(self.params, self.averaged):
+            p.copy_(avg)
 
-    def train(self, mode: bool) -> None:
-        if self.training == mode:
-            super().train(mode)
-            return
-
-        if not mode:
-            logger.info(
-                "EMA: Switching from train to eval, backing up parameters and copying EMA params"
-            )
-            self.backup()
-            self.copy_to_model()
-        else:
-            logger.info("EMA: Switching from eval to train, restoring saved parameters")
-            self.restore_to_model()
-
-        super().train(mode)
-
-    def update_ema(self) -> None:
-        self.num_updates += 1
-        num_updates = self.num_updates.item()
-        decay = min(self.decay, (1 + num_updates) / (10 + num_updates))
-        with torch.no_grad():
-            params = [p for p in self.model.parameters() if p.requires_grad]
-            for shadow, param in zip(self.shadow_params, params):
-                shadow.sub_((1 - decay) * (shadow - param))
-
-    def forward(self, *args, **kwargs) -> torch.Tensor:
-        return self.model(*args, **kwargs)
-
-    def copy_to_model(self) -> None:
-        params = [p for p in self.model.parameters() if p.requires_grad]
-        for shadow, param in zip(self.shadow_params, params):
-            param.data.copy_(shadow.data)
-
-    def backup(self) -> None:
-        assert (
-            self.training
-        ), "Backup can only be created in train mode to avoid backing-up ema weights."
-        if len(self.backup_params) > 0:
-            for p, b in zip(self.model.parameters(), self.backup_params):
-                b.data.copy_(p.data)
-        else:
-            self.backup_params = [param.clone() for param in self.model.parameters()]
-
-    def restore_to_model(self) -> None:
-        for param, backup in zip(self.model.parameters(), self.backup_params):
-            param.data.copy_(backup.data)
+    @torch.no_grad()
+    def swap_out(self) -> None:
+        for p, raw in zip(self.params, self.stash):
+            p.copy_(raw)
+        self.stash = []
 
 
 @torch.no_grad()
@@ -176,7 +130,7 @@ def fdq_test(experiment):
             list(range(batch_size)), dtype=torch.int32, device=experiment.device
         )
 
-        cfg_weighted_model = CFGScaledModel(model=model)
+        cfg_weighted_model = GuidedVelocityModel(model=model)
 
         x_0 = torch.randn(
             [batch_size, 3, sample_resolution, sample_resolution],
@@ -237,11 +191,10 @@ def fdq_train(experiment) -> None:
     model_no_ddp = experiment.models_no_ddp[targs.model_name]
 
     ema_decay = targs.get("ema_decay")
-    ema = EMA(model_no_ddp, decay=ema_decay) if ema_decay else None
+    ema = WeightEMA(model_no_ddp, decay=ema_decay) if ema_decay else None
 
     device_type = "cuda" if experiment.device == torch.device("cuda") else "cpu"
     train_loader = data.train_data_loader
-    skewed_timesteps = False
 
     path = CondOTProbPath()
 
@@ -271,10 +224,7 @@ def fdq_train(experiment) -> None:
             conditioning = {}
             noise = torch.randn_like(samples).to(experiment.device)
 
-            if skewed_timesteps:
-                t = skewed_timestep_sample(samples.shape[0], device=experiment.device)
-            else:
-                t = torch.torch.rand(samples.shape[0]).to(experiment.device)
+            t = torch.rand(samples.shape[0]).to(experiment.device)
 
             path_sample = path.sample(t=t, x_0=noise, x_1=samples)
             x_t = path_sample.x_t
@@ -306,7 +256,7 @@ def fdq_train(experiment) -> None:
             )
 
             if apply_update and ema is not None:
-                ema.update_ema()
+                ema.update()
 
         pbar.finish()
         experiment.trainLoss = _epoch_mean_loss(experiment, train_loss_sum, train_sample_count)
@@ -327,10 +277,7 @@ def fdq_train(experiment) -> None:
                 conditioning = {}
                 noise = torch.randn_like(samples).to(experiment.device)
 
-                if skewed_timesteps:
-                    t = skewed_timestep_sample(samples.shape[0], device=experiment.device)
-                else:
-                    t = torch.rand(samples.shape[0]).to(experiment.device)
+                t = torch.rand(samples.shape[0]).to(experiment.device)
 
                 path_sample = path.sample(t=t, x_0=noise, x_1=samples)
                 x_t = path_sample.x_t
@@ -352,8 +299,7 @@ def fdq_train(experiment) -> None:
         # preview and the saved/resumable model reflect the smoothed weights rather
         # than this epoch's raw weights
         if ema is not None:
-            ema.backup()
-            ema.copy_to_model()
+            ema.swap_in()
 
         # generate samples for wandb logging - resolution follows the actual
         # (post-transform) training images, not a hardcoded value, so previews stay
@@ -369,7 +315,7 @@ def fdq_train(experiment) -> None:
         # inference through the DDP-wrapped model (no matching backward) can
         # desync DDP's reducer bookkeeping across ranks and eventually hang the
         # next real training-step all-reduce.
-        cfg_weighted_model = CFGScaledModel(model=model_no_ddp)
+        cfg_weighted_model = GuidedVelocityModel(model=model_no_ddp)
 
         x_0 = torch.randn(
             [batch_size, 3, sample_resolution, sample_resolution],
@@ -396,4 +342,4 @@ def fdq_train(experiment) -> None:
         )
 
         if ema is not None:
-            ema.restore_to_model()
+            ema.swap_out()

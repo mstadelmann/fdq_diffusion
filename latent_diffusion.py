@@ -38,7 +38,7 @@ def get_encoder(experiment):
     encoder_name = experiment.cfg.train.args.encoder_name
     if encoder_name != "maisi":
         return experiment.models[encoder_name]
-    # imported here so the non-MAISI configs don't need monai's maisi deps/safetensors
+    # imported here so the non-MAISI configs don't need monai's maisi deps
     from monai.apps.generation.maisi.networks.autoencoderkl_maisi import (
         AutoencoderKlMaisi,
     )

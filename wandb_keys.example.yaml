@@ -1,0 +1,10 @@
+# Every experiment config includes a `wandb_keys.yaml` from its own config
+# directory (see `defaults:` at the top of each config). That file holds your
+# personal Weights & Biases API key and is excluded from git (.gitignore).
+#
+# Copy this file next to the config you want to run, e.g.
+#   cp wandb_keys.example.yaml configs/celeb_vae/wandb_keys.yaml
+# and either enter your key, or keep it empty and disable wandb logging
+# (store.use_wandb: false, e.g. as a command line override).
+store:
+  wandb_key: null

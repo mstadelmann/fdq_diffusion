@@ -10,6 +10,9 @@ from ae_test_eval import AETestEvaluator
 # TI2V-5B is the Wan2.2 variant that ships the new high-compression
 # "Wan2.2-VAE" (4x16x16, https://github.com/Wan-Video/Wan2.2); the other
 # Wan2.2 variants (T2V/I2V-A14B) reuse the original Wan2.1 VAE instead.
+# Weights (Apache-2.0) are downloaded at runtime, they are not part of this repository.
+# Team Wan et al., "Wan: Open and Advanced Large-Scale Video Generative Models",
+# arXiv:2503.20314, 2025.
 WAN22_VAE_REPO = "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
 WAN22_VAE_SUBFOLDER = "vae"
 
