@@ -88,6 +88,8 @@ data:
       pin_memory: true
       compress_cache: false
 
+# UNet hyperparameters follow the CIFAR-10 config of Meta's flow_matching image example
+# (examples/image/models/model_configs.py, https://github.com/facebookresearch/flow_matching).
 models:
   metaUNET:
     path: ~/dev/fdq_diffusion/meta_unet.py

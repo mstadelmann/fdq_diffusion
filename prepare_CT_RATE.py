@@ -1,3 +1,13 @@
+"""Download and preprocess CT-RATE chest CT volumes into fixed-size NIfTI files.
+
+CT-RATE (CC BY-NC-SA 4.0, gated - accept the dataset terms on Hugging Face first):
+    https://huggingface.co/datasets/ibrahimhamamci/CT-RATE
+    Hamamci et al., "Generalist foundation models from a multimodal dataset for 3D
+    computed tomography", Nature Biomedical Engineering, 2026 (arXiv:2403.17834).
+Requires a Hugging Face token in the HUGGINGFACE_TOKEN environment variable.
+The dataset itself is not part of this repository and must not be redistributed.
+"""
+
 import argparse
 import ast
 import concurrent.futures
@@ -39,31 +49,35 @@ def is_interleaved_volume(data: np.ndarray, threshold: float = 1.2) -> tuple[boo
         return False, 0.0
 
 
-def resize_array(array, current_spacing, target_spacing):
-    """
-    Resize the array to match the target spacing.
+def resample_to_spacing(volume, spacing, target_spacing):
+    """Trilinearly resample a [N, C, D, H, W] volume from `spacing` to `target_spacing`.
 
-    Args:
-    array (torch.tensor): Input array to be resized.
-    current_spacing (tuple): Current voxel spacing (z_spacing, xy_spacing, xy_spacing).
-    target_spacing (tuple): Target voxel spacing (target_z_spacing, target_x_spacing, target_y_spacing).
-
-    Returns:
-    np.ndarray: Resized array.
+    Both spacings are given in mm per voxel, in the same (D, H, W) order as the
+    volume's spatial axes. The output size per axis is the physical extent
+    (size * spacing) divided by the target spacing, rounded to the nearest voxel.
     """
-    # Calculate new dimensions
-    original_shape = array.shape[2:]
-    scaling_factors = [current_spacing[i] / target_spacing[i] for i in range(len(original_shape))]
-    new_shape = [round(original_shape[i] * scaling_factors[i]) for i in range(len(original_shape))]
-    # Resize the array
-    resized_array = F.interpolate(array, size=new_shape, mode="trilinear", align_corners=False)
-    return resized_array
+    out_size = [
+        round(size * (cur / tgt))
+        for size, cur, tgt in zip(volume.shape[2:], spacing, target_spacing)
+    ]
+    return F.interpolate(volume, size=out_size, mode="trilinear", align_corners=False)
+
+
+def ct_rate_subfolder(volume_name, split):
+    """Location of a volume inside the CT-RATE Hugging Face dataset repository.
+
+    Volumes are stored per patient and scan, e.g. "train_1_a_1.nii.gz" lives in
+    "dataset/train/train_1/train_1_a/" (layout of
+    https://huggingface.co/datasets/ibrahimhamamci/CT-RATE).
+    """
+    split_name, patient, scan = volume_name.split("_")[:3]
+    patient_dir = f"{split_name}_{patient}"
+    return f"dataset/{split}/{patient_dir}/{patient_dir}_{scan}"
 
 
 def single_job(data_batched, split="train", overwrite=False, download_dir=None, output_base_dir=None, resolution=128):
     try:
         repo_id = "ibrahimhamamci/CT-RATE"
-        directory_name = f"dataset/{split}/"
         hf_token = os.environ.get("HUGGINGFACE_TOKEN")
 
         # path where raw data is downloaded and stored
@@ -90,12 +104,7 @@ def single_job(data_batched, split="train", overwrite=False, download_dir=None, 
         target_spacing = [xy_spacing_mm, xy_spacing_mm, xy_spacing_mm]  # target spacing in mm (z, x, y)
 
         name = data_batched["VolumeName"].item()
-        folder1 = name.split("_")[0]
-        folder2 = name.split("_")[1]
-        folder = folder1 + "_" + folder2
-        folder3 = name.split("_")[2]
-        subfolder = folder + "_" + folder3
-        subfolder = directory_name + folder + "/" + subfolder
+        subfolder = ct_rate_subfolder(name, split)
 
         # The output path only depends on names, not on the downloaded/processed
         # data, so it can be checked before doing any of the expensive work below.
@@ -212,7 +221,7 @@ def single_job(data_batched, split="train", overwrite=False, download_dir=None, 
         # reshape to desired voxel spacing
         tensor_data = torch.tensor(arr_ras, dtype=torch.float32)
         tensor_data = tensor_data.unsqueeze(0).unsqueeze(0)
-        tensor_data = resize_array(tensor_data, current_spacing, new_target_spacing)
+        tensor_data = resample_to_spacing(tensor_data, current_spacing, new_target_spacing)
         tensor_data = tensor_data[0][0]
 
         # Crop volume if it has more slices than specified

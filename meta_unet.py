@@ -1,8 +1,37 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
+# Third-party code - NOT covered by this repository's GPL-3.0 license.
 #
-# This source code is licensed under the CC-by-NC license found in the
-# LICENSE file in the root directory of this source tree.
+# Copied from Meta's flow_matching image example:
+#   https://github.com/facebookresearch/flow_matching/blob/11568d37f8d5a080e12aa7b5305d9c35ae07d136/examples/image/models/unet.py
+#   Copyright (c) Meta Platforms, Inc. and affiliates.
+# which itself is modified from OpenAI's guided-diffusion:
+#   https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/unet.py
+#   Copyright (c) 2021 OpenAI
+#
+# License: MIT. The upstream file header refers to the CC-BY-NC license of the
+# flow_matching repository, but the example's README states: "The UNet model is
+# under MIT license." (examples/image/README.md, section "License").
+# The full MIT license text is in LICENSES/MIT-OpenAI-guided-diffusion.txt.
+#
+# Further portions (see the comments at the respective places):
+#   - AttentionPool2d: adapted from OpenAI CLIP (MIT, Copyright (c) 2021 OpenAI),
+#     https://github.com/openai/CLIP, license text in LICENSES/MIT-OpenAI-CLIP.txt.
+#     Radford et al., "Learning Transferable Visual Models From Natural Language
+#     Supervision", ICML 2021, arXiv:2103.00020.
+#   - base2_fourier_features: based on Google Research VDM (Apache-2.0),
+#     https://github.com/google-research/vdm, license text in LICENSES/Apache-2.0.txt.
+#     Kingma et al., "Variational Diffusion Models", NeurIPS 2021, arXiv:2107.00630.
+#   - timestep embedding: originally ported from Ho et al.'s diffusion code,
+#     https://github.com/hojonathanho/diffusion (via guided-diffusion).
+#     Ho, Jain & Abbeel, "Denoising Diffusion Probabilistic Models", NeurIPS 2020,
+#     arXiv:2006.11239.
+#
+# Changes made in this repository: import path of the helper module changed from
+# `models.nn` to `meta_nn`, and code formatting. No functional changes.
+#
+# Original publications:
+#   - Lipman et al., "Flow Matching Guide and Code", arXiv:2412.06264, 2024.
+#   - Dhariwal & Nichol, "Diffusion Models Beat GANs on Image Synthesis",
+#     NeurIPS 2021, arXiv:2105.05233.
 """
 Modified from https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/unet.py
 """

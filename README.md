@@ -3,7 +3,9 @@
 Reference implementations of VAEs, pixel-space and latent diffusion, DiT/ViT
 backbones, and flow matching, built on top of
 [FDQ](https://github.com/mstadelmann/fonduecaquelon). Two domains: face
-generation on CelebA-HQ and CT volume generation/reconstruction on CBCT/CT-RATE.
+generation on CelebA-HQ and CT volume generation/reconstruction on CT-RATE
+chest CTs. The experiment and config names use "cbct" for historical reasons:
+all CT experiments in this repo use the (fan-beam) CT volumes of CT-RATE.
 
 **Goal**: this repo is not an attempt to produce the best possible images. It's
 a playground for exploring and comparing different diffusion-style generative
@@ -17,15 +19,37 @@ the good results.
 
 ## Running an experiment
 
-Locally:
+### Setup
+
+The configs reference the scripts in this repository by absolute path
+(`~/dev/fdq_diffusion/...`, e.g. `train.path`, `data.*.processor`). Either
+clone the repository to `~/dev/fdq_diffusion`, or adjust these paths.
+
+Every config includes a `wandb_keys.yaml` from its own config directory, which
+holds your personal [Weights & Biases](https://wandb.ai) API key and is not
+part of the repository. Create it from the template before the first run, and
+change `store.wandb_entity` to your own W&B entity, or disable W&B logging:
 ```bash
-pip install fdq[full]
-git clone https://github.com/mstadelmann/fdq_diffusion.git
-cd fdq_diffusion
-fdq --config-path configs/celeb_vae --config-name vae_celeb_x128_00_base
+cp wandb_keys.example.yaml configs/celeb_vae/wandb_keys.yaml   # then add your key
 ```
 
-On a Slurm cluster:
+Some configs contain further system-specific paths that need to be adjusted:
+`store.results_path`, `data.*.caching.cache_dir`, `data.ctrate.args.root_path`
+(location of the preprocessed CT-RATE data, see [Data and
+licenses](#data-and-licenses)), `globals.uv_cache_dir`, and the
+`trained_model_path` of the frozen VAEs used by the latent diffusion configs
+(set it to the checkpoint of your own VAE run).
+
+### Locally
+```bash
+git clone https://github.com/mstadelmann/fdq_diffusion.git ~/dev/fdq_diffusion
+cd ~/dev/fdq_diffusion
+pip install fdq[full] -r requirements.txt
+cp wandb_keys.example.yaml configs/celeb_vae/wandb_keys.yaml
+fdq --config-path configs/celeb_vae --config-name vae_celeb_x128_00_base store.use_wandb=false
+```
+
+### On a Slurm cluster
 
 The `slurm_cluster` settings in these configs (partition, account, module
 names, storage paths) are tuned for the
@@ -37,8 +61,8 @@ course locally wherever fdq can be installed.
 ```bash
 # lightweight submit extra, no PyTorch required on the login node
 pip install fdq[submit]
-git clone https://github.com/mstadelmann/fdq_diffusion.git
-cd fdq_diffusion
+git clone https://github.com/mstadelmann/fdq_diffusion.git ~/dev/fdq_diffusion
+cd ~/dev/fdq_diffusion
 fdq_submit configs/celeb_vae/vae_celeb_x128_00_base.yaml
 ```
 
@@ -55,33 +79,65 @@ once.
 
 ## Experiments
 
+Numbers in brackets refer to the [References](#references).
+
 | Directory | Contents |
 |---|---|
-| `configs/celeb_vae` | VAE pretraining, latent space for the models below |
-| `configs/celeb_diff_gen_monai` | pixel-space DDPM, MONAI UNet |
-| `configs/celeb_diff_gen_cc` | pixel-space DDPM, chuchichaestli UNet |
-| `configs/celeb_diff_gen_vit` | pixel-space DDPM, DiT/ViT backbone |
-| `configs/celeb_latent_diff` | latent DDPM, UNet backbone |
-| `configs/celeb_latent_diff_vit` | latent DDPM, DiT/ViT backbone |
-| `configs/celeb_fm_gen` | flow matching, UNet backbone |
-| `configs/cbct_vae` | VAE pretraining on CT volumes |
+| `configs/celeb_vae` | VAE [2] pretraining, latent space for the models below |
+| `configs/celeb_diff_gen_monai` | pixel-space DDPM [1], MONAI UNet [4, 26], zero terminal SNR / v-prediction [10, 11] |
+| `configs/celeb_diff_gen_cc` | pixel-space DDPM [1], chuchichaestli UNet [25], noise schedule sweep [8, 9] |
+| `configs/celeb_diff_gen_vit` | pixel-space DDPM, DiT/ViT backbone [6, 7, 28] |
+| `configs/celeb_diff_cond_monai`, `celeb_diff_cond_cc` | conditional DDPM (deblurring, inpainting, outpainting), MONAI / chuchichaestli UNet |
+| `configs/celeb_latent_diff` | latent DDPM [3], UNet backbone |
+| `configs/celeb_latent_diff_vit` | latent DDPM [3], DiT/ViT backbone [7] |
+| `configs/celeb_fm_gen` | flow matching [12, 13], guided-diffusion UNet [5] |
+| `configs/cbct_vae` | VAE [2] pretraining on CT volumes, zero-shot tests of pretrained MAISI [15] and Wan2.2 [16] VAEs |
 | `configs/cbct_diff_gen_monai`, `cbct_diff_gen_cc` | pixel-space DDPM on CT volumes, MONAI / chuchichaestli UNet |
 | `configs/cbct_diff_cond_monai`, `cbct_diff_cond_cc` | conditional DDPM, artifact/blur correction, MONAI / chuchichaestli UNet |
-| `configs/cbct_latent_diff` | latent DDPM on CT volumes, frozen pretrained MAISI or trained CBCT VAE |
+| `configs/cbct_latent_diff` | latent DDPM [3] on CT volumes, frozen pretrained MAISI [15] or trained CT VAE |
 
-## Data
+## Data and licenses
 
-**Celeb**: [bitmind/celeb-a-hq](https://huggingface.co/datasets/bitmind/celeb-a-hq)
-on Hugging Face - 30,000 images at native 1024x1024, CC-BY-4.0, no login or
-token required. Downloaded once and cached locally; see `hf_preparator_celeb.py`.
-Train/val/test are fixed, non-overlapping slices of that single split (by row
-index, not random), so they're identical across runs.
+No data and no pretrained weights are included in this repository. They are
+downloaded from their original sources and are subject to their own terms.
 
-**CBCT/CT**: currently trained on a locally preprocessed copy of
-[CT-RATE](https://huggingface.co/datasets/ibrahimhamamci/CT-RATE) staged on
-the cluster (see `nifity_preparator.py`, `data.ctrate.args.root_path`). Not
-yet loaded directly from Hugging Face - migrating this to the same
-download-once approach used for Celeb is planned.
+**CelebA-HQ**: loaded from the Hugging Face mirror
+[bitmind/celeb-a-hq](https://huggingface.co/datasets/bitmind/celeb-a-hq)
+(30,000 images at native 1024x1024, no login or token required), downloaded
+once and cached locally; see `hf_preparator_celeb.py`. Train/val/test are
+fixed, non-overlapping slices of that single split (by row index, not random),
+so they're identical across runs. CelebA-HQ [[18]](#references) is derived from
+CelebA [[17]](#references). Although the mirror is tagged CC-BY-4.0, the
+images remain subject to the
+[CelebA terms](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html):
+non-commercial research use only, the images are not owned by the dataset
+creators, and they must not be redistributed. CelebA-HQ itself is released
+under [CC BY-NC 4.0](https://github.com/tkarras/progressive_growing_of_gans).
+
+**CT-RATE**: chest CT volumes from
+[CT-RATE](https://huggingface.co/datasets/ibrahimhamamci/CT-RATE)
+[[19-23]](#references) (gated, CC BY-NC-SA 4.0, research use only, no
+redistribution of the data or any portion thereof). `prepare_CT_RATE.py`
+downloads and preprocesses the volumes (HU clipping, reorientation, isotropic
+resampling, crop/pad to a fixed size); `nifity_preparator.py` loads the
+preprocessed files (`data.ctrate.args.root_path`). Downloading requires
+accepting the dataset terms and a Hugging Face token (`HUGGINGFACE_TOKEN`).
+
+**Figures**: the figures in `assets/` are low-resolution result plots (at most
+~200 px per panel). Besides generated samples, the VAE and conditional
+experiments show the corresponding test inputs (ground truth / condition) for
+comparison. These are shown for illustration only; no dataset files are part of
+this repository. Face images derived from CelebA-HQ remain subject to the
+CelebA terms. Figures derived from CT-RATE are shared under
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), as
+required by the CT-RATE license.
+
+**Pretrained models**: the MAISI VAE [[15]](#references) is downloaded from
+NVIDIA (see `maisi.py`) and is subject to the
+[NVIDIA license of the MONAI model zoo bundle](https://github.com/Project-MONAI/model-zoo/blob/dev/models/maisi_ct_generative/LICENSE)
+(non-commercial, research and evaluation only). The Wan2.2 VAE
+[[16]](#references) (`Wan-AI/Wan2.2-TI2V-5B-Diffusers`, Apache-2.0) is
+downloaded from Hugging Face (see `wan2.py`).
 
 
 ## Results
@@ -360,7 +416,7 @@ download-once approach used for Celeb is planned.
 
 ### CBCT VAE
 
-All CBCT autoencoders share the same test routine (`ae_test_eval.py`). Each test uses the same 20 CT-RATE validation scans, in the same order, so sample 0 is the same patient in every experiment. Each entry shows:
+All CT autoencoders share the same test routine (`ae_test_eval.py`). Each test uses the same 20 CT-RATE validation scans, in the same order, so sample 0 is the same patient in every experiment. Each entry shows:
 - the detailed result of test sample 0: GT / Recon / Diff / GT HU / Recon HU, each with an axial slice, a histogram of the full volume, and two orthogonal slices
 - the `results_overview`: an axial slice of the reconstruction of every test sample
 
@@ -496,7 +552,7 @@ Unconditional pixel-space DDPM on CT-RATE volumes. Each test generates 10 volume
 
 ### CBCT DIFF COND
 
-Conditional DDPM, deblurring: the condition is the same volume with a 3D Gaussian blur. The overview shows 10 test samples, rows: ground truth / condition / result / GT - result. The `test_gen_history` plot below it follows test sample 0 through the reverse diffusion process: an axial slice (top) and the histogram of the full volume (bottom) at 10 evenly spaced denoising steps.
+Conditional DDPM, deblurring: the condition is the same volume with a Gaussian blur, applied slice by slice in the axial plane (`torchvision.transforms.GaussianBlur` blurs the last two dimensions only). The overview shows 10 test samples, rows: ground truth / condition / result / GT - result. The `test_gen_history` plot below it follows test sample 0 through the reverse diffusion process: an axial slice (top) and the histogram of the full volume (bottom) at 10 evenly spaced denoising steps.
 
 #### dc_m_ct_x64_deblur.yaml (MONAI UNet, 64px)
 - Keywords: conditional 3D DDPM, deblurring, MONAI UNet (small, 3 levels), 64px, blur sigma 2.5px
@@ -569,3 +625,70 @@ Unconditional latent DDPM on CT-RATE volumes: a 3D chuchichaestli UNet is traine
 ![lat_diff_cbct_monai_x256 generated test samples](assets/lat_diff_cbct_monai_x256.jpg)
 ![lat_diff_cbct_monai_x256 generation history of test sample 0](assets/lat_diff_cbct_monai_x256_gen_history.jpg)
 - Quality: bad. About half the samples are smooth chest CTs like the 128px run, the other half have bright blotches all over the background and a broken body outline
+
+---
+
+## References
+
+### Methods
+1. J. Ho, A. Jain, P. Abbeel. *Denoising Diffusion Probabilistic Models.* NeurIPS 2020. [arXiv:2006.11239](https://arxiv.org/abs/2006.11239), code: https://github.com/hojonathanho/diffusion
+2. D. P. Kingma, M. Welling. *Auto-Encoding Variational Bayes.* ICLR 2014. [arXiv:1312.6114](https://arxiv.org/abs/1312.6114)
+3. R. Rombach, A. Blattmann, D. Lorenz, P. Esser, B. Ommer. *High-Resolution Image Synthesis with Latent Diffusion Models.* CVPR 2022. [arXiv:2112.10752](https://arxiv.org/abs/2112.10752)
+4. O. Ronneberger, P. Fischer, T. Brox. *U-Net: Convolutional Networks for Biomedical Image Segmentation.* MICCAI 2015. [arXiv:1505.04597](https://arxiv.org/abs/1505.04597)
+5. P. Dhariwal, A. Nichol. *Diffusion Models Beat GANs on Image Synthesis.* NeurIPS 2021. [arXiv:2105.05233](https://arxiv.org/abs/2105.05233), code: https://github.com/openai/guided-diffusion
+6. A. Dosovitskiy et al. *An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.* ICLR 2021. [arXiv:2010.11929](https://arxiv.org/abs/2010.11929)
+7. W. Peebles, S. Xie. *Scalable Diffusion Models with Transformers (DiT).* ICCV 2023. [arXiv:2212.09748](https://arxiv.org/abs/2212.09748), code: https://github.com/facebookresearch/DiT
+8. A. Nichol, P. Dhariwal. *Improved Denoising Diffusion Probabilistic Models* (cosine schedule). ICML 2021. [arXiv:2102.09672](https://arxiv.org/abs/2102.09672)
+9. A. Jabri, D. Fleet, T. Chen. *Scalable Adaptive Computation for Iterative Generation* (sigmoid schedule). ICML 2023. [arXiv:2212.11972](https://arxiv.org/abs/2212.11972)
+10. S. Lin, B. Liu, J. Li, X. Yang. *Common Diffusion Noise Schedules and Sample Steps Are Flawed* (zero terminal SNR). WACV 2024. [arXiv:2305.08891](https://arxiv.org/abs/2305.08891)
+11. T. Salimans, J. Ho. *Progressive Distillation for Fast Sampling of Diffusion Models* (v-prediction). ICLR 2022. [arXiv:2202.00512](https://arxiv.org/abs/2202.00512)
+12. Y. Lipman, R. T. Q. Chen, H. Ben-Hamu, M. Nickel, M. Le. *Flow Matching for Generative Modeling.* ICLR 2023. [arXiv:2210.02747](https://arxiv.org/abs/2210.02747)
+13. Y. Lipman, M. Havasi, P. Holderrieth, N. Shaul, M. Le, B. Karrer, R. T. Q. Chen, D. Lopez-Paz, H. Ben-Hamu, I. Gat. *Flow Matching Guide and Code.* 2024. [arXiv:2412.06264](https://arxiv.org/abs/2412.06264), code: https://github.com/facebookresearch/flow_matching
+14. J. Ho, T. Salimans. *Classifier-Free Diffusion Guidance.* NeurIPS 2021 Workshop on Deep Generative Models. [arXiv:2207.12598](https://arxiv.org/abs/2207.12598)
+
+### Pretrained models
+15. P. Guo, C. Zhao, D. Yang, Z. Xu, V. Nath, Y. Tang, B. Simon, M. Belue, S. Harmon, B. Turkbey, D. Xu. *MAISI: Medical AI for Synthetic Imaging.* WACV 2025. [arXiv:2409.11169](https://arxiv.org/abs/2409.11169), weights: [MONAI model zoo `maisi_ct_generative`](https://github.com/Project-MONAI/model-zoo/tree/dev/models/maisi_ct_generative)
+16. Team Wan et al. *Wan: Open and Advanced Large-Scale Video Generative Models.* 2025. [arXiv:2503.20314](https://arxiv.org/abs/2503.20314), code: https://github.com/Wan-Video/Wan2.2, weights: [Wan-AI/Wan2.2-TI2V-5B-Diffusers](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers)
+
+### Datasets
+17. Z. Liu, P. Luo, X. Wang, X. Tang. *Deep Learning Face Attributes in the Wild* (CelebA). ICCV 2015. [arXiv:1411.7766](https://arxiv.org/abs/1411.7766), https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
+18. T. Karras, T. Aila, S. Laine, J. Lehtinen. *Progressive Growing of GANs for Improved Quality, Stability, and Variation* (CelebA-HQ). ICLR 2018. [arXiv:1710.10196](https://arxiv.org/abs/1710.10196), https://github.com/tkarras/progressive_growing_of_gans
+19. I. E. Hamamci, S. Er, C. Wang, F. Almas, A. G. Simsek, S. N. Esirgun, I. Dogan, O. F. Durugol, B. Hou, S. Shit, et al. *Generalist foundation models from a multimodal dataset for 3D computed tomography* (CT-RATE). Nature Biomedical Engineering, 2026. [arXiv:2403.17834](https://arxiv.org/abs/2403.17834), https://huggingface.co/datasets/ibrahimhamamci/CT-RATE
+20. I. E. Hamamci, S. Er, A. Sekuboyina, E. Simsar, A. Tezcan, A. G. Simsek, S. N. Esirgun, F. Almas, I. Dogan, M. F. Dasdelen, et al. *GenerateCT: Text-Conditional Generation of 3D Chest CT Volumes.* ECCV 2024. [arXiv:2305.16037](https://arxiv.org/abs/2305.16037)
+21. I. E. Hamamci, S. Er, B. Menze. *CT2Rep: Automated Radiology Report Generation for 3D Medical Imaging.* MICCAI 2024. [arXiv:2403.06801](https://arxiv.org/abs/2403.06801)
+22. I. E. Hamamci, S. Er, S. Shit, H. Reynaud, D. Yang, P. Guo, M. Edgar, D. Xu, B. Kainz, B. Menze. *Better Tokens for Better 3D: Advancing Vision-Language Modeling in 3D Medical Imaging.* NeurIPS 2025.
+23. I. E. Hamamci, S. Er, S. Shit, H. Reynaud, B. Kainz, B. Menze. *CRG Score: A Distribution-Aware Clinical Metric for Radiology Report Generation.* MIDL 2025 (short paper).
+
+### Software
+24. FDQ (fonduecaquelon), GPL-3.0: https://github.com/mstadelmann/fonduecaquelon
+25. chuchichaestli, GPL-3.0: https://github.com/CAIIVS/chuchichaestli
+26. M. J. Cardoso et al. *MONAI: An open-source framework for deep learning in healthcare.* 2022. [arXiv:2211.02701](https://arxiv.org/abs/2211.02701), Apache-2.0: https://github.com/Project-MONAI/MONAI
+27. W. H. L. Pinaya et al. *Generative AI for Medical Imaging: extending the MONAI Framework.* 2023. [arXiv:2307.15208](https://arxiv.org/abs/2307.15208), tutorials (Apache-2.0): https://github.com/Project-MONAI/tutorials/tree/main/generation
+28. P. von Platen et al. *Diffusers: State-of-the-art diffusion models.* Apache-2.0: https://github.com/huggingface/diffusers
+29. A. Paszke et al. *PyTorch: An Imperative Style, High-Performance Deep Learning Library.* NeurIPS 2019. [arXiv:1912.01703](https://arxiv.org/abs/1912.01703)
+
+## License
+
+The code in this repository is licensed under the
+[GNU General Public License v3.0 or later](LICENSE), except for the
+third-party files listed below, which keep their original licenses:
+
+| File | Origin | License |
+|---|---|---|
+| `meta_unet.py`, `meta_nn.py` | UNet of Meta's [flow_matching](https://github.com/facebookresearch/flow_matching) image example, derived from OpenAI [guided-diffusion](https://github.com/openai/guided-diffusion), with parts of [CLIP](https://github.com/openai/CLIP) and [VDM](https://github.com/google-research/vdm) | MIT ([LICENSES/MIT-OpenAI-guided-diffusion.txt](LICENSES/MIT-OpenAI-guided-diffusion.txt), [LICENSES/MIT-OpenAI-CLIP.txt](LICENSES/MIT-OpenAI-CLIP.txt)), VDM part Apache-2.0 ([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)) |
+
+Dependencies are installed separately and keep their own licenses. Note in
+particular that the `flow_matching` library used by
+`meta_flow_match_train.py` is licensed CC BY-NC 4.0 (non-commercial), and
+that the datasets and the MAISI weights are restricted to non-commercial
+research use (see [Data and licenses](#data-and-licenses)).
+
+The figures in `assets/` that show CT-RATE data are licensed under
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+## Acknowledgements
+
+CT-RATE was created by Hamamci et al. [[19]](#references); its data was provided
+by Istanbul Medipol University Mega Hospital. CelebA was created by the
+Multimedia Laboratory of The Chinese University of Hong Kong [[17]](#references),
+CelebA-HQ by Karras et al. (NVIDIA) [[18]](#references).

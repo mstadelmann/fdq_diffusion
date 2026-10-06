@@ -1,0 +1,13 @@
+# Packages needed on top of `pip install fdq[full]` for a local run.
+# On Slurm, fdq_submit installs the per-experiment subset listed under
+# slurm_cluster.additional_pip_packages in each config instead.
+monai==1.5.2
+chuchichaestli==0.2.17
+diffusers==0.40.0
+flow_matching==1.0.10
+datasets
+nibabel
+# only for the CT-RATE preprocessing script (prepare_CT_RATE.py)
+SimpleITK
+pandas
+huggingface_hub

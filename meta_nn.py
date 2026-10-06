@@ -1,8 +1,16 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
+# Third-party code - NOT covered by this repository's GPL-3.0 license.
 #
-# This source code is licensed under the CC-by-NC license found in the
-# LICENSE file in the root directory of this source tree.
+# Copied unmodified from Meta's flow_matching image example:
+#   https://github.com/facebookresearch/flow_matching/blob/11568d37f8d5a080e12aa7b5305d9c35ae07d136/examples/image/models/nn.py
+#   Copyright (c) Meta Platforms, Inc. and affiliates.
+# which itself is taken from OpenAI's guided-diffusion:
+#   https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/nn.py
+#   Copyright (c) 2021 OpenAI
+#
+# License: MIT. The upstream file header refers to the CC-BY-NC license of the
+# flow_matching repository, but the example's README states: "The UNet model is
+# under MIT license." (examples/image/README.md, section "License").
+# The full MIT license text is in LICENSES/MIT-OpenAI-guided-diffusion.txt.
 """
 Various utilities for neural networks.
 Taken from https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/nn.py

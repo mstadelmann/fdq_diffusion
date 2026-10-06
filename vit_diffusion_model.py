@@ -4,7 +4,8 @@ from diffusers.models.transformers.dit_transformer_2d import DiTTransformer2DMod
 
 
 class DiTNoisePredictor(nn.Module):
-    """Diffusion Transformer (DiT, Peebles & Xie 2023) noise predictor.
+    """Diffusion Transformer noise predictor (DiT: Peebles & Xie, "Scalable Diffusion
+    Models with Transformers", ICCV 2023, arXiv:2212.09748).
 
     Thin wrapper around diffusers' DiTTransformer2DModel that exposes the same
     forward(x, t) interface as chuchichaestli.models.unet.unet.UNet, so it can

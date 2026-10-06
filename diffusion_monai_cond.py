@@ -5,6 +5,9 @@ from monai.inferers import DiffusionInferer
 from monai.networks.schedulers import DDPMScheduler
 from image_functions import createSubplots
 
+# DDPM (Ho, Jain & Abbeel, "Denoising Diffusion Probabilistic Models", NeurIPS 2020,
+# arXiv:2006.11239) with MONAI's DiffusionInferer/DDPMScheduler, following the usage in the
+# MONAI tutorial (Apache-2.0):
 # https://github.com/Project-MONAI/tutorials/blob/main/generation/2d_ddpm/2d_ddpm_tutorial.ipynb
 
 
